@@ -50,7 +50,7 @@ def process_document(doc: dict):
             doc[V0_LAT], doc[V0_LON], start_time.replace(tzinfo=timezone.utc)
         )
         b: bool = check_if_illuminated(
-            doc[V1_LAT], doc[V1_LON], end_time.replace(tzinfo=timezone.utc)
+            doc[V2_LAT], doc[V2_LON], end_time.replace(tzinfo=timezone.utc)
         )
 
         with open(STATISTICS_COMM_PIPE, "w") as pipe:
@@ -58,16 +58,16 @@ def process_document(doc: dict):
                 pipe.write("1\n")
                 create_or_update_document(doc, True)
             else:
+                # print(f"{doc[STARTIME]} = {doc[V0_LAT]}-{doc[V0_LON]}")
                 pipe.write("0\n")
 
-            print("zzz")
             pipe.flush()
     except Exception:
         print(doc["_id"])
         print(traceback.format_exc())
 
 
-cursor = class_fits_all.find().batch_size(1000).limit(100)
+cursor = class_fits_all.find().batch_size(1000).limit(1000000)
 
 count = 0
 

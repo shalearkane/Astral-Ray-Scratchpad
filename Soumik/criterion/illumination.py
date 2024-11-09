@@ -3,10 +3,6 @@ from datetime import datetime, timezone
 
 
 def angular_difference_long(long1: float, long2: float) -> float:
-    # Ensure longitudes are in the range [-180, 180]
-    long1 = ((long1 + 180.0) % 360.0) - 180.0
-    long2 = ((long2 + 180.0) % 360.0) - 180.0
-
     # Calculate the raw difference
     diff = abs(long1 - long2)
 
@@ -18,10 +14,6 @@ def angular_difference_long(long1: float, long2: float) -> float:
 
 
 def angular_difference_lat(lat1: float, lat2: float) -> float:
-    # Ensure latitudes are in the range [-90, 90]
-    lat1 = max(min(lat1, 90.0), -90.0)
-    lat2 = max(min(lat2, 90.0), -90.0)
-
     # Calculate the absolute difference
     diff = abs(lat1 - lat2)
 
@@ -54,7 +46,7 @@ def get_subsolar_latitude_longitude(dt: datetime) -> tuple[float, float]:
 def check_if_illuminated(lat: float, long: float, dt: datetime) -> bool:
     moon_lat, moon_long = get_subsolar_latitude_longitude(dt)
 
-    if angular_difference_lat(moon_lat, lat) > 44.0:
+    if angular_difference_lat(moon_lat, lat) > 89.0:
         return False
 
     if angular_difference_long(moon_long, long) > 89.0:
