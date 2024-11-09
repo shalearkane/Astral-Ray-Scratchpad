@@ -6,6 +6,7 @@ from bson import ObjectId
 import traceback
 
 from criterion.illumination import check_if_illuminated
+from criterion.geotail import check_if_not_in_geotail
 from constants.class_fits import *
 from constants.mongo import *
 from constants.misc import *
@@ -46,19 +47,20 @@ def process_document(doc: dict):
             start_time = datetime.strptime(doc[STARTIME], "%Y%m%dT%H%M%S%f")
             end_time = datetime.strptime(doc[ENDTIME], "%Y%m%dT%H%M%S%f")
 
-        a: bool = check_if_illuminated(
-            doc[V0_LAT], doc[V0_LON], start_time.replace(tzinfo=timezone.utc)
-        )
-        b: bool = check_if_illuminated(
-            doc[V2_LAT], doc[V2_LON], end_time.replace(tzinfo=timezone.utc)
-        )
+        start_time = start_time.replace(tzinfo=timezone.utc)
+        end_time = start_time.replace(tzinfo=timezone.utc)
+
+        a: bool = check_if_illuminated(doc[V0_LAT], doc[V0_LON], start_time)
+        b: bool = check_if_illuminated(doc[V2_LAT], doc[V2_LON], end_time)
+
+        c: bool = check_if_not_in_geotail(start_time)
+        d: bool = check_if_not_in_geotail(end_time)
 
         with open(STATISTICS_COMM_PIPE, "w") as pipe:
-            if a and b:
+            if a and b and c and d:
                 pipe.write("1\n")
                 create_or_update_document(doc, True)
             else:
-                # print(f"{doc[STARTIME]} = {doc[V0_LAT]}-{doc[V0_LON]}")
                 pipe.write("0\n")
 
             pipe.flush()
