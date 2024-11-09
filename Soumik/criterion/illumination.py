@@ -54,7 +54,6 @@ def get_subsolar_latitude_longitude(dt: datetime) -> tuple[float, float]:
 
 def check_if_illuminated(lat: float, long: float, dt: datetime) -> bool:
     moon_lat, moon_long = get_subsolar_latitude_longitude(dt)
-    print(moon_lat, moon_long)
 
     if angular_difference_lat(moon_lat, lat) > 44.0:
         return False

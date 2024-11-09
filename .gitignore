@@ -581,3 +581,9 @@ zsdoc/data
 !/tests/_output/.gitkeep
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,windows,macos,git,direnv,fish,zsh,powershell,python,go,dotenv,node,web,cmake,c++,jupyternotebooks,premake-gmake,nextjs
+
+# ephemeris data
+*.bpc
+*.bsp
+*.tf
+*.tpc

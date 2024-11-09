@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import astropy.io.fits as aif
 from astropy.table import Table
-from constants import *
+from constants.class_fits import *
 
 
 @dataclass
@@ -33,5 +33,3 @@ with aif.open("ch2_cla_l1_20210827T210316000_20210827T210332000_1024.fits") as h
         float(t.meta[V2_LON]),
         float(t.meta[V3_LON]),
     )
-
-if
