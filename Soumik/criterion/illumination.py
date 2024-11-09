@@ -2,21 +2,6 @@ from skyfield.api import load, PlanetaryConstants
 from datetime import datetime, timezone
 
 
-ts = load.timescale()
-
-# Load ephemeris data for the Sun and the Moon
-eph = load("de421.bsp")
-moon = eph["moon"]
-sun = eph["Sun"]
-
-pc = PlanetaryConstants()
-pc.read_text(load("moon_080317.tf"))
-pc.read_text(load("pck00008.tpc"))
-pc.read_binary(load("moon_pa_de421_1900-2050.bpc"))
-
-frame = pc.build_frame_named("MOON_ME_DE421")
-
-
 def angular_difference_long(long1: float, long2: float) -> float:
     # Ensure longitudes are in the range [-180, 180]
     long1 = ((long1 + 180.0) % 360.0) - 180.0
@@ -44,6 +29,20 @@ def angular_difference_lat(lat1: float, lat2: float) -> float:
 
 
 def get_subsolar_latitude_longitude(dt: datetime) -> tuple[float, float]:
+    ts = load.timescale()
+
+    # Load ephemeris data for the Sun and the Moon
+    eph = load("de421.bsp")
+    moon = eph["moon"]
+    sun = eph["Sun"]
+
+    pc = PlanetaryConstants()
+    pc.read_text(load("moon_080317.tf"))
+    pc.read_text(load("pck00008.tpc"))
+    pc.read_binary(load("moon_pa_de421_1900-2050.bpc"))
+
+    frame = pc.build_frame_named("MOON_ME_DE421")
+
     t = ts.utc(dt)
     p = moon.at(t).observe(sun).apparent()
     lat, long, distance = p.frame_latlon(frame)
