@@ -1,18 +1,16 @@
-import ephem
-from datetime import datetime, timedelta
+from ephem import Date, previous_full_moon, next_full_moon
+from datetime import datetime, timezone
 
 
 def check_if_not_in_geotail(dt: datetime) -> bool:
-    previous_full_moon = ephem.Date(ephem.previous_full_moon(dt)).datetime()
-    next_full_moon = ephem.Date(ephem.next_full_moon(dt)).datetime()
+    previous_fm = Date(previous_full_moon(dt)).datetime().replace(tzinfo=timezone.utc)
+    next_fm = Date(next_full_moon(dt)).datetime().replace(tzinfo=timezone.utc)
 
-    print(previous_full_moon)
-    print(next_full_moon)
-
-    if( abs(dt - previous_full_moon).days < 3) or (abs(next_full_moon - dt).days < 3):
+    if (abs(dt - previous_fm).days < 3) or (abs(next_fm - dt).days < 3):
         return False
 
     return True
+
 
 if __name__ == "__main__":
     date = datetime.strptime("2022-01-14 23:48:26.239464", "%Y-%m-%d %H:%M:%S.%f")
