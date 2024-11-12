@@ -9,3 +9,5 @@ COLLECTION_CLASS_XSM_PRIMARY: Final[str] = "xsm_primary"
 
 KEY_PASSED_CHECK: Final[str] = "passed_check"
 KEY_IS_IN_GEOTAIL: Final[str] = "is_in_geotail"
+
+DUMMY = "dummy"
