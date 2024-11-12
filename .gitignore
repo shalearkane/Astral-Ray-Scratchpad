@@ -587,3 +587,7 @@ zsdoc/data
 *.bsp
 *.tf
 *.tpc
+
+# draw.io
+*.drawio.bkp
+*.drawio.dtmp
