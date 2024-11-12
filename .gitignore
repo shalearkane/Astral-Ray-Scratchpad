@@ -591,3 +591,24 @@ zsdoc/data
 # draw.io
 *.drawio.bkp
 *.drawio.dtmp
+
+
+# SD ------
+
+# XSM data
+sd/data/*
+
+# Class data - First attempt to process CLASS data headers and upload to MongoDB
+sd/class_data/data/*
+sd/class_data/files/*
+sd/class_data/uncompressed/*
+
+# PROCESS | Aimed to process the CLASS and XSM fits files and upload to MongoDB
+sd/class_data/process/target/*
+sd/class_data/process/fits-rs/*
+
+# Frontend | Aimed for the frontend of the project
+sd/frontend/node_modules/*
+
+# Img | Aimed for image generation of the map
+sd/img/target/*
