@@ -1,0 +1,21 @@
+[package]
+name = "img"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.93"
+imageproc = "0.25.0"
+mongodb = "3.1.0"
+bson = { version = "2", features = [
+    "chrono-0_4",
+] } # Needed for using chrono datetime in doc
+tokio = "1"
+chrono = "0.4" # Used for setting DateTimes
+serde = "1" # Used in the Map Data into Structs section
+rayon = "1.10.0"
+colorgrad = "0.7.0"
+pretty = "0.12.3"
+futures = "0.3.31"
+random_color = "1.0.0"
+indicatif = "0.17.9"
