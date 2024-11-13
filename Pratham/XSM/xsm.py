@@ -1,7 +1,7 @@
 from datetime import datetime
 import pandas as pd
 from datetime import datetime, timedelta
-from constants.mongo import *
+# from constants.mongo import *
 from pymongo import MongoClient
 from astropy.io import fits
 from astropy.table import Table
@@ -40,17 +40,55 @@ def get_good_times(gti: str) -> pd.DataFrame:
     return df
 
 
+
 def check_time_intersect(
     start_time_of_goes_flare: datetime,
     end_time_of_goes_flare: datetime,
     gti: pd.DataFrame,
 ):
+    # Initialize an empty DataFrame with specified columns
+    output_df = pd.DataFrame(columns=["START", "STOP"])
 
-
-
+    # Iterate through each row in gti
+    for _, row in gti.iterrows():
+        # Case 1: Row's START is within the flare time range
+        if row["START"] >= start_time_of_goes_flare and row["START"] <= end_time_of_goes_flare:
+            # Case 1a: Row is completely within flare time
+            if row["STOP"] <= end_time_of_goes_flare:
+                output_df = pd.concat([output_df, pd.DataFrame([row])], ignore_index=True)
+            # Case 1b: Row START is within flare, but STOP exceeds flare end
+            elif row["STOP"] >= end_time_of_goes_flare :
+                new_row = {"START": row["START"], "STOP": end_time_of_goes_flare}
+                output_df = pd.concat([output_df, pd.DataFrame([new_row])], ignore_index=True)
+        # Case 2: Row START is before flare start
+        elif row["START"] < start_time_of_goes_flare and row["STOP"]>=start_time_of_goes_flare:
+            # Case 2a: Row START is before flare, but STOP is within flare
+            if row["STOP"] <= end_time_of_goes_flare:
+                new_row = {"START": start_time_of_goes_flare, "STOP": row["STOP"]}
+                output_df = pd.concat([output_df, pd.DataFrame([new_row])], ignore_index=True)
 
 
     return output_df
+
+
+    
+
+    
+
+if __name__ == "__main__":
+    start_time = datetime(2021,8,27, 00,00,00)
+    end_time = datetime(2021, 8, 27, 17,44,0)
+
+    gti=get_good_times("/home/pg/Documents/Astral-Ray-Scratchpad/Pratham/XSM/example_files/ch2_xsm_20210827_v1_level2.gti")
+
+    print(check_time_intersect(start_time,end_time,gti))
+
+
+
+
+
+
+
 
     # df=pd.read_csv(csv_path_goes)
 
