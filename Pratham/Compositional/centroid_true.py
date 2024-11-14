@@ -3,7 +3,10 @@ import pandas as pd
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+column_names = ['longitude','latitude','al','fe','mg','si']
 
+# Load the CSV without headers
+df_samples = pd.read_csv("/content/all.csv", header=None, names=column_names)
 
 atomic_weights = {
     'Si': 28.0855,
