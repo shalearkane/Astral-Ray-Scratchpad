@@ -13,7 +13,7 @@ from constants.misc import *
 
 
 def create_or_update_document(doc: dict, check_passed: bool):
-    class_fits_accepted = MongoClient(MONGO_URI)[DATABASE_NAME][
+    class_fits_accepted = MongoClient(MONGO_URI)[DATABASE_ISRO][
         COLLECTION_CLASS_FITS_ACCEPTED
     ]
 
@@ -71,7 +71,7 @@ def process_document(doc: dict):
         print(format_exc())
 
 
-class_fits_all = MongoClient(MONGO_URI)[DATABASE_NAME][COLLECTION_CLASS_FITS]
+class_fits_all = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_CLASS_FITS]
 cursor = class_fits_all.find().batch_size(1000).limit(10)
 count = 0
 
