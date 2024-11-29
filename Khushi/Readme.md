@@ -1,6 +1,6 @@
-Scatter Spectrum Calculation and Data Processing
+# Scatter Spectrum Calculation and Data Processing
 
-##Table of Contents
+Table of Contents
 
   1. Overview
      
