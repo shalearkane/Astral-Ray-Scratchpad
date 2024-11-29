@@ -1,6 +1,6 @@
 Scatter Spectrum Calculation and Data Processing
 
-Table of Contents
+##Table of Contents
 
   1. Overview
      
@@ -53,6 +53,7 @@ Main Script
 
 
   Parameters
+  
    1.Element Properties:
      The element_properties dictionary contains the abundance and density for each element. These values are used to calculate the number density and contribute to the scattered spectrum.
 
