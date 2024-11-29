@@ -1,6 +1,7 @@
 # Scatter Spectrum Calculation and Data Processing
 
-Table of Contents
+
+## Table of Contents
 
   1. Overview
      
@@ -12,23 +13,23 @@ Table of Contents
 
   
 
-Overview
+# Overview
 
 This project processes FFAST data, performs interpolation, and calculates the total scattered spectrum for selected elements. It takes as input cross-sectional data files and an incident spectrum, processes them, and outputs the resulting scattered spectrum. The output can be used for further analysis or visualized via plots.
 
 
-File Input and Output
-Input Files
+## File Input and Output
+1. Input Files
 
 FAST Data Files: These files contain cross-sectional data for each element, and they should be named according to the atomic number and element name (e.g., ffast_12_mg.txt for Magnesium). The data file    should be in a space-separated format and contain the following columns:
         Energy: Energy values in eV (or other units)
         F1, F2, MuRho, SigmaRho: Cross-section data
 
-Incident Spectrum File: The file that contains the incident spectrum data (energy and intensity) for the model. This file should be in a space-separated format with the following columns:
+2. Incident Spectrum File: The file that contains the incident spectrum data (energy and intensity) for the model. This file should be in a space-separated format with the following columns:
         Energy: Energy values (same unit as FFAST data)
         Intensity: Intensity of the incident spectrum at each energy level
 
-Output Files
+3. Output Files
 
   Total Scattered Spectrum: This is the primary output of the code. It is a CSV file containing the energy values and the corresponding total scattered spectrum calculated by the model.
         Energy: Energy values (same as input)
@@ -37,22 +38,22 @@ Output Files
   Interpolated Spectrum: If any missing values are found in the Total Scattered Spectrum, they are interpolated and saved in a new CSV file. This ensures a smooth spectrum without gaps
 
 
-Code Structure
+# Code Structure
 
 Main Script
 
-  (load_ffast_data): This function loads the cross-section data for the selected elements, cleans the data, and formats it for further processing.
+  1. (load_ffast_data): This function loads the cross-section data for the selected elements, cleans the data, and formats it for further processing.
 
-  (interpolate_cross_section): This function performs linear interpolation on the SigmaRho values based on the energies from the incident spectrum.
+  2. (interpolate_cross_section): This function performs linear interpolation on the SigmaRho values based on the energies from the incident spectrum.
 
-  (model_scattered_spectrum_with_density): This function calculates the total scattered spectrum for each element by considering its density, abundance, and SigmaRho values.
+  3. (model_scattered_spectrum_with_density): This function calculates the total scattered spectrum for each element by considering its density, abundance, and SigmaRho values.
 
-  (load_incident_spectrum): This function loads the incident spectrum data (energy and intensity) from the file.
+  4. (load_incident_spectrum): This function loads the incident spectrum data (energy and intensity) from the file.
 
-  (main): This function coordinates the loading of data files, calculation of the scattered spectrum, and saving of the results to a CSV file. It also handles plotting the spectrum.
+  5. (main): This function coordinates the loading of data files, calculation of the scattered spectrum, and saving of the results to a CSV file. It also handles plotting the spectrum.
 
 
-  Parameters
+  # Parameters
   
    1.Element Properties:
      The element_properties dictionary contains the abundance and density for each element. These values are used to calculate the number density and contribute to the scattered spectrum.
@@ -65,7 +66,7 @@ Main Script
 
 
 
-  How to Use
+  # How to Use
 Step 1: Prepare Input Files
 
   Ensure you have the correct FFAST data files for the elements you want to process.
