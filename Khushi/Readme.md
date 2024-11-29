@@ -38,17 +38,18 @@ Output Files
 
 
 Code Structure
+
 Main Script
 
-  Loading FFAST Data (load_ffast_data): This function loads the cross-section data for the selected elements, cleans the data, and formats it for further processing.
+  (load_ffast_data): This function loads the cross-section data for the selected elements, cleans the data, and formats it for further processing.
 
-  Interpolating SigmaRho (interpolate_cross_section): This function performs linear interpolation on the SigmaRho values based on the energies from the incident spectrum.
+  (interpolate_cross_section): This function performs linear interpolation on the SigmaRho values based on the energies from the incident spectrum.
 
-  Calculating Scattered Spectrum (model_scattered_spectrum_with_density): This function calculates the total scattered spectrum for each element by considering its density, abundance, and SigmaRho values.
+  (model_scattered_spectrum_with_density): This function calculates the total scattered spectrum for each element by considering its density, abundance, and SigmaRho values.
 
-  Loading Incident Spectrum (load_incident_spectrum): This function loads the incident spectrum data (energy and intensity) from the file.
+  (load_incident_spectrum): This function loads the incident spectrum data (energy and intensity) from the file.
 
-  Main Function (main): This function coordinates the loading of data files, calculation of the scattered spectrum, and saving of the results to a CSV file. It also handles plotting the spectrum.
+  (main): This function coordinates the loading of data files, calculation of the scattered spectrum, and saving of the results to a CSV file. It also handles plotting the spectrum.
 
 
   Parameters
