@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import matplotlib
+
 import matplotlib.pyplot as plt
 from astropy.io import fits
 
@@ -40,7 +41,6 @@ def combine_fits(folder_path: str, output_fits_path: str):
             fits.Column(name="COUNTS", format="1D", array=total_counts),
         ]
     )
-
     hdu.header["EXTNAME"] = "SPECTRUM"
     hdu.header["HDUCLASS"] = "OGIP"
     hdu.header["HDUCLAS1"] = "SPECTRUM"
@@ -53,56 +53,61 @@ def combine_fits(folder_path: str, output_fits_path: str):
     hdu.header["TELESCOP"] = "CHANDRAYAAN-2"
     hdu.header["INSTRUME"] = "CLASS"
     hdu.header["FILTER"] = "none"
-    hdu.header["EXPOSURE"] = "16"
-    hdu.header["AREASCAL"] = "1.0"
+    hdu.header["EXPOSURE"] = 8.0
+    hdu.header["AREASCAL"] = 1.0
     hdu.header["BACKFILE"] = "NONE"
-    hdu.header["BACKSCAL"] = "1.0"
+    hdu.header["BACKSCAL"] = 1.0
     hdu.header["CORRFILE"] = "NONE"
-    hdu.header["CORRSCAL"] = "1.0"
+    hdu.header["CORRSCAL"] = 1.0
     hdu.header["RESPFILE"] = "class_rmf_v1.rmf"
     hdu.header["ANCRFILE"] = "class_arf_v1.arf"
     hdu.header["PHAVERSN"] = "1992a"
-    hdu.header["DETCHANS"] = "2048"
+    hdu.header["DETCHANS"] = 2048
     hdu.header["CHANTYPE"] = "PHA"
     hdu.header["POISSERR"] = "True"
-    hdu.header["STAT_ERR"] = "0"
-    hdu.header["SYS_ERR"] = "0"
-    hdu.header["GROUPING"] = "0"
-    hdu.header["QUALITY"] = "0"
-    hdu.header["EQUINOX"] = "2000.0"
-    hdu.header["DATE"] = "Thu Mar 17 17:41:51 2022"
-    hdu.header["PROGRAM"] = "generate_spectrum_from_spectrogram.pro"
-    hdu.header["STARTIME"] = "2021-08-27T21:03:16.000"
-    hdu.header["ENDTIME"] = "2021-08-27T21:03:32.000"
-    hdu.header["GAIN"] = "27.0"
-    hdu.header["SCD_USED"] = "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"
-    hdu.header["MID_UTC"] = "2021-08-27T21:03:24.000"
-    hdu.header["SAT_ALT"] = "113.779"
-    hdu.header["SAT_LAT"] = "-13.7739"
-    hdu.header["SAT_LON"] = "-123.762"
-    hdu.header["LST_HR"] = "7"
-    hdu.header["LST_MIN"] = "46"
-    hdu.header["LST_SEC"] = "48"
-    hdu.header["BORE_LAT"] = "-13.7739"
-    hdu.header["BORE_LON"] = "-123.762"
-    hdu.header["V0_LAT"] = "-12.9754"
-    hdu.header["V1_LAT"] = "-14.7087"
-    hdu.header["V2_LAT"] = "-14.5669"
-    hdu.header["V3_LAT"] = "-12.8399"
-    hdu.header["V0_LON"] = "-124.311"
-    hdu.header["V1_LON"] = "-124.163"
-    hdu.header["V2_LON"] = "-123.206"
-    hdu.header["V3_LON"] = "-123.359"
-    hdu.header["SOLARANG"] = "64.55"
-    hdu.header["PHASEANG"] = "64.55"
-    hdu.header["EMISNANG"] = "3.83034e-09"
+    hdu.header["STAT_ERR"] = 0
+    hdu.header["SYS_ERR"] = 0
+    hdu.header["GROUPING"] = 0
+    hdu.header["QUALITY"] = 0
+    hdu.header["EQUINOX"] = 2000.0
+    hdu.header["DATE"] = "Sun Dec  6 14:23:21 2020"
+    hdu.header["PROGRAM"] = "CLASS_add_scds.pro"
+    hdu.header["IPFILE"] = "CLA01D18CHO0195703016020032073056411_08.pld"
+    hdu.header["DATASET"] = 249
+    hdu.header["STARTIME"] = "20200201T000000114"
+    hdu.header["ENDTIME"] = "20200201T000008114"
+    hdu.header["TEMP"] = -43.7
+    hdu.header["GAIN"] = 13.5
+    hdu.header["SCD_USED"] = "0,1,2,3,4,5,6,7,8,9,10,11"
+    hdu.header["MID_UTC"] = "2020-02-01T00:00:04.114"
+    hdu.header["SAT_ALT"] = 79.1612
+    hdu.header["SAT_LAT"] = -18.0006
+    hdu.header["SAT_LON"] = 61.818
+    hdu.header["LST_HR"] = 9
+    hdu.header["LST_MIN"] = 36
+    hdu.header["LST_SEC"] = 48
+    hdu.header["BORE_LAT"] = -18.0026
+    hdu.header["BORE_LON"] = 61.8179
+    hdu.header["V0_LAT"] = -17.4623
+    hdu.header["V1_LAT"] = -18.5262
+    hdu.header["V2_LAT"] = -18.5379
+    hdu.header["V3_LAT"] = -17.4739
+    hdu.header["V0_LON"] = 61.486
+    hdu.header["V1_LON"] = 61.4647
+    hdu.header["V2_LON"] = 62.1519
+    hdu.header["V3_LON"] = 62.1688
+    hdu.header["SOLARANG"] = 39.1038
+    hdu.header["PHASEANG"] = 39.1038
+    hdu.header["EMISNANG"] = 1.3486838e-09
+
     hdu.writeto(output_fits_path, overwrite=True)
 
 
 if __name__ == "__main__":
-    folder_path = "class"
-    output_fits_path = "combined_96s.fits"
+    folder_path = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data/class"
+    output_fits_path = "combined.fits"
     combine_fits(folder_path, output_fits_path)
+    exit(0)
 
     # Load the combined FITS file and plot the data
     with fits.open(output_fits_path) as hdul:
