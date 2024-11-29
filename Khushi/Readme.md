@@ -3,9 +3,14 @@ Scatter Spectrum Calculation and Data Processing
 Table of Contents
 
   1. Overview
+     
   2.File Input and Output
+  
   3.Parameters
+  
   4.How to Use
+
+  
 
 Overview
 
@@ -55,6 +60,7 @@ Main Script
 
   3. FFAST Data Files:
      The names of the FFAST data files should be constructed based on the atomic number and element name (e.g., ffast_12_mg.txt). These files are expected to contain columns for energy and cross-section data.
+
 
 
   How to Use
