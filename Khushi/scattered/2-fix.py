@@ -1,18 +1,50 @@
 import pandas as pd
+from pandas import DataFrame
 
 
-def fix_spectrum_from_unsorted_or_duplicated_values(theoritical_spectrum_df: pd.DataFrame) -> pd.DataFrame:
-    # Interpolate missing values in the "Total Scattered Spectrum" column
-    theoretical_spectrum_df["Total Scattered Spectrum"] = theoretical_spectrum_df["Total Scattered Spectrum"].interpolate()
+def preprocess_and_remove_duplicates(df: DataFrame, key_column: str) -> DataFrame:
+    """
+    Sorts the dataframe by the key column, interpolates NaN values,
+    and removes duplicates by averaging.
 
-    duplicates = theoretical_spectrum_df[theoretical_spectrum_df.duplicated(subset=["Energy"], keep=False)]
-    averaged_duplicates = duplicates.groupby("Energy", as_index=False).mean()
-    unique_rows = theoretical_spectrum_df.drop_duplicates(subset=["Energy"], keep=False)
-    combined_df = pd.concat([unique_rows, averaged_duplicates], ignore_index=True)
-    combined_df = combined_df.sort_values(by="Energy").reset_index(drop=True)
+    Parameters:
+        df (DataFrame): The input dataframe.
+        key_column (str): The column used as the key to sort and identify duplicates.
 
-    return combined_df
+    Returns:
+        DataFrame: A dataframe with NaN values interpolated, duplicates removed, and values averaged.
+    """
+    if key_column not in df.columns:
+        raise ValueError(f"Column '{key_column}' not found in the dataframe.")
+
+    # Sort the dataframe based on the key column
+    df = df.sort_values(by=key_column).reset_index(drop=True)
+
+    # Interpolate NaN values for numeric columns
+    df = df.interpolate(method="linear", axis=0, limit_direction="both")
+
+    # Group by the key column and calculate the mean for each group
+    averaged_df = df.groupby(key_column, as_index=False).mean()
+
+    return averaged_df
 
 
 if __name__ == "__main__":
+    # # Sample dataframe with NaN values
+    # data = {"Key": ["C", "B", "A", "A", "B"], "Value1": [10, None, 30, 50, 40], "Value2": [None, 15, 25, None, 45]}
+    # df: DataFrame = pd.DataFrame(data)
+    # print("Original DataFrame:")
+    # print(df)
+
+    # # Preprocess and remove duplicates
+    # result: DataFrame = preprocess_and_remove_duplicates(df, key_column="Key")
+    # print("\nProcessed DataFrame:")
+    # print(result)
+
+    solar_model = pd.read_csv("model.2.txt", sep="\\s+", names=["energy", "error", "flux"])
+    solar_model = preprocess_and_remove_duplicates(solar_model, "energy")
+    solar_model.to_csv("model.2.processed.txt", sep=" ", index=False, header=False)
+
     theoretical_spectrum_df = pd.read_csv("total_scattered_spectrum.csv")
+    theoretical_spectrum_df =  preprocess_and_remove_duplicates(solar_model, "Energy")
+

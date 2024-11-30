@@ -1,7 +1,6 @@
 from io import TextIOWrapper
 import pexpect
 import os
-import time
 
 
 def initialize_gdl(log_file: TextIOWrapper):
@@ -18,19 +17,11 @@ def initialize_gdl(log_file: TextIOWrapper):
 
     child.sendline("o->set, spex_file_reader='ch2xsm_read'")
     child.sendline('o->set, fit_function="vth_abun"')
-    child.sendline(
-        "o->set, fit_comp_params=[1.00000, 2.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000]"
-    )
-    child.sendline(
-        "o->set, fit_comp_minima=[1.00000e-20, 0.500000, 0.100000, 0.100000, 0.100000, 0.100000, 0.100000, 0.100000]"
-    )
-    child.sendline(
-        "o->set, fit_comp_maxima=[1.00000e+20, 8.00000, 2.00000, 2.00000, 2.00000, 2.00000, 2.00000, 2.00000]"
-    )
+    child.sendline("o->set, fit_comp_params=[1.00000, 2.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000]")
+    child.sendline("o->set, fit_comp_minima=[1.00000e-20, 0.500000, 0.100000, 0.100000, 0.100000, 0.100000, 0.100000, 0.100000]")
+    child.sendline("o->set, fit_comp_maxima=[1.00000e+20, 8.00000, 2.00000, 2.00000, 2.00000, 2.00000, 2.00000, 2.00000]")
     child.sendline("o->set, fit_comp_free_mask=[1B, 1B, 1B, 1B, 0B, 0B, 0B, 0B]")
-    child.sendline(
-        "o->set, spex_eband=[[1.02800, 1.75763], [1.75763, 3.00513], [3.00513, 5.13806], [5.13806, 8.78485], [8.78485, 15.0200]]"
-    )
+    child.sendline("o->set, spex_eband=[[1.02800, 1.75763], [1.75763, 3.00513], [3.00513, 5.13806], [5.13806, 8.78485], [8.78485, 15.0200]]")
 
     return child
 
@@ -92,12 +83,8 @@ def automate_ospex(file_list, output_dir, log_file="automation_log.txt"):
             for file_path in file_list:
                 try:
                     output_filepath = process_file(child, file_path, output_dir)
-                    log.write(
-                        f"Processed file: {file_path} -> Output saved at: {output_filepath}\n"
-                    )
-                    print(
-                        f"Processed file: {file_path} -> Output saved at: {output_filepath}"
-                    )
+                    log.write(f"Processed file: {file_path} -> Output saved at: {output_filepath}\n")
+                    print(f"Processed file: {file_path} -> Output saved at: {output_filepath}")
                 except FileNotFoundError as e:
                     log.write(str(e) + "\n")
                     print(e)

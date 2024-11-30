@@ -28,17 +28,13 @@ def get_flux_from_energy_bins(
         df.columns = header
 
         # convert the first column into datetime objects
-        df["time"] = df["time"].apply(
-            lambda x: datetime.datetime.strptime(x, format_string)
-        )
+        df["time"] = df["time"].apply(lambda x: datetime.datetime.strptime(x, format_string))
 
         filtered_df = df[(df["time"] >= start_time) & (df["time"] <= end_time)]
         sum_df = filtered_df.sum(axis=0, numeric_only=True)
 
-
-
         for idx, value in zip(sum_df.index, sum_df.values):
-            low, high = idx.split('-')
+            low, high = idx.split("-")
             low = float(low)
             high = float(high)
             mid = (high + low) / 2
