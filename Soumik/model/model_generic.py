@@ -3,13 +3,13 @@ from astropy.io import fits
 from functions.xrf_localmodel import LocalModel_Parameters, create_xrf_localmodel
 
 
-def process_abundance(class_l1: str, background: str, solar: str, scatter_atable: str):
+def process_abundance(class_l1: str, background: str, solar: str, scatter_atable: str, bin_size: int):
     ignore_erange = ["0.9", "4.2"]
     ignore_string = "0.0-" + ignore_erange[0] + " " + ignore_erange[1] + "-**"
 
     # Getting the information for making the static parameter file
     hdu_data = fits.open(class_l1)
-    hdu_header = hdu_data[1].header # type: ignore
+    hdu_header = hdu_data[1].header  # type: ignore
     hdu_data.close()
 
     localmodel_params = LocalModel_Parameters(
@@ -19,16 +19,23 @@ def process_abundance(class_l1: str, background: str, solar: str, scatter_atable
     # PyXspec Initialisation
     AllData.clear()
     AllModels.clear()
+    Xset.parallel.show()
+    N = 8
+    Xset.parallel.error = N
+    Xset.parallel.goodness = N
+    Xset.parallel.leven = N
+    Xset.parallel.steppar = N
+    Xset.parallel.walkers = N
+    Xset.allowPrompting = False
 
-    spec_data = Spectrum(class_l1)
-    spec_data.background = background
+    spec_data = Spectrum(class_l1, backFile=background, respFile=f"data/{str(bin_size)}/class_rmf_v1.rmf", arfFile=f"data/{str(bin_size)}/class_arf_v1.arf")
     spec_data.ignore(ignore_string)
 
     # Defining model and fitting
     spec_data.response.gain.slope = "1.0043000"
     spec_data.response.gain.offset = "0.0316000"
-    spec_data.response.gain.slope.frozen = True # type: ignore
-    spec_data.response.gain.offset.frozen = True # type: ignore
+    spec_data.response.gain.slope.frozen = True  # type: ignore
+    spec_data.response.gain.offset.frozen = True  # type: ignore
 
     create_xrf_localmodel(localmodel_params)
 
@@ -42,10 +49,11 @@ def process_abundance(class_l1: str, background: str, solar: str, scatter_atable
     Fit.nIterations = 100
     Fit.perform()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     class_l1 = "data/reference/ch2_cla_l1_20210827T210316000_20210827T210332000_1024.fits"
     background = "data/reference/ch2_cla_l1_20210826T220355000_20210826T223335000_1024.fits"
     solar = "data/reference/modelop_20210827T210316000_20210827T210332000.txt"
     scatter_atable = "data/reference/tbmodel_20210827T210316000_20210827T210332000.fits"
 
-    process_abundance(class_l1, background, solar, scatter_atable)
+    process_abundance(class_l1, background, solar, scatter_atable, bin_size=1024)
