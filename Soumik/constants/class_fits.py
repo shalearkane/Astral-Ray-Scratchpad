@@ -44,6 +44,7 @@ LST_MIN: Final[str] = "46"
 LST_SEC: Final[str] = "48"
 BORE_LAT: Final[str] = "BORE_LAT"
 BORE_LON: Final[str] = "BORE_LON"
+
 V0_LAT: Final[str] = "V0_LAT" # upper left
 V1_LAT: Final[str] = "V1_LAT" # lower left
 V2_LAT: Final[str] = "V2_LAT" # lower right
@@ -53,6 +54,7 @@ V0_LON: Final[str] = "V0_LON" # upper left
 V1_LON: Final[str] = "V1_LON" # lower left
 V2_LON: Final[str] = "V2_LON" # lower right
 V3_LON: Final[str] = "V3_LON" # upper right
+
 SOLARANG: Final[str] = "SOLARANG"
 PHASEANG: Final[str] = "PHASEANG"
 EMISNANG: Final[str] = "EMISNANG"
