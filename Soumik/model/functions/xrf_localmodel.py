@@ -16,9 +16,11 @@ class LocalModel_Parameters:
     altitude: float
     exposure: float
 
+local_parameters = LocalModel_Parameters("", 0, 0, 0, 0)
+
 
 # Defining the model function
-def xrf_localmodel(energy, parameters, flux, local_parameters: LocalModel_Parameters):
+def xrf_localmodel(energy, parameters, flux):
 
     # Defining proper energy axis
     energy_mid = np.zeros(np.size(energy) - 1)
@@ -144,7 +146,9 @@ def xrf_localmodel(energy, parameters, flux, local_parameters: LocalModel_Parame
         flux[i] = spectrum_xrf_scaled[i]
 
 
-def create_xrf_localmodel():
+def create_xrf_localmodel(local_parameters_instance: LocalModel_Parameters):
+    global local_parameters
+    local_parameters = local_parameters_instance
     # Specifying parameter information
     xrf_localmodel_ParInfo = (
         'Wt_Fe "" 5 1 1 20 20 1e-2',

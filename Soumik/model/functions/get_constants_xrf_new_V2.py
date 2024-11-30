@@ -15,7 +15,7 @@
 This file contains the function get_constants_xrf that interpolates the cross-sections from the database to the input energy axis and also takes into account inter-element effects
 """
 
-from common_modules import *
+from .common_modules import *
 from scipy.interpolate import interp1d
 
 

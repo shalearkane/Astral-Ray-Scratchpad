@@ -15,7 +15,7 @@
 This file contains the function xrf_comp that computes the actual XRF line intensity from each element.
 '''
 
-from common_modules import *
+from .common_modules import *
 import numpy as np
 from scipy.interpolate import interp1d
 

@@ -16,7 +16,7 @@ This file contains the function get_xrf_lines which derives various constants (c
 
 """
 
-from common_modules import *
+from .common_modules import *
 import xraylib
 import os
 
