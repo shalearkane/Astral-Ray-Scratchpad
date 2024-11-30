@@ -7,13 +7,10 @@ def create_fits_file(csv_file_path, output_fits_file):
     data = pd.read_csv(csv_file_path)
     energy = data['Energy'].values
     spectrum = data['Total Scattered Spectrum'].values
-    spectrum_scaled = spectrum * 0.321 * 1e-10
-    print(len(spectrum_scaled))
+    spectrum_scaled = spectrum * 1.1573 * 1e-8
     # for b in spectrum_scaled:
     #     print(f"{b:.7f}", end="\t")
-    energy = energy[:3000]
     energy_upper = energy + 0.01
-    spectrum_scaled = np.tile(spectrum_scaled[:3000], (15, 1))
 
     primary_header = fits.Header({
         'SIMPLE': True,
@@ -69,8 +66,8 @@ def create_fits_file(csv_file_path, output_fits_file):
     })
     hdu2 = fits.BinTableHDU(energies_table, header=energies_header)
 
-    paramval = np.arange(15, dtype=np.float32)
-    INTPSPEC = [np.array(spectrum_scaled[i], dtype=np.float32) for i in range(15)]
+    paramval = np.arange(0, 1.5, 0.1, dtype=np.float32)
+    INTPSPEC = [spectrum_scaled + param * 1 for param in paramval]
     spectra_table = Table(
         {'paramval': paramval, 'INTPSPEC': INTPSPEC},
         names=('paramval', 'INTPSPEC')
@@ -90,6 +87,7 @@ def create_fits_file(csv_file_path, output_fits_file):
 
     print(f"FITS file written to: {output_fits_file}")
 
-csv_file_path = 'theoretical_spectrum_interpolated.csv'
-output_fits_file = 'b.fits'
-create_fits_file(csv_file_path, output_fits_file)
+if __name__ == "__main__":
+    csv_file_path = 'theoretical_spectrum_interpolated.csv'
+    output_fits_file = 'b.fits'
+    create_fits_file(csv_file_path, output_fits_file)

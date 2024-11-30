@@ -1,18 +1,18 @@
 import pandas as pd
 
-# Load the theoretical spectrum from the CSV file
-theoretical_spectrum_df = pd.read_csv('total_scattered_spectrum.csv')
 
-# Check the first few rows of the data
-print(theoretical_spectrum_df.head())
+def fix_spectrum_from_unsorted_or_duplicated_values(theoritical_spectrum_df: pd.DataFrame) -> pd.DataFrame:
+    # Interpolate missing values in the "Total Scattered Spectrum" column
+    theoretical_spectrum_df["Total Scattered Spectrum"] = theoretical_spectrum_df["Total Scattered Spectrum"].interpolate()
 
-# Check for missing (NaN) values in the theoretical spectrum
-missing_values = theoretical_spectrum_df.isnull().sum()
-print("Missing values in each column:", missing_values)
+    duplicates = theoretical_spectrum_df[theoretical_spectrum_df.duplicated(subset=["Energy"], keep=False)]
+    averaged_duplicates = duplicates.groupby("Energy", as_index=False).mean()
+    unique_rows = theoretical_spectrum_df.drop_duplicates(subset=["Energy"], keep=False)
+    combined_df = pd.concat([unique_rows, averaged_duplicates], ignore_index=True)
+    combined_df = combined_df.sort_values(by="Energy").reset_index(drop=True)
 
-# Interpolate missing values in the "Total Scattered Spectrum" column
-theoretical_spectrum_interpolated = theoretical_spectrum_df.copy()
-theoretical_spectrum_interpolated['Total Scattered Spectrum'] = theoretical_spectrum_interpolated['Total Scattered Spectrum'].interpolate()
+    return combined_df
 
 
-theoretical_spectrum_interpolated.to_csv('theoretical_spectrum_interpolated.csv')
+if __name__ == "__main__":
+    theoretical_spectrum_df = pd.read_csv("total_scattered_spectrum.csv")
