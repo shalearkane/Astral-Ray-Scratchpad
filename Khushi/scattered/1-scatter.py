@@ -160,7 +160,7 @@ def main():
             })
 
             # Save to CSV
-            output_file_path = "/Users/apple/Desktop/inter iit astro/theoretical_spectrum_interpolated.csv"
+            output_file_path = "theoretical_spectrum_interpolated.csv"
             result_df.to_csv(output_file_path, index=False)
 #            print(f"Interpolated spectrum saved to: {output_file_path}")
 #        else:
