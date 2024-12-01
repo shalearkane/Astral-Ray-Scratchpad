@@ -1,9 +1,27 @@
 import { Vector2d } from "konva/lib/types";
 import { useEffect, useState } from "react";
-import { Coordinate } from "../types/coord";
+import { Abundance, Coordinate } from "../types/coord";
 import { getCoordinatesFromVector2d } from "../lib/utils";
 import Slider from "react-input-slider";
 import { INITIAL_SCALING_FACTOR } from "./app";
+
+function getMapAbundance(
+  abundanceMap: Map<number, Map<number, Abundance>>,
+  key: string,
+  lat?: number,
+  lon?: number,
+): string {
+  if (!lat || !lon) return "-";
+  let returnString = "-";
+  let abundance: Abundance | undefined = abundanceMap
+    .get(Math.round(lat))
+    ?.get(Math.round(lon));
+
+  // @ts-ignore
+  if (abundance && abundance[key] != "NaN") returnString = abundance[key] + "%";
+
+  return returnString;
+}
 
 function Overlay({
   pointerPos,
@@ -11,9 +29,11 @@ function Overlay({
   imageHeight,
   scale,
   setScale,
+  abundanceMap,
 }: {
   pointerPos: Vector2d;
   scale: number;
+  abundanceMap: Map<number, Map<number, Abundance>>;
   setScale: (scale: number) => void;
   imageWidth?: number;
   imageHeight?: number;
@@ -59,7 +79,6 @@ function Overlay({
           ymax={1}
           ystep={0.01}
           onChange={({ y }) => {
-            console.log(y);
             setScale(y);
           }}
         />
@@ -69,6 +88,41 @@ function Overlay({
         >
           -
         </div>
+      </div>
+      <div className="fixed text-white top-0 right-[35%] m-5 bg-black px-5 py-2">
+        Hover to view the latitude, longitude and elemental abundances
+      </div>
+
+      <div className="fixed text-white top-0 right-0 m-5 bg-black px-5 py-2">
+        Al:{" "}
+        {getMapAbundance(
+          abundanceMap,
+          "al",
+          hoveredCoordinate?.lat,
+          hoveredCoordinate?.lon,
+        )}
+        , Si:{" "}
+        {getMapAbundance(
+          abundanceMap,
+          "si",
+          hoveredCoordinate?.lat,
+          hoveredCoordinate?.lon,
+        )}
+        , Mg:{" "}
+        {getMapAbundance(
+          abundanceMap,
+          "mg",
+          hoveredCoordinate?.lat,
+          hoveredCoordinate?.lon,
+        )}
+        , Fe:{" "}
+        {getMapAbundance(
+          abundanceMap,
+          "fe",
+          hoveredCoordinate?.lat,
+          hoveredCoordinate?.lon,
+        )}
+        , O: 45%
       </div>
     </div>
   );

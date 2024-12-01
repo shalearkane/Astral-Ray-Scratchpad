@@ -21,11 +21,18 @@ use mongodb::{options::ClientOptions, Client};
 use points::{Coordinate, Patch};
 use random_color::RandomColor;
 use rayon::prelude::*;
+use script::run;
 use tokio::spawn;
 
 mod color;
 mod mongo;
 mod points;
+mod script;
+mod script2;
+mod script3;
+mod script4;
+mod script5;
+mod script6;
 
 const IMAGE_HEIGHT: i32 = 1417;
 const IMAGE_WIDTH: i32 = 2834;
@@ -58,55 +65,59 @@ async fn paint(
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let mongo = Client::with_options(
-        ClientOptions::parse("mongodb://localhost:27017")
-            .await
-            .unwrap(),
-    )
-    .unwrap();
-
-    let path = Path::new("./test1.png");
-    // let patches: Vec<Patch> = vec![Patch::new_from(
-    //     "element".to_string(),
-    //     vec![
-    //         Coordinate::new_from_lat_lon(50.4, 60.4),
-    //         Coordinate::new_from_lat_lon(60.4, 60.4),
-    //         Coordinate::new_from_lat_lon(-69.4, 50.4),
-    //         Coordinate::new_from_lat_lon(50.4, 59.4),
-    //     ],
-    //     0.1,
-    // )];
-
-    let patches = find_all_patches(mongo, String::from("primary"), doc! {})
-        .await
-        .unwrap();
-
-    let red = Rgb([255u8, 0u8, 0u8]);
-    let green = Rgba([0u8, 255u8, 0u8, 255u8]);
-    let blue = Rgb([0u8, 0u8, 255u8]);
-    let white = Rgba([255u8, 255u8, 255u8, 255u8]);
-
-    let color = Arc::new(ColorManager::new(green));
-    let image = Arc::new(Mutex::new(RgbaImage::new(2834, 1417)));
-    let mut handlers = vec![];
-
-    println!("\n PAINTING: ");
-    let bar = Arc::new(Mutex::new(ProgressBar::new(
-        patches.len().try_into().unwrap(),
-    )));
-
-    for patch in patches {
-        handlers.push(spawn(paint(
-            image.clone(),
-            patch,
-            color.clone(),
-            bar.clone(),
-        )));
-    }
-
-    join_all(handlers).await;
-
-    image.lock().unwrap().save(path).unwrap();
-
+    script6::run().await.unwrap();
     Ok(())
 }
+// async fn main() -> Result<()> {
+//     let mongo = Client::with_options(
+//         ClientOptions::parse("mongodb://localhost:27017")
+//             .await
+//             .unwrap(),
+//     )
+//     .unwrap();
+
+//     let path = Path::new("./test1.png");
+//     // let patches: Vec<Patch> = vec![Patch::new_from(
+//     //     "element".to_string(),
+//     //     vec![
+//     //         Coordinate::new_from_lat_lon(50.4, 60.4),
+//     //         Coordinate::new_from_lat_lon(60.4, 60.4),
+//     //         Coordinate::new_from_lat_lon(-69.4, 50.4),
+//     //         Coordinate::new_from_lat_lon(50.4, 59.4),
+//     //     ],
+//     //     0.1,
+//     // )];
+
+//     let patches = find_all_patches(mongo, String::from("primary"), doc! {})
+//         .await
+//         .unwrap();
+
+//     let red = Rgb([255u8, 0u8, 0u8]);
+//     let green = Rgba([0u8, 255u8, 0u8, 255u8]);
+//     let blue = Rgb([0u8, 0u8, 255u8]);
+//     let white = Rgba([255u8, 255u8, 255u8, 255u8]);
+
+//     let color = Arc::new(ColorManager::new(green));
+//     let image = Arc::new(Mutex::new(RgbaImage::new(2834, 1417)));
+//     let mut handlers = vec![];
+
+//     println!("\n PAINTING: ");
+//     let bar = Arc::new(Mutex::new(ProgressBar::new(
+//         patches.len().try_into().unwrap(),
+//     )));
+
+//     for patch in patches {
+//         handlers.push(spawn(paint(
+//             image.clone(),
+//             patch,
+//             color.clone(),
+//             bar.clone(),
+//         )));
+//     }
+
+//     join_all(handlers).await;
+
+//     image.lock().unwrap().save(path).unwrap();
+
+//     Ok(())
+// }

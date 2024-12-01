@@ -6,8 +6,15 @@ import Overlay from "./overlay";
 import { Vector2d } from "konva/lib/types";
 import { Canvas } from "@react-three/fiber";
 import CanvasComponent from "./canvas";
-import { Coordinate, Patch } from "../types/coord";
+import {
+  Abundance,
+  AbundanceData,
+  AbundanceDataResponse,
+  Coordinate,
+  Patch,
+} from "../types/coord";
 import { getVector2dFromCoordinate } from "../lib/utils";
+import { Tooltip } from "@mantine/core";
 
 export const INITIAL_SCALING_FACTOR = 1;
 
@@ -37,7 +44,7 @@ const dummy: Patch[] = [
 
 function App() {
   const [image] = useImage("moon.png");
-  const [testImage] = useImage("test.png");
+  // const [testImage] = useImage("test.png");
   const imageRef = useRef<Konva.Image>(null);
   const stageRef = useRef<Konva.Stage>(null);
   const overlayLayerRef = useRef<Konva.Layer>(null);
@@ -50,8 +57,10 @@ function App() {
   const [scalingFactor, setScalingFactor] = useState<number>(
     INITIAL_SCALING_FACTOR,
   );
-
-  console.log(image?.height, image?.width);
+  const [abundanceData, setAbundanceData] = useState<AbundanceData[]>([]);
+  const [abundanceMap, setAbundanceMap] = useState<
+    Map<number, Map<number, Abundance>>
+  >(new Map());
 
   const handleDragMove = (evt: Konva.KonvaEventObject<DragEvent>) => {
     handleBoundingBox(evt);
@@ -114,6 +123,8 @@ function App() {
       y: 0,
     };
 
+    console.log(abundanceMap.get(relPos.x)?.get(relPos.y)?.al);
+
     setPointerPosition({
       x: relPos.x,
       y: relPos.y,
@@ -172,10 +183,58 @@ function App() {
   //   paintPatch(dummy[0]);
   // }, [dummy, overlayLayerRef]);
 
+  const handleLoadData = async () => {
+    const response = await (await fetch("/data.json")).json();
+    const abundance_data: AbundanceData[] = [];
+    const abundance_map: Map<number, Map<number, Abundance>> = new Map();
+    response.forEach((data: AbundanceDataResponse) => {
+      const adata = {
+        coord: {
+          lat: data.la,
+          lon: data.lo,
+        },
+        abundance: {
+          si: data.s,
+          fe: data.f,
+          mg: data.m,
+          al: data.a,
+        },
+      };
+      abundance_data.push(adata);
+      let internalMap: Map<number, Abundance> =
+        abundance_map.get(Math.round(adata.coord.lat)) ?? new Map();
+      internalMap.set(Math.round(adata.coord.lon), adata.abundance);
+      abundance_map.set(Math.round(adata.coord.lat), internalMap);
+    });
+    setAbundanceData(abundance_data);
+    setAbundanceMap(abundance_map);
+  };
+
+  const calculateAbundanceMatrix = async () => {
+    let abundMatrix: Map<number, Map<number, Abundance>> = new Map();
+
+    abundanceData.forEach((data: AbundanceData) => {
+      let internalMap: Map<number, Abundance> =
+        abundMatrix.get(Math.round(data.coord.lat)) ?? new Map();
+      internalMap.set(Math.round(data.coord.lon), data.abundance);
+      abundMatrix.set(Math.round(data.coord.lat), internalMap);
+    });
+
+    setAbundanceMap(abundMatrix);
+  };
+
+  // console.log(abundanceMatrix);
+
   useEffect(() => {
     // TODO: Try to replace this
     stageRef.current?.batchDraw();
   });
+
+  useEffect(() => {
+    if (!abundanceData.length) handleLoadData();
+    // else if (imageHeight && imageWidth)
+    //   calculateAbundanceMatrix(imageHeight, imageWidth);
+  }, [imageWidth, imageHeight, abundanceData]);
 
   return (
     <main>
@@ -199,6 +258,7 @@ function App() {
           imageWidth={imageWidth}
           scale={scalingFactor}
           setScale={(scale) => setScalingFactor(scale)}
+          abundanceMap={abundanceMap}
         />
       </div>
       <div
@@ -223,15 +283,6 @@ function App() {
               image={image}
               scaleY={scalingFactor}
               scaleX={scalingFactor}
-            />
-            <Image
-              // draggable
-              image={testImage}
-              width={imageWidth}
-              height={imageHeight}
-              opacity={0.5}
-              scaleX={scalingFactor}
-              scaleY={scalingFactor}
             />
 
             {dummy.map((patch: Patch, patchIdx: number) => (

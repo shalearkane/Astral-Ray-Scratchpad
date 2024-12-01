@@ -612,3 +612,11 @@ sd/frontend/node_modules/*
 
 # Img | Aimed for image generation of the map
 sd/img/target/*
+# There are many dummy files we dont need
+sd/img/*
+
+# Worker Server
+sd/worker/files/*
+
+# Process
+sd/process/test/*

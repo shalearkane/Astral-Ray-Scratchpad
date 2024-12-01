@@ -1,22 +1,39 @@
 use std::{ops::Deref, str};
 
 use anyhow::{Ok, Result};
+use geo::{Coord, LineString, Polygon};
 use imageproc::point::Point;
 
 const NO_OF_LATITUDES: i32 = 180;
 const NO_OF_LONGITUDES: i32 = 360;
 
-#[derive(Debug, Copy, Clone)]
+pub const PRECISION: f64 = 10.0;
+
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Coordinate {
     pub lat: f64,
     pub lon: f64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone, Default, PartialEq)]
+pub struct Elements {
+    pub mg: f64,
+    pub al: f64,
+    pub fe: f64,
+    pub si: f64,
+}
+
+#[derive(Debug, Clone, Default, Copy)]
+pub struct ElementsMap {
+    pub wt: Elements,
+    pub total_err: Elements,
+}
+
+#[derive(Debug, Clone, Default)]
 pub struct Patch {
-    pub element: String,
     pub bounding_box: Vec<Coordinate>,
-    pub intensity: f64,
+    pub wt: Elements,
+    pub total_err: Elements,
 }
 
 impl Coordinate {
@@ -65,18 +82,14 @@ impl Coordinate {
 
 impl Patch {
     pub fn new() -> Self {
-        Patch {
-            element: String::new(),
-            bounding_box: vec![],
-            intensity: f64::from_bits(0),
-        }
+        Self::default()
     }
 
-    pub fn new_from(element: String, bounding_box: Vec<Coordinate>, intensity: f64) -> Self {
+    pub fn new_from(bounding_box: Vec<Coordinate>, wt: Elements, total_err: Elements) -> Self {
         Patch {
-            element,
+            wt,
             bounding_box,
-            intensity,
+            total_err,
         }
     }
 
@@ -100,5 +113,74 @@ impl Patch {
         )
         .unwrap();
         Ok(bounding_box_points)
+    }
+
+    pub fn get_bounding_box_geo_polygon(&self) -> Result<geo::Polygon<i32>> {
+        Ok(Polygon::new(
+            LineString::new(vec![
+                Coord {
+                    x: (self.bounding_box[0].lon * PRECISION) as i32,
+                    y: (self.bounding_box[0].lat * PRECISION) as i32,
+                },
+                Coord {
+                    x: (self.bounding_box[1].lon * PRECISION) as i32,
+                    y: (self.bounding_box[1].lat * PRECISION) as i32,
+                },
+                Coord {
+                    x: (self.bounding_box[2].lon * PRECISION) as i32,
+                    y: (self.bounding_box[2].lat * PRECISION) as i32,
+                },
+                Coord {
+                    x: (self.bounding_box[3].lon * PRECISION) as i32,
+                    y: (self.bounding_box[3].lat * PRECISION) as i32,
+                },
+            ]),
+            vec![],
+        ))
+    }
+}
+
+impl Elements {
+    pub fn default_with(num: f64) -> Self {
+        Elements {
+            al: num,
+            fe: num,
+            mg: num,
+            si: num,
+        }
+    }
+
+    pub fn add(&self, element: Elements) -> Self {
+        Elements {
+            mg: self.mg + element.mg,
+            al: self.al + element.al,
+            fe: self.fe + element.fe,
+            si: self.si + element.si,
+        }
+    }
+
+    pub fn multiply(&self, element: Elements) -> Self {
+        Elements {
+            mg: self.mg * element.mg,
+            al: self.al * element.al,
+            fe: self.fe * element.fe,
+            si: self.si * element.si,
+        }
+    }
+
+    pub fn divide(&self, element: Elements) -> Self {
+        Elements {
+            mg: self.mg / element.mg,
+            al: self.al / element.al,
+            fe: self.fe / element.fe,
+            si: self.si / element.si,
+        }
+    }
+
+    pub fn is_zero(&self) -> bool {
+        if *self == Elements::default_with(0.0) {
+            return true;
+        }
+        return false;
     }
 }

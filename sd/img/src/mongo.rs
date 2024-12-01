@@ -13,7 +13,7 @@ use mongodb::{
 };
 use tokio::spawn;
 
-use crate::points::{Coordinate, Patch};
+use crate::points::{Coordinate, Elements, Patch};
 use rayon::prelude::*;
 
 const DB: &str = "ISRO";
@@ -53,7 +53,6 @@ pub async fn find_all_patches(
 
         if all_keys_present {
             result.push(Patch::new_from(
-                "test".to_string(),
                 vec![
                     Coordinate::new_from_lat_lon(
                         doc.get_f64("V0_LAT").unwrap(),
@@ -72,7 +71,8 @@ pub async fn find_all_patches(
                         doc.get_f64("V3_LON").unwrap(),
                     ),
                 ],
-                1.0,
+                Elements::default(),
+                Elements::default(),
             ));
             // println!("| FOUND | ObjectID: {:?}", doc.get_object_id("_id"));
         } else {
