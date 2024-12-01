@@ -24,7 +24,7 @@ def preprocess_and_remove_duplicates(df: DataFrame, key_column: str) -> DataFram
     return averaged_df
 
 def read_and_filter_pha_file(file_path: str, start_time: datetime.datetime, end_time: datetime.datetime) -> DataFrame:
-   
+    
     with open(file_path, "r") as f_in:
         lines = f_in.readlines()
         lines = lines[5:]  # remove the first few logs
@@ -49,19 +49,27 @@ def read_and_filter_pha_file(file_path: str, start_time: datetime.datetime, end_
         return filtered_df
 
 def get_flux_from_energy_bins(
-    input_file_path: str,
+    pha_files: list,
     output_file_path: str,
     start_time: datetime.datetime,
     end_time: datetime.datetime,
+    normalize: bool = False
 ):
-    filtered_df = read_and_filter_pha_file(input_file_path, start_time, end_time)
+   
+    # Combine data from all pha files into a single dataframe
+    combined_df = pd.concat(
+        [read_and_filter_pha_file(file_path, start_time, end_time) for file_path in pha_files],
+        ignore_index=True
+    )
 
-    # Preprocess and remove duplicates from the filtered dataframe
-    filtered_df = preprocess_and_remove_duplicates(filtered_df, key_column="time")
+    # Sum the combined dataframe values for numeric columns
+    sum_df = combined_df.sum(axis=0, numeric_only=True)
 
-    # Sum the filtered dataframe values for numeric columns
-    sum_df = filtered_df.sum(axis=0, numeric_only=True)
+    # Normalize the summed values if needed
+    if normalize:
+        sum_df = sum_df / len(combined_df)
 
+    # Write the final (normalized) flux to the output file
     with open(output_file_path, "w") as f_out:
         for idx, value in zip(sum_df.index, sum_df.values):
             if "-" in idx:
@@ -71,40 +79,20 @@ def get_flux_from_energy_bins(
                 mid = (high + low) / 2
                 f_out.write(f"{mid:.2f} 0.0 {value:.4f}\n")
 
-def normalize_flux_across_files(
-    pha_files: list,
-    output_file_path: str,
-    start_time: datetime.datetime,
-    end_time: datetime.datetime,
-):
-   
-    combined_df = pd.concat(
-        [read_and_filter_pha_file(file_path, start_time, end_time) for file_path in pha_files],
-        ignore_index=True
-    )
+    # Convert the sum_df to a dataframe for easier duplicate removal
+    summed_df = pd.DataFrame([sum_df])
 
+    df_transposed = summed_df.transpose()
     # Preprocess and remove duplicates from the combined dataframe
-    combined_df = preprocess_and_remove_duplicates(combined_df, key_column="time")
+    final_df = preprocess_and_remove_duplicates(df_transposed)
 
-    # Sum the combined dataframe values for numeric columns and normalize by the number of rows
-    sum_df = combined_df.sum(axis=0, numeric_only=True)
-    normalized_df = sum_df / len(combined_df)
+    return final_df
 
-    # Write the normalized flux to the output file
-    with open(output_file_path, "w") as f_out:
-        for idx, value in zip(normalized_df.index, normalized_df.values):
-            if "-" in idx:
-                low, high = idx.split("-")
-                low = float(low)
-                high = float(high)
-                mid = (high + low) / 2
-                f_out.write(f"{mid:.2f} 0.0 {value:.4f}\n")
-
-if __name__ == "__main__":
+if __name__ == "__main__": 
     start_time = datetime.datetime(2022, 12, 22, 23, 40, 30)
     end_time = datetime.datetime(2022, 12, 22, 23, 45, 39)
     pha_files = [
         "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Pratham/GDL/ch2_xsm_20221222_v1_level2_output.txt"
     ]
     output_file_path = f"normalized_flux_{start_time.strftime('%Y%m%d%H%M')}_{end_time.strftime('%Y%m%d%H%M')}.txt"
-    normalize_flux_across_files(pha_files, output_file_path, start_time, end_time)
+    get_normalized_flux(pha_files, output_file_path, start_time, end_time)

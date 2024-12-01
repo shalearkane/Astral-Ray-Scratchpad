@@ -38,9 +38,11 @@ def main_pipeline(start_time: datetime.datetime, end_time: datetime.datetime):
         if raw_file.endswith("_output.txt"):
             input_file_path = os.path.join(raw_energy_output_dir, raw_file)
             output_file_path = os.path.join(flux_output_dir, f"output_{start_time.strftime('%Y%m%d%H%M')}_{end_time.strftime('%Y%m%d%H%M')}.txt")
-            get_flux_from_energy_bins(input_file_path, output_file_path, start_time, end_time)
+            final_df=get_flux_from_energy_bins(input_file_path, output_file_path, start_time, end_time)
 
+    print(final_df)
     print("Pipeline execution complete.")
+
 
 
 if __name__ == "__main__":
