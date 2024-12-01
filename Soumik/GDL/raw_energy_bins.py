@@ -82,6 +82,14 @@ def automate_ospex(file_list, output_dir, log_file="automation_log.txt"):
             child.sendline("o->xinput")
 
             for file_path in file_list:
+                # Check if output file already exists
+                output_filename = os.path.splitext(os.path.basename(file_path))[0] + "_output.txt"
+                output_filepath = os.path.join(output_dir, output_filename)
+                if os.path.exists(output_filepath):
+                    log.write(f"Skipping file (already processed): {file_path}\n")
+                    print(f"Skipping file (already processed): {file_path}")
+                    continue
+
                 try:
                     output_filepath = process_file(child, file_path, output_dir)
                     log.write(f"Processed file: {file_path} -> Output saved at: {output_filepath}\n")
