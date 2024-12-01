@@ -39,7 +39,7 @@ def get_class_file(lat: float, lon: float):
             {"V3_LON": {"$gte": lon}},
             {"is_in_geotail": False},
         ]
-    }
+    }172.20.59.218:27017
 
     result = class_fits_accepted.find(filter=filter)
 

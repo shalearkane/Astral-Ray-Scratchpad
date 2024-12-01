@@ -104,8 +104,7 @@ def combine_fits(folder_path: str, output_fits_path: str):
 
 
 if __name__ == "__main__":
-    folder_path = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data/class"
-    output_fits_path = "combined.fits"
+    folder_path = "DOCS/home/av/Documents/Code/Inter-IIT/Astral-Ray-Scratchpad/combinefits.py/home/av/Documents/Code/Inter-IIT/Astral-Ray-Scratchpad/combinefits.pyits_path = "combined.fits"
     combine_fits(folder_path, output_fits_path)
     exit(0)
 
