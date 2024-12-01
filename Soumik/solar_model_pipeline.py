@@ -1,5 +1,7 @@
 import os
 import datetime
+
+from regex import F
 from helpers.download import download_file_from_file_server
 from helpers.query_xsm import get_xsm_pha
 from GDL.raw_energy_bins import automate_ospex
