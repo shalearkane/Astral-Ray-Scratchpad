@@ -3,12 +3,12 @@ from os.path import isfile
 from constants.misc import FILE_SERVER
 
 
-def download_file_from_file_server(doc: dict, collection: str, download_location: str):
+def download_file_from_file_server(doc: dict, collection: str, download_location_prefix: str) -> bool:
     if "_id" not in doc.keys() or "path" not in doc.keys():
         raise Exception("pass doc with _id and path. project if necessary")
 
     try:
-        on_disk_path = f"{download_location}/{doc["path"].split("/")[-1]}"
+        on_disk_path = f"{download_location_prefix}/{doc["path"].split("/")[-1]}"
         if isfile(on_disk_path):
             return
 
@@ -23,3 +23,6 @@ def download_file_from_file_server(doc: dict, collection: str, download_location
 
         print(traceback.format_exc())
         print(f"could not download file: {doc["_id"]}")
+        return False
+    else:
+        return True

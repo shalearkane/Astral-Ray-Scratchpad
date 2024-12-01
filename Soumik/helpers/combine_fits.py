@@ -39,8 +39,12 @@ def rad_to_deg(radians: float) -> float:
     return (radians * 180.0) / math.pi
 
 
-def combine_fits(fit_files: List[str], output_fits_path: str):
+def combine_fits(fits_files: List[str], output_fits_path: str):
     file_count = len(fits_files)
+
+    if file_count == 0:
+        print("no input files provided")
+        return
 
     photon_counts_sum = np.zeros(CHANNELS, dtype=np.float64)
     solar_zenith_angles_cosec_sum: float = 0
