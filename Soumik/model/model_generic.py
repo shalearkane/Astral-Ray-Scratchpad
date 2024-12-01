@@ -1,6 +1,6 @@
 from xspec import *
 from astropy.io import fits
-from functions.xrf_localmodel import LocalModel_Parameters, create_xrf_localmodel
+from .functions.xrf_localmodel import LocalModel_Parameters, create_xrf_localmodel
 
 
 def process_abundance(class_l1: str, background: str, solar: str, scatter_atable: str, bin_size: int):
@@ -46,9 +46,10 @@ def process_abundance(class_l1: str, background: str, solar: str, scatter_atable
     mo(1).frozen = True
     mo(6).link = "100 - (3+4+5+7+8+9+10)"
 
-    Fit.nIterations = 100
+    Fit.nIterations = 2
     Fit.perform()
 
+    print(Fit.show())
 
 if __name__ == "__main__":
     class_l1 = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/combined-fits/35.20_85.20.fits"

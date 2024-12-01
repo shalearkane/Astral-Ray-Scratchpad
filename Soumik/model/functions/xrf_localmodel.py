@@ -2,10 +2,10 @@ from dataclasses import dataclass
 import numpy as np
 from xspec import *
 import xraylib
-from functions.common_modules import *
-from functions.get_xrf_lines_V1 import get_xrf_lines
-from functions.get_constants_xrf_new_V2 import get_constants_xrf
-from functions.xrf_comp_new_V2 import xrf_comp
+from .common_modules import *
+from .get_xrf_lines_V1 import get_xrf_lines
+from .get_constants_xrf_new_V2 import get_constants_xrf
+from .xrf_comp_new_V2 import xrf_comp
 
 
 @dataclass
