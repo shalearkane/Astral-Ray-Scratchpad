@@ -156,11 +156,11 @@ def main():
         if len(energies) == len(theoretical_spectrum_df['Total Scattered Spectrum']):
             result_df = pd.DataFrame({
                 "Energy": energies,
-                "Total Scattered Spectrum": theoretical_spectrum_df['Total Scattered Spectrum']
+                "Total Scattered Spectrum": total_scattered_spectrum
             })
 
             # Save to CSV
-            output_file_path = "theoretical_spectrum_interpolated.csv"
+            output_file_path = "/Users/apple/Desktop/inter iit astro/theoretical_spectrum_interpolated.csv"
             result_df.to_csv(output_file_path, index=False)
 #            print(f"Interpolated spectrum saved to: {output_file_path}")
 #        else:

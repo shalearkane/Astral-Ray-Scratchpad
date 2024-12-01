@@ -48,7 +48,7 @@ if __name__ == "__main__":
     theoretical_spectrum_df = pd.read_csv("/Users/apple/Desktop/inter iit astro/theoretical_spectrum_interpolated.csv")
     processed_theoretical_spectrum =  preprocess_and_remove_duplicates(solar_model, "energy")
     
-    output_file = "theoretical_spectrum_processed.csv"
+    output_file = "/Users/apple/Desktop/inter iit astro/theoretical_spectrum_processed.csv"
     processed_theoretical_spectrum.to_csv(output_file, index=False)
 #    print(f"Processed spectrum saved to: {output_file}")
 
