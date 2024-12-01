@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 
+from helpers.download import download_file_from_file_server
 from constants.class_fits import (
     V0_LAT,
     V0_LON,
@@ -10,15 +11,12 @@ from constants.class_fits import (
     V3_LAT,
     V3_LON,
 )
-from plot.land_patches import plot_quadrilaterals
 from constants.mongo import (
     MONGO_URI,
     DATABASE_ISRO,
     COLLECTION_CLASS_FITS_ACCEPTED,
 )
-from constants.misc import FILE_SERVER
-import requests
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 
 
 def get_class_fits(lat: float, lon: float):
@@ -39,19 +37,11 @@ def get_class_fits(lat: float, lon: float):
         ]
     }
 
-    project = {"_id": 1, "path": 1}
+    # project = {"_id": 1, "path": 1}
 
-    result = class_fits_accepted.find(filter=filter, projection=project)
+    result = class_fits_accepted.find(filter=filter)
 
     return [doc for doc in result]
-
-
-def download_file(doc: dict):
-    response = requests.get(f"{FILE_SERVER}/primary/{doc["_id"]}")
-    response.raise_for_status()
-
-    with open(f"data/class/{doc["path"].split("/")[-1]}", "wb") as f:
-        f.write(response.content)
 
 
 if __name__ == "__main__":
@@ -66,6 +56,6 @@ if __name__ == "__main__":
                 (doc[V3_LAT], doc[V3_LON]),
             ]
         )
-        download_file(doc)
+        download_file_from_file_server(doc, "primary", "data/class")
 
-    plot_quadrilaterals(list_of_land_patches, None, 0.05)
+    # plot_quadrilaterals(list_of_land_patches, None, 0.05)

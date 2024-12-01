@@ -124,8 +124,8 @@ def combine_fits(folder_path: str, output_fits_path: str):
     hdu.header["SAT_ALT"] = altitude_avg
     hdu.header["SAT_LAT"] = 0.0
     hdu.header["SAT_LON"] = 0.0
-    hdu.header["LST_HR"] = 0.0
-    hdu.header["LST_MIN"] = 0.0
+    hdu.header["LST_HR"] = 9
+    hdu.header["LST_MIN"] = 36
     hdu.header["LST_SEC"] = 48
     hdu.header["BORE_LAT"] = 0.0
     hdu.header["BORE_LON"] = 0.0
