@@ -4,6 +4,11 @@ import pexpect
 import os
 
 
+def get_output_filepath(original_path: str, output_dir: str) -> str:
+    output_filename = os.path.splitext(os.path.basename(original_path))[0] + ".txt"
+    return os.path.join(output_dir, output_filename)
+
+
 def initialize_gdl(log_file: TextIOWrapper):
     """
     Initializes the GDL environment and returns the child process.
@@ -27,7 +32,7 @@ def initialize_gdl(log_file: TextIOWrapper):
     return child
 
 
-def process_file(child, file_path, output_dir):
+def process_file(child: pexpect.spawn, file_path: str, output_dir: str):
     """
     Processes a single file and writes the output to a text file.
 
@@ -42,9 +47,7 @@ def process_file(child, file_path, output_dir):
     # Set the input file in the GDL session
     child.sendline(f'o->set, spex_specfile="{file_path}"')
 
-    # Define the output file path
-    output_filename = os.path.splitext(os.path.basename(file_path))[0] + "_output.txt"
-    output_filepath = os.path.join(output_dir, output_filename)
+    output_filepath = get_output_filepath(file_path, output_dir)
 
     # Write the output to the file
     child.sendline(f'o->textfile, spex_units=units, filename="{output_filepath}"')
@@ -57,7 +60,7 @@ def process_file(child, file_path, output_dir):
     return output_filepath
 
 
-def close_gdl(child):
+def close_gdl(child: pexpect.spawn):
     """
     Closes the GDL session.
 
@@ -66,7 +69,7 @@ def close_gdl(child):
     child.close()
 
 
-def automate_ospex(file_list, output_dir, log_file="automation_log.txt"):
+def automate_ospex(file_list: list[str], output_dir: str, log_file: str = "automation_log.txt") -> list[str]:
     """
     Automates running OSPEX for multiple files using GDL within a tcsh shell.
 
@@ -74,6 +77,8 @@ def automate_ospex(file_list, output_dir, log_file="automation_log.txt"):
     :param output_dir: Directory where output files will be saved.
     :param log_file: Path to the log file.
     """
+
+    raw_energy_bin_files: list[str] = list()
     os.makedirs(output_dir, exist_ok=True)
     with open(log_file, "w") as log:
         try:
@@ -83,8 +88,7 @@ def automate_ospex(file_list, output_dir, log_file="automation_log.txt"):
 
             for file_path in file_list:
                 # Check if output file already exists
-                output_filename = os.path.splitext(os.path.basename(file_path))[0] + "_output.txt"
-                output_filepath = os.path.join(output_dir, output_filename)
+                output_filepath = get_output_filepath(file_path, output_dir)
                 if os.path.exists(output_filepath):
                     log.write(f"Skipping file (already processed): {file_path}\n")
                     print(f"Skipping file (already processed): {file_path}")
@@ -94,6 +98,7 @@ def automate_ospex(file_list, output_dir, log_file="automation_log.txt"):
                     output_filepath = process_file(child, file_path, output_dir)
                     log.write(f"Processed file: {file_path} -> Output saved at: {output_filepath}\n")
                     print(f"Processed file: {file_path} -> Output saved at: {output_filepath}")
+                    raw_energy_bin_files.append(output_filepath)
                 except FileNotFoundError as e:
                     log.write(str(e) + "\n")
                     print(e)
@@ -111,6 +116,9 @@ def automate_ospex(file_list, output_dir, log_file="automation_log.txt"):
         except Exception as e:
             log.write(f"An unexpected error occurred: {e}\n")
             print(f"An unexpected error occurred: {e}")
+
+        finally:
+            return raw_energy_bin_files
 
 
 if __name__ == "__main__":

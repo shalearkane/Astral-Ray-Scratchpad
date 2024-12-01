@@ -5,7 +5,7 @@ from astropy.table import Table
 
 
 def create_fits_file(scatter_df: pd.DataFrame, output_fits_file: str):
-    energy = scatter_df["kev"].values
+    energy = scatter_df["keV"].values
     spectrum = scatter_df["scattered_spectrum"].values
     spectrum_scaled = spectrum * 1.1573 * 1e-8 # type: ignore
     energy_upper = energy + 0.01 # type: ignore

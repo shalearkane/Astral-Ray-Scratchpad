@@ -145,8 +145,8 @@ def scatter_from_incident(data_folder_path: str, incident_solar_file_path: str) 
 
     total_scattered_spectrum = model_scattered_spectrum_with_density(ffast_data_dict, incident_intensity, energies)
 
-    result_df = pd.DataFrame({"kev": energies, "scattered_spectrum": total_scattered_spectrum})
-    result_df = preprocess_and_remove_duplicates(result_df, "kev")
+    result_df = pd.DataFrame({"keV": energies, "scattered_spectrum": total_scattered_spectrum})
+    result_df = preprocess_and_remove_duplicates(result_df, "keV")
 
     return result_df
 

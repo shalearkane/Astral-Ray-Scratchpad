@@ -1,5 +1,5 @@
 import requests
-from os.path import isfile
+from os.path import isfile, join
 from constants.misc import FILE_SERVER
 
 
@@ -8,7 +8,7 @@ def download_file_from_file_server(doc: dict, collection: str, download_location
         raise Exception("pass doc with _id and path. project if necessary")
 
     try:
-        on_disk_path = f"{download_location_prefix}/{doc["path"].split("/")[-1]}"
+        on_disk_path = join(download_location_prefix, doc["path"].split("/")[-1])
         if isfile(on_disk_path):
             return True
 

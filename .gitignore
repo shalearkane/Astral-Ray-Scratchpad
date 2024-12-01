@@ -630,3 +630,6 @@ Soumik/model/new.txt
 Soumik/helpers/combined.fits
 Soumik/data-generated/combined-fits/*
 Soumik/data/raw_energy/*
+automation_log.txt
+new.txt
+*.fits
