@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from Soumik.helpers.download import download_file_from_file_server
+from helpers.download import download_file_from_file_server
 from constants.mongo import (
     MONGO_URI,
     DATABASE_ISRO,
