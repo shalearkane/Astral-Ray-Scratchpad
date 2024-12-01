@@ -5,8 +5,8 @@ from astropy.table import Table
 
 def create_fits_file(csv_file_path, output_fits_file):
     data = pd.read_csv(csv_file_path)
-    energy = data['Energy'].values
-    spectrum = data['Total Scattered Spectrum'].values
+    energy = data['energy'].values
+    spectrum = data['flux'].values
     spectrum_scaled = spectrum * 1.1573 * 1e-8
     # for b in spectrum_scaled:
     #     print(f"{b:.7f}", end="\t")
@@ -85,9 +85,9 @@ def create_fits_file(csv_file_path, output_fits_file):
     hdul = fits.HDUList([hdu0, hdu1, hdu2, hdu3])
     hdul.writeto(output_fits_file, overwrite=True)
 
-    print(f"FITS file written to: {output_fits_file}")
+#    print(f"FITS file written to: {output_fits_file}")
 
 if __name__ == "__main__":
-    csv_file_path = 'theoretical_spectrum_interpolated.csv'
-    output_fits_file = 'b.fits'
+    csv_file_path = '/Users/apple/Desktop/inter iit astro/theoretical_spectrum_processed.csv'
+    output_fits_file = '/Users/apple/Desktop/inter iit astro/b.fits'
     create_fits_file(csv_file_path, output_fits_file)
