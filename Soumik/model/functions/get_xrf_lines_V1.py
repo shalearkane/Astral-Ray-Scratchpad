@@ -37,7 +37,7 @@ def get_xrf_lines(
     elename_string = strarr(no_elements)
     (atomic_number_list, kalpha_list, ele_list, be_list, density_list, kbeta_list) = (
         readcol(
-            "data_constants/kalpha_be_density_kbeta.txt",
+            "model/data_constants/kalpha_be_density_kbeta.txt",
             format="I,F,A,F,F,F",
         )
     )
@@ -48,7 +48,7 @@ def get_xrf_lines(
         elename_string[i] = ele_list[tmp1]
 
         filename = (
-            "data_constants/ffast/ffast_"
+            "model/data_constants/ffast/ffast_"
             + str(int(at_no[i])).strip()
             + "_"
             + (ele_list[tmp1])[0]

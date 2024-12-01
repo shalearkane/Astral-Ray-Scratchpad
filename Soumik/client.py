@@ -13,9 +13,9 @@ DOWNLOAD_DIR = "/tmp"
 
 
 def process_fits(class_l1: str):
-    background = "data/reference/background_allevents.fits"
-    solar = "data/reference/modelop_20210827T210316000_20210827T210332000.txt"
-    scatter_atable = "data/reference/tbmodel_20210827T210316000_20210827T210332000.fits"
+    background = "model/data/reference/background_allevents.fits"
+    solar = "model/data/reference/modelop_20210827T210316000_20210827T210332000.txt"
+    scatter_atable = "model/data/reference/tbmodel_20210827T210316000_20210827T210332000.fits"
 
     if not os.path.isfile(class_l1):
         print("Error error")
@@ -83,7 +83,7 @@ def monitor_workers():
     except KeyboardInterrupt:
         print("Shutting down server...")
         for proc in workers.values():
-            proc.terminate()
+            proc.kill()
         print("All workers terminated.")
 
 

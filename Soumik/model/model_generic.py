@@ -28,7 +28,7 @@ def process_abundance(class_l1: str, background: str, solar: str, scatter_atable
     Xset.parallel.walkers = N
     Xset.allowPrompting = False
 
-    spec_data = Spectrum(class_l1, backFile=background, respFile=f"data/{str(bin_size)}/class_rmf_v1.rmf", arfFile=f"data/{str(bin_size)}/class_arf_v1.arf")
+    spec_data = Spectrum(class_l1, backFile=background, respFile=f"model/data/{str(bin_size)}/class_rmf_v1.rmf", arfFile=f"model/data/{str(bin_size)}/class_arf_v1.arf")
     spec_data.ignore(ignore_string)
 
     # Defining model and fitting

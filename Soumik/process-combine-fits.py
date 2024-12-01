@@ -4,7 +4,7 @@ import concurrent.futures
 
 from helpers.download import download_file_from_file_server
 from helpers.combine_fits import combine_fits
-from helpers.query import get_class_fits_at_lat_lon
+from helpers.query_class import get_class_fits_at_lat_lon
 from os.path import isfile
 
 increment: Final[float] = 0.1
@@ -19,7 +19,6 @@ download_folder = "data/class"
 
 
 def generate_combined_fits_for_lat_lon(latitude: float, longitude: float, redo: bool) -> bool:
-
     combined_fits_path = f"data-generated/combined-fits/{latitude:.1f}_{longitude:.1f}.fits"
     if not redo and isfile(combined_fits_path):
         print(f"already generated: {combined_fits_path}")
