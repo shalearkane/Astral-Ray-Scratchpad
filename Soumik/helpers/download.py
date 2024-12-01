@@ -10,7 +10,7 @@ def download_file_from_file_server(doc: dict, collection: str, download_location
     try:
         on_disk_path = f"{download_location_prefix}/{doc["path"].split("/")[-1]}"
         if isfile(on_disk_path):
-            return
+            return True
 
         response = requests.get(f"{FILE_SERVER}/{collection}/{doc["_id"]}")
         response.raise_for_status()

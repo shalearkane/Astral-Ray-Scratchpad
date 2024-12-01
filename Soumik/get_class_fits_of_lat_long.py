@@ -1,4 +1,4 @@
-from Soumik.helpers.query import get_class_fits_at_lat_lon
+from helpers.query import get_class_fits_at_lat_lon
 from helpers.download import download_file_from_file_server
 from constants.class_fits import (
     V0_LAT,
