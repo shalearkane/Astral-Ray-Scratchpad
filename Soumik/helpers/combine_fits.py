@@ -4,7 +4,7 @@ import math
 
 import matplotlib.pyplot as plt
 from astropy.io import fits
-from typing import Final
+from typing import Final, List
 from astropy.table import Table
 from datetime import datetime
 
@@ -39,8 +39,7 @@ def rad_to_deg(radians: float) -> float:
     return (radians * 180.0) / math.pi
 
 
-def combine_fits(folder_path: str, output_fits_path: str):
-    fits_files = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith(".fits")]
+def combine_fits(fit_files: List[str], output_fits_path: str):
     file_count = len(fits_files)
 
     photon_counts_sum = np.zeros(CHANNELS, dtype=np.float64)
@@ -147,33 +146,5 @@ def combine_fits(folder_path: str, output_fits_path: str):
 if __name__ == "__main__":
     folder_path = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data/class"
     output_fits_path = "combined.fits"
-    combine_fits(folder_path, output_fits_path)
-    exit(0)
-
-    # Load the combined FITS file and plot the data
-    with fits.open(output_fits_path) as hdul:
-        hdul.info()  # Print information about the FITS file
-        data = hdul[1].data  # Access the data from the second HDU (index 1)
-        energy_keV = data["CHANNEL"] * 0.0135  # Convert channels to keV
-        counts = data["COUNTS"]
-
-        # Ensure data can be plotted
-        energy_keV = np.array(energy_keV, dtype=float)
-        counts = np.array(counts, dtype=float)
-
-        # Filter energy values up to 7 keV
-        mask = (energy_keV >= 1.0) & (energy_keV <= 2.0)
-        energy_keV = energy_keV[mask]
-        counts = counts[mask]
-
-        # Plot the spectrum
-        matplotlib.use("Agg")
-
-        plt.figure(figsize=(10, 6))
-        plt.plot(energy_keV, counts, label="Combined Spectrum", linestyle="-", color="blue")
-        plt.xlabel("Energy (keV)")
-        plt.ylabel("Counts")
-        plt.legend()
-        plt.title("Combined Spectrum from FITS Files")
-        plt.grid(True)
-        plt.savefig("combined_spectrum_plot.png")
+    fits_files = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith(".fits")]
+    combine_fits(fits_files, output_fits_path)
