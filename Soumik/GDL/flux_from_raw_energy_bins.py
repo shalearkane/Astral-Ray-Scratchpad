@@ -60,7 +60,7 @@ def get_flux_from_energy_bins(
     transposed_df = filtered_df.transpose()
 
     # Preprocess and remove duplicates from the filtered dataframe
-    transposed_df = preprocess_and_remove_duplicates(transposed_df, key_column="time")
+    transposed_df = preprocess_and_remove_duplicates(transposed_df, key_column="KeV")
 
     # Sum the filtered dataframe values for numeric columns
     sum_df = filtered_df.sum(axis=0, numeric_only=True)
