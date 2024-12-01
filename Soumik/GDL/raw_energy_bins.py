@@ -1,3 +1,4 @@
+from time import sleep
 from io import TextIOWrapper
 import pexpect
 import os
@@ -48,10 +49,10 @@ def process_file(child, file_path, output_dir):
     # Write the output to the file
     child.sendline(f'o->textfile, spex_units=units, filename="{output_filepath}"')
 
-    # time.sleep(2)
+    sleep(10)
 
-    # if not os.path.exists(output_filepath):
-    #     raise FileNotFoundError(f"Output file not generated: {output_filepath}")
+    if not os.path.exists(output_filepath):
+        raise FileNotFoundError(f"Output file not generated: {output_filepath}")
 
     return output_filepath
 
@@ -106,7 +107,7 @@ def automate_ospex(file_list, output_dir, log_file="automation_log.txt"):
 
 if __name__ == "__main__":
     files_to_process = [
-        "~/Downloads/ch2_xsm_20221222_v1_level2.pha",
+        "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data/xsm/ch2_xsm_20240901_v1_level2.pha",
     ]
     output_directory = "."
     automate_ospex(files_to_process, output_directory)

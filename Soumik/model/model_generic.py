@@ -1,6 +1,6 @@
 from xspec import *
 from astropy.io import fits
-from .functions.xrf_localmodel import LocalModel_Parameters, create_xrf_localmodel
+from functions.xrf_localmodel import LocalModel_Parameters, create_xrf_localmodel
 
 
 def process_abundance(class_l1: str, background: str, solar: str, scatter_atable: str, bin_size: int):
@@ -27,8 +27,14 @@ def process_abundance(class_l1: str, background: str, solar: str, scatter_atable
     Xset.parallel.steppar = N
     Xset.parallel.walkers = N
     Xset.allowPrompting = False
+    Xset.chatter = 0
 
-    spec_data = Spectrum(class_l1, backFile=background, respFile=f"model/data/{str(bin_size)}/class_rmf_v1.rmf", arfFile=f"model/data/{str(bin_size)}/class_arf_v1.arf")
+    spec_data = Spectrum(
+        class_l1,
+        backFile=background,
+        respFile=f"model/data/{str(bin_size)}/class_rmf_v1.rmf",
+        arfFile=f"model/data/{str(bin_size)}/class_arf_v1.arf",
+    )
     spec_data.ignore(ignore_string)
 
     # Defining model and fitting
@@ -47,14 +53,23 @@ def process_abundance(class_l1: str, background: str, solar: str, scatter_atable
     mo(6).link = "100 - (3+4+5+7+8+9+10)"
 
     Fit.nIterations = 2
+    Fit.query = "no"
     Fit.perform()
 
-    print(Fit.show())
+    with open("fit_results.txt", "w") as f:
+        for i in range(1, 11):
+            param = mo(i)
+            if param.frozen:
+                f.write(f"{param.name}: {param.values[0]} (frozen)\n")
+            else:
+                f.write(f"{param.name}: {param.values[0]} ± {param.sigma}\n")
+        f.write("\n")
+
 
 if __name__ == "__main__":
-    class_l1 = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/combined-fits/35.20_85.20.fits"
-    background = "data/reference/background_allevents.fits"
-    solar = "data/reference/modelop_20210827T210316000_20210827T210332000.txt"
-    scatter_atable = "data/reference/tbmodel_20210827T210316000_20210827T210332000.fits"
+    class_l1 = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/combined-fits/35.2_85.2.fits"
+    background = "model/data/reference/background_allevents.fits"
+    solar = "model/data/reference/modelop_20210827T210316000_20210827T210332000.txt"
+    scatter_atable = "model/data/reference/tbmodel_20210827T210316000_20210827T210332000.fits"
 
     process_abundance(class_l1, background, solar, scatter_atable, bin_size=2048)
