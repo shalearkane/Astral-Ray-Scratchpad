@@ -41,10 +41,14 @@ if __name__ == "__main__":
     # print("\nProcessed DataFrame:")
     # print(result)
 
-    solar_model = pd.read_csv("model.2.txt", sep="\\s+", names=["energy", "error", "flux"])
+    solar_model = pd.read_csv("/Users/apple/Desktop/inter iit astro/model.2.txt", sep="\\s+", names=["energy", "error", "flux"])
     solar_model = preprocess_and_remove_duplicates(solar_model, "energy")
-    solar_model.to_csv("model.2.processed.txt", sep=" ", index=False, header=False)
+    solar_model.to_csv("/Users/apple/Desktop/inter iit astro/model.2.processed.txt", sep=" ", index=False, header=False)
 
-    theoretical_spectrum_df = pd.read_csv("total_scattered_spectrum.csv")
-    theoretical_spectrum_df =  preprocess_and_remove_duplicates(solar_model, "Energy")
+    theoretical_spectrum_df = pd.read_csv("/Users/apple/Desktop/inter iit astro/theoretical_spectrum_interpolated.csv")
+    processed_theoretical_spectrum =  preprocess_and_remove_duplicates(solar_model, "energy")
+    
+    output_file = "/Users/apple/Desktop/inter iit astro/theoretical_spectrum_processed.csv"
+    processed_theoretical_spectrum.to_csv(output_file, index=False)
+#    print(f"Processed spectrum saved to: {output_file}")
 
