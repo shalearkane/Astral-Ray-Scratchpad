@@ -1,15 +1,17 @@
 from xspec import *
 from astropy.io import fits
-from functions.xrf_localmodel import LocalModel_Parameters, create_xrf_localmodel
+from model.functions.xrf_localmodel import LocalModel_Parameters, create_xrf_localmodel
 
 
-def process_abundance(class_l1: str, background: str, solar: str, scatter_atable: str, bin_size: int):
+def process_abundance(class_l1: str, background: str, solar: str, scatter_atable: str, bin_size: int) -> dict:
     ignore_erange = ["0.9", "4.2"]
     ignore_string = "0.0-" + ignore_erange[0] + " " + ignore_erange[1] + "-**"
 
     # Getting the information for making the static parameter file
     hdu_data = fits.open(class_l1)
     hdu_header = hdu_data[1].header  # type: ignore
+    latitude = hdu_header["TARG_LAT"]
+    longitude = hdu_header["TARG_LON"]
     hdu_data.close()
 
     localmodel_params = LocalModel_Parameters(
@@ -56,14 +58,17 @@ def process_abundance(class_l1: str, background: str, solar: str, scatter_atable
     Fit.query = "no"
     Fit.perform()
 
-    with open("fit_results.txt", "w") as f:
-        for i in range(1, 11):
-            param = mo(i)
-            if param.frozen:
-                f.write(f"{param.name}: {param.values[0]} (frozen)\n")
-            else:
-                f.write(f"{param.name}: {param.values[0]} ± {param.sigma}\n")
-        f.write("\n")
+    abundances = {"filename": "some", "lat": latitude, "lon": longitude, "wt": {}, "error": {}}
+
+    for i in range(1, 11):
+        param = mo(i)
+        abundances["wt"][param.name] = float(param.values[0])
+        if param.frozen:
+            abundances["error"][param.name] = -1
+        else:
+            abundances["error"][param.name] = float(param.sigma)
+
+    return abundances
 
 
 if __name__ == "__main__":
@@ -72,4 +77,7 @@ if __name__ == "__main__":
     solar = "model/data/reference/modelop_20210827T210316000_20210827T210332000.txt"
     scatter_atable = "model/data/reference/tbmodel_20210827T210316000_20210827T210332000.fits"
 
-    process_abundance(class_l1, background, solar, scatter_atable, bin_size=2048)
+    abundance = process_abundance(class_l1, background, solar, scatter_atable, bin_size=2048)
+
+    import pprint
+    pprint.pprint(abundance)

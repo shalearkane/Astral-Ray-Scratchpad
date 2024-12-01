@@ -1,3 +1,4 @@
+from typing import Optional
 import requests
 import multiprocessing
 import os
@@ -6,23 +7,24 @@ import time
 from model.model_generic import process_abundance
 
 # Configuration
-SERVER_URL = "http://localhost:5000/request_fits"
-RETURN_URL = "http://localhost:5000/return_results"
-NUM_PROCESSES = 16
+SERVER_URL = "http://172.20.59.218:8082/new"
+RETURN_URL = "http://172.20.59.218:8082/done"
+NUM_PROCESSES = 1
 DOWNLOAD_DIR = "/tmp"
 
 
-def process_fits(class_l1: str):
+def process_fits(class_l1: str) -> Optional[dict]:
     background = "model/data/reference/background_allevents.fits"
     solar = "model/data/reference/modelop_20210827T210316000_20210827T210332000.txt"
     scatter_atable = "model/data/reference/tbmodel_20210827T210316000_20210827T210332000.fits"
 
     if not os.path.isfile(class_l1):
         print("Error error")
-        return
+        return None
 
     try:
-        process_abundance(class_l1, background, solar, scatter_atable, 2048)
+        abundance = process_abundance(class_l1, background, solar, scatter_atable, 2048)
+        return abundance
     except Exception as e:
         raise RuntimeError(f"Error processing FITS file {class_l1}: {e}")
 
@@ -48,7 +50,7 @@ def worker(worker_id: int):
 
             result = process_fits(file_path)
 
-            return_response = requests.post(RETURN_URL, json={"worker_id": worker_id, "result": result}, timeout=10)
+            return_response = requests.post(RETURN_URL, json=result, timeout=10)
             return_response.raise_for_status()
 
             print(f"Worker {worker_id}: Successfully processed and returned results.")
