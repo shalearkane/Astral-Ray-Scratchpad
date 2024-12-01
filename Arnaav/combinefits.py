@@ -1,46 +1,87 @@
 import numpy as np
 import os
-import matplotlib
+import math
 
 import matplotlib.pyplot as plt
 from astropy.io import fits
+from typing import Final
+from astropy.table import Table
+from datetime import datetime
+
+
+CHANNELS: Final[int] = 2048
+
+
+def deg_to_rad(degrees: float) -> float:
+    """Converts degrees to radians.
+
+    Args:
+      degrees: The angle in degrees.
+
+    Returns:
+      The angle in radians.
+    """
+
+    return (degrees * math.pi) / 180.0
+
+
+def rad_to_deg(radians: float) -> float:
+    """Converts radians to degrees.
+
+    Args:
+      radians: The angle in radians.
+
+    Returns:
+      The angle in degrees.
+
+    """
+
+    return (radians * 180.0) / math.pi
 
 
 def combine_fits(folder_path: str, output_fits_path: str):
-    # Folder containing the FITS files to combine
+    fits_files = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith(".fits")]
+    file_count = len(fits_files)
 
-    # Get a list of all FITS files in the folder
-    fits_files = [
-        os.path.join(folder_path, f)
-        for f in os.listdir(folder_path)
-        if f.endswith(".fits")
-    ]
-
-    # Load and sum the counts from each FITS file
-    total_counts = None
-    energy_keV = None
+    photon_counts_sum = np.zeros(CHANNELS, dtype=np.float64)
+    solar_zenith_angles_cosec_sum: float = 0
+    emission_angles_cosec_sum: float = 0
+    altitude_sum: float = 0
+    exposure_sum: float = 0
+    mid_utc_in_seconds_sum: float = 0
 
     for file_path in fits_files:
         with fits.open(file_path) as hdul:
-            data = hdul[1].data
-            counts = data["COUNTS"]
+            data = hdul["SPECTRUM"].data  # type: ignore
+            photon_counts = data["COUNTS"]
             energy_channel = data["CHANNEL"]
+            photon_counts_sum += photon_counts
 
-            if total_counts is None:
-                total_counts = np.zeros_like(counts)
-                energy_keV = (
-                    energy_channel * 0.0135
-                )  # Convert channels to keV (assuming same across all files)
+            table = Table.read(hdul["SPECTRUM"])
 
-            total_counts += counts
+            solar_zenith_angles_cosec_sum += 1.0 / math.sin(deg_to_rad(float(table.meta["SOLARANG"])))
+            emission_angles_cosec_sum += 1.0 / math.sin(deg_to_rad(float(table.meta["EMISNANG"])))
+            altitude_sum += float(table.meta["SAT_ALT"])
+            exposure_sum += float(table.meta["EXPOSURE"])
+            mid_utc_in_seconds_sum += datetime.strptime(table.meta["MID_UTC"], "%Y-%m-%dT%H:%M:%S.%f").timestamp()
+
+    solar_zenith_angles_cosec_avg = solar_zenith_angles_cosec_sum / file_count
+    emission_angles_cosec_avg = emission_angles_cosec_sum / file_count
+    altitude_avg = altitude_sum / file_count
+    mid_utc_in_seconds_avg = mid_utc_in_seconds_sum / file_count
+
+    solar_zenith_angle = rad_to_deg(math.asin(1.0 / solar_zenith_angles_cosec_avg))
+    emission_angle = rad_to_deg(math.asin(1.0 / emission_angles_cosec_avg))
+    mid_utc = datetime.fromtimestamp(mid_utc_in_seconds_avg).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 
     # Save the combined data to a new FITS file
     hdu = fits.BinTableHDU.from_columns(
         [
             fits.Column(name="CHANNEL", format="1I", array=energy_channel),
-            fits.Column(name="COUNTS", format="1D", array=total_counts),
+            fits.Column(name="COUNTS", format="1D", array=photon_counts_sum),
         ]
     )
+
     hdu.header["EXTNAME"] = "SPECTRUM"
     hdu.header["HDUCLASS"] = "OGIP"
     hdu.header["HDUCLAS1"] = "SPECTRUM"
@@ -53,7 +94,7 @@ def combine_fits(folder_path: str, output_fits_path: str):
     hdu.header["TELESCOP"] = "CHANDRAYAAN-2"
     hdu.header["INSTRUME"] = "CLASS"
     hdu.header["FILTER"] = "none"
-    hdu.header["EXPOSURE"] = 8.0
+    hdu.header["EXPOSURE"] = exposure_sum
     hdu.header["AREASCAL"] = 1.0
     hdu.header["BACKFILE"] = "NONE"
     hdu.header["BACKSCAL"] = 1.0
@@ -79,26 +120,26 @@ def combine_fits(folder_path: str, output_fits_path: str):
     hdu.header["TEMP"] = -43.7
     hdu.header["GAIN"] = 13.5
     hdu.header["SCD_USED"] = "0,1,2,3,4,5,6,7,8,9,10,11"
-    hdu.header["MID_UTC"] = "2020-02-01T00:00:04.114"
-    hdu.header["SAT_ALT"] = 79.1612
-    hdu.header["SAT_LAT"] = -18.0006
-    hdu.header["SAT_LON"] = 61.818
-    hdu.header["LST_HR"] = 9
-    hdu.header["LST_MIN"] = 36
+    hdu.header["MID_UTC"] = mid_utc
+    hdu.header["SAT_ALT"] = altitude_avg
+    hdu.header["SAT_LAT"] = 0.0
+    hdu.header["SAT_LON"] = 0.0
+    hdu.header["LST_HR"] = 0.0
+    hdu.header["LST_MIN"] = 0.0
     hdu.header["LST_SEC"] = 48
-    hdu.header["BORE_LAT"] = -18.0026
-    hdu.header["BORE_LON"] = 61.8179
-    hdu.header["V0_LAT"] = -17.4623
-    hdu.header["V1_LAT"] = -18.5262
-    hdu.header["V2_LAT"] = -18.5379
-    hdu.header["V3_LAT"] = -17.4739
-    hdu.header["V0_LON"] = 61.486
-    hdu.header["V1_LON"] = 61.4647
-    hdu.header["V2_LON"] = 62.1519
-    hdu.header["V3_LON"] = 62.1688
-    hdu.header["SOLARANG"] = 39.1038
-    hdu.header["PHASEANG"] = 39.1038
-    hdu.header["EMISNANG"] = 1.3486838e-09
+    hdu.header["BORE_LAT"] = 0.0
+    hdu.header["BORE_LON"] = 0.0
+    hdu.header["V1_LAT"] = 0.0
+    hdu.header["V0_LAT"] = 0.0
+    hdu.header["V2_LAT"] = 0.0
+    hdu.header["V3_LAT"] = 0.0
+    hdu.header["V0_LON"] = 0.0
+    hdu.header["V1_LON"] = 0.0
+    hdu.header["V2_LON"] = 0.0
+    hdu.header["V3_LON"] = 0.0
+    hdu.header["SOLARANG"] = solar_zenith_angle
+    hdu.header["PHASEANG"] = 0.0
+    hdu.header["EMISNANG"] = emission_angle
 
     hdu.writeto(output_fits_path, overwrite=True)
 
@@ -129,9 +170,7 @@ if __name__ == "__main__":
         matplotlib.use("Agg")
 
         plt.figure(figsize=(10, 6))
-        plt.plot(
-            energy_keV, counts, label="Combined Spectrum", linestyle="-", color="blue"
-        )
+        plt.plot(energy_keV, counts, label="Combined Spectrum", linestyle="-", color="blue")
         plt.xlabel("Energy (keV)")
         plt.ylabel("Counts")
         plt.legend()

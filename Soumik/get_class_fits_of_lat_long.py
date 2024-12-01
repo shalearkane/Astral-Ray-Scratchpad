@@ -21,10 +21,8 @@ import requests
 from typing import List, Tuple, Optional
 
 
-def get_class_file(lat: float, lon: float):
-    class_fits_accepted = MongoClient(MONGO_URI)[DATABASE_ISRO][
-        COLLECTION_CLASS_FITS_ACCEPTED
-    ]
+def get_class_fits(lat: float, lon: float):
+    class_fits_accepted = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_CLASS_FITS_ACCEPTED]
     lon_r = lon - 360.0
 
     filter = {
@@ -41,7 +39,9 @@ def get_class_file(lat: float, lon: float):
         ]
     }
 
-    result = class_fits_accepted.find(filter=filter)
+    project = {"_id": 1, "path": 1}
+
+    result = class_fits_accepted.find(filter=filter, projection=project)
 
     return [doc for doc in result]
 
@@ -55,7 +55,7 @@ def download_file(doc: dict):
 
 
 if __name__ == "__main__":
-    list_of_docs = get_class_file(20, 130)
+    list_of_docs = get_class_fits(20, 130)
     list_of_land_patches: List[List[Tuple[float, float]]] = list()
     for doc in list_of_docs:
         list_of_land_patches.append(
