@@ -51,9 +51,9 @@ def process_abundance(class_l1: str, background: str, solar: str, scatter_atable
 
 
 if __name__ == "__main__":
-    class_l1 = "data/reference/ch2_cla_l1_20210827T210316000_20210827T210332000_1024.fits"
-    background = "data/reference/ch2_cla_l1_20210826T220355000_20210826T223335000_1024.fits"
+    class_l1 = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/combined-fits/35.20_85.20.fits"
+    background = "data/reference/background_allevents.fits"
     solar = "data/reference/modelop_20210827T210316000_20210827T210332000.txt"
     scatter_atable = "data/reference/tbmodel_20210827T210316000_20210827T210332000.fits"
 
-    process_abundance(class_l1, background, solar, scatter_atable, bin_size=1024)
+    process_abundance(class_l1, background, solar, scatter_atable, bin_size=2048)
