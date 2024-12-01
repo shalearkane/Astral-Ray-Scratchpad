@@ -23,7 +23,7 @@ def get_xsm_pha(start_time: datetime, end_time: datetime):
 
     result = class_fits_accepted.find(filter=filter, projection=project)
 
-    return [{"_id": doc["_id"], "path": doc["path"].split["/"][-1]} for doc in result]
+    return [{"_id": doc["_id"], "path": doc["path"].split("/")[-1]} for doc in result]
 
 
 if __name__ == "__main__":

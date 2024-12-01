@@ -52,7 +52,7 @@ def process_file(child: pexpect.spawn, file_path: str, output_dir: str):
     # Write the output to the file
     child.sendline(f'o->textfile, spex_units=units, filename="{output_filepath}"')
 
-    sleep(10)
+    sleep(15)
 
     if not os.path.exists(output_filepath):
         raise FileNotFoundError(f"Output file not generated: {output_filepath}")

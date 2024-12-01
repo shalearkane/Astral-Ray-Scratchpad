@@ -15,7 +15,7 @@ DOWNLOAD_DIR = "/tmp"
 
 def process_fits(class_l1: str) -> Optional[dict]:
     background = "model/data/reference/background_allevents.fits"
-    solar = "model/data/reference/modelop_20210827T210316000_20210827T210332000.txt"
+    solar = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data/flux/some.txt"
     scatter_atable = "model/data/reference/tbmodel_20210827T210316000_20210827T210332000.fits"
 
     if not os.path.isfile(class_l1):
@@ -24,9 +24,10 @@ def process_fits(class_l1: str) -> Optional[dict]:
 
     try:
         abundance = process_abundance(class_l1, background, solar, scatter_atable, 2048)
-        return abundance
     except Exception as e:
         raise RuntimeError(f"Error processing FITS file {class_l1}: {e}")
+    else:
+        return abundance
 
 
 def worker(worker_id: int):
@@ -44,11 +45,17 @@ def worker(worker_id: int):
             if not response.content:
                 raise ValueError("Received an empty response from the server.")
 
-            file_path = os.path.join(DOWNLOAD_DIR, f"worker_{worker_id}.fits")
+            filename = response.headers["filename"]
+
+            file_path = os.path.join(DOWNLOAD_DIR, f"worker_{worker_id}_{filename}.fits")
             with open(file_path, "wb") as file:
                 file.write(response.content)
 
             result = process_fits(file_path)
+            if result is not None:
+                result["filename"] = filename
+
+            print(result)
 
             return_response = requests.post(RETURN_URL, json=result, timeout=10)
             return_response.raise_for_status()

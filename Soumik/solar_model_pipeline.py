@@ -37,7 +37,7 @@ def main_pipeline(start_time: datetime.datetime, end_time: datetime.datetime):
 
 if __name__ == "__main__":
 
-    start_time = datetime.datetime(2024, 8, 27, 0, 0, 0, tzinfo=datetime.timezone.utc)
-    end_time = datetime.datetime(2024, 9, 27, 23, 59, 59, tzinfo=datetime.timezone.utc)
+    start_time = datetime.datetime(2024, 8, 27, 0, 0, 0)
+    end_time = datetime.datetime(2024, 9, 27, 23, 59, 59)
 
     main_pipeline(start_time, end_time)

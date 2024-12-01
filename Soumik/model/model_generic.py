@@ -54,7 +54,7 @@ def process_abundance(class_l1: str, background: str, solar: str, scatter_atable
     mo(1).frozen = True
     mo(6).link = "100 - (3+4+5+7+8+9+10)"
 
-    Fit.nIterations = 2
+    Fit.nIterations = 10
     Fit.query = "no"
     Fit.perform()
 
@@ -74,7 +74,7 @@ def process_abundance(class_l1: str, background: str, solar: str, scatter_atable
 if __name__ == "__main__":
     class_l1 = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/combined-fits/35.2_85.2.fits"
     background = "model/data/reference/background_allevents.fits"
-    solar = "model/data/reference/modelop_20210827T210316000_20210827T210332000.txt"
+    solar = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data/flux/some.txt"
     scatter_atable = "model/data/reference/tbmodel_20210827T210316000_20210827T210332000.fits"
 
     abundance = process_abundance(class_l1, background, solar, scatter_atable, bin_size=2048)
