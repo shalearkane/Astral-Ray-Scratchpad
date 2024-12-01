@@ -122,11 +122,10 @@ def load_incident_spectrum(file_path: str) -> pd.DataFrame:
 
 
 def main():
-    folder_path = "/home/sm/Public/Inter-IIT/V2/data_constants/ffast"
+    folder_path = "/Users/apple/Desktop/inter iit astro/X2ABUND_LMODEL_V1/data_constants/ffast"
     ffast_data_dict = {}
 
     for element in selected_elements:
-
         atomic_number = atomic_number_map[element]
         file_name = f"ffast_{atomic_number}_{element}.txt"
         file_path = os.path.join(folder_path, file_name)
@@ -136,20 +135,36 @@ def main():
             if data is not None:
                 ffast_data_dict[element] = data
 
-    incident_file_path = "/home/sm/Public/Inter-IIT/V2/test1.2/data/model.2.txt"
+    incident_file_path = "/Users/apple/Desktop/inter iit astro/model.2.txt"
     incident_spectrum = load_incident_spectrum(incident_file_path)
 
     if incident_spectrum is not None:
         energies = incident_spectrum["Energy"].values
         incident_intensity = incident_spectrum["Intensity"].values
 
-        total_scattered_spectrum = model_scattered_spectrum_with_density(ffast_data_dict, incident_intensity, energies, element_properties)
+        # Compute total scattered spectrum
+        total_scattered_spectrum = model_scattered_spectrum_with_density(
+            ffast_data_dict, incident_intensity, energies, element_properties
+        )
 
-        result_df = pd.DataFrame({"Energy": energies, "Total Scattered Spectrum": total_scattered_spectrum})
+        # Load theoretical spectrum
+        theoretical_spectrum_df = pd.read_csv('/Users/apple/Desktop/inter iit astro/total_scattered_spectrum.csv')
+        # Interpolate missing values in the "Total Scattered Spectrum" column
+        theoretical_spectrum_df['Total Scattered Spectrum'] = theoretical_spectrum_df['Total Scattered Spectrum'].interpolate()
 
-        output_file_path = "total_scattered_spectrum.csv"
-        result_df.to_csv(output_file_path, index=False)
+        # Validate shapes and create the final DataFrame
+        if len(energies) == len(theoretical_spectrum_df['Total Scattered Spectrum']):
+            result_df = pd.DataFrame({
+                "Energy": energies,
+                "Total Scattered Spectrum": theoretical_spectrum_df['Total Scattered Spectrum']
+            })
 
+            # Save to CSV
+            output_file_path = "/Users/apple/Desktop/inter iit astro/theoretical_spectrum_interpolated.csv"
+            result_df.to_csv(output_file_path, index=False)
+#            print(f"Interpolated spectrum saved to: {output_file_path}")
+#        else:
+#            print("Error: Mismatch in the lengths of energy and interpolated spectrum data.")
 
 if __name__ == "__main__":
     main()
