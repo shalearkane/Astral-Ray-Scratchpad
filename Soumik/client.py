@@ -1,29 +1,29 @@
 from typing import Optional
 import requests
 import multiprocessing
-import os
-import time
-
+from os.path import isfile, join
+from time import sleep
 from model.model_generic import process_abundance
+from json import dump
 
 # Configuration
-SERVER_URL = "http://172.20.59.218:8082/new"
-RETURN_URL = "http://172.20.59.218:8082/done"
-NUM_PROCESSES = 1
+SERVER_URL = "http://34.131.28.6:8082/new"
+RETURN_URL = "http://34.131.28.6:8082/done"
+NUM_PROCESSES = 8
 DOWNLOAD_DIR = "/tmp"
 
 
 def process_fits(class_l1: str) -> Optional[dict]:
     background = "model/data/reference/background_allevents.fits"
     solar = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data/flux/some.txt"
-    scatter_atable = "model/data/reference/tbmodel_20210827T210316000_20210827T210332000.fits"
+    scatter_atable = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/scatter/some.fits"
 
-    if not os.path.isfile(class_l1):
-        print("Error error")
+    if not isfile(class_l1):
+        print("Class L1 not found on path")
         return None
 
     try:
-        abundance = process_abundance(class_l1, background, solar, scatter_atable, 2048)
+        abundance = process_abundance(class_l1, background, solar, scatter_atable)
     except Exception as e:
         raise RuntimeError(f"Error processing FITS file {class_l1}: {e}")
     else:
@@ -47,17 +47,19 @@ def worker(worker_id: int):
 
             filename = response.headers["filename"]
 
-            file_path = os.path.join(DOWNLOAD_DIR, f"worker_{worker_id}_{filename}.fits")
+            file_path = join(DOWNLOAD_DIR, f"worker_{worker_id}_{filename}.fits")
             with open(file_path, "wb") as file:
                 file.write(response.content)
 
-            result = process_fits(file_path)
-            if result is not None:
-                result["filename"] = filename
+            abundance = process_fits(file_path)
+            if abundance is not None:
+                abundance["filename"] = filename
 
-            print(result)
+            # local persistence
+            with open(f"data-generated/abundance_jsons/{filename[:-5]}.json", "w") as f:
+                dump(abundance, f)
 
-            return_response = requests.post(RETURN_URL, json=result, timeout=10)
+            return_response = requests.post(RETURN_URL, json=abundance, timeout=10)
             return_response.raise_for_status()
 
             print(f"Worker {worker_id}: Successfully processed and returned results.")
@@ -66,7 +68,7 @@ def worker(worker_id: int):
             import traceback
 
             print(f"Worker {worker_id}: Encountered an error:\n{traceback.format_exc()}")
-            break  # Exit the worker on exception
+            break
 
 
 def monitor_workers():
@@ -86,7 +88,7 @@ def monitor_workers():
                     worker_process.start()
                     workers[i] = worker_process
 
-            time.sleep(10)
+            sleep(10)
             # Check worker statuses
 
     except KeyboardInterrupt:
