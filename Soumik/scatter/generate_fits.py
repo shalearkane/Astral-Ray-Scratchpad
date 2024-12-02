@@ -6,9 +6,10 @@ from astropy.table import Table
 
 def create_fits_file(scatter_df: pd.DataFrame, output_fits_file: str):
     energy = scatter_df["keV"].values
-    spectrum = scatter_df["scattered_spectrum"].values
-    spectrum_scaled = spectrum * 1.1573 * 1e-8 # type: ignore
-    energy_upper = energy + 0.01 # type: ignore
+    spectrum = scatter_df["INTPSPEC"].values
+    spectrum_scaled = spectrum * 4 * 1e-2 # type: ignore
+    energy_upper = energy[1:] # type: ignore
+    energy_upper = np.append(energy_upper, 15.3)
 
     primary_header = fits.Header(
         {
@@ -28,7 +29,7 @@ def create_fits_file(scatter_df: pd.DataFrame, output_fits_file: str):
     hdu0 = fits.PrimaryHDU(header=primary_header)
 
     params_data = np.array(
-        [("addnorm", 1, 0.1, 0.01, 0.0, 0.0, 0.1, 0.2, 1, 1)],
+        [("addnorm", 0, 0, 0.0001, 0.0, 0.0, 10, 10, 1, 1)],
         dtype=[
             ("NAME", "U7"),
             ("METHOD", "i2"),
@@ -93,7 +94,7 @@ def create_fits_file(scatter_df: pd.DataFrame, output_fits_file: str):
 
 
 if __name__ == "__main__":
-    csv_file_path = "total_scattered_spectrum.csv"
+    csv_file_path = "../../Neeraj/output_scatter.csv"
     scatter_df = pd.read_csv(csv_file_path)
     output_fits_file = "b.fits"
     create_fits_file(scatter_df, output_fits_file)

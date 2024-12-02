@@ -90,6 +90,7 @@ def automate_ospex(file_list: list[str], output_dir: str, log_file: str = "autom
                 # Check if output file already exists
                 output_filepath = get_output_filepath(file_path, output_dir)
                 if os.path.exists(output_filepath):
+                    raw_energy_bin_files.append(output_filepath)
                     log.write(f"Skipping file (already processed): {file_path}\n")
                     print(f"Skipping file (already processed): {file_path}")
                     continue

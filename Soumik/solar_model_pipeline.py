@@ -25,7 +25,7 @@ def get_xsm_files(start_time: datetime.datetime, end_time: datetime.datetime, ou
 def main_pipeline(start_time: datetime.datetime, end_time: datetime.datetime):
     xsm_output_dir = "data/xsm"
     raw_energy_output_dir = "data/raw_energy"
-    flux_output_dir = "data/flux"
+    flux_output_dir = "data-generated/flux"
 
     os.makedirs(flux_output_dir, exist_ok=True)
 
@@ -34,7 +34,7 @@ def main_pipeline(start_time: datetime.datetime, end_time: datetime.datetime):
 
     sum_flux_across_files(
         raw_energy_bin_files,
-        flux_output_dir + f"normalized_flux_{start_time.strftime('%Y%m%d%H%M')}_{end_time.strftime('%Y%m%d%H%M')}.txt",
+        flux_output_dir + f"/normalized_flux_{start_time.strftime('%Y%m%d%H%M')}_{end_time.strftime('%Y%m%d%H%M')}.txt",
         start_time,
         end_time,
     )
