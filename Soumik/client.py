@@ -1,3 +1,4 @@
+from os import makedirs
 from typing import Optional
 import requests
 import multiprocessing
@@ -56,7 +57,7 @@ def worker(worker_id: int):
                 abundance["filename"] = filename
 
             # local persistence
-            os.makedirs("data-generated/abundance_jsons", exist_ok=True)
+            makedirs("data-generated/abundance_jsons", exist_ok=True)
             with open(f"data-generated/abundance_jsons/{filename[:-5]}.json", "w") as f:
                 dump(abundance, f)
 
