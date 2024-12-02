@@ -54,7 +54,7 @@ def process_abundance(class_l1: str, background: str, solar: str, scatter_atable
     mo(1).frozen = True
     mo(6).link = "100 - (3+4+5+7+8+9+10)"
 
-    Fit.nIterations = 10
+    Fit.nIterations = 100
     Fit.query = "no"
     Fit.perform()
 
