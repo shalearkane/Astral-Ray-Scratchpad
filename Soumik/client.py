@@ -15,8 +15,8 @@ DOWNLOAD_DIR = "/tmp"
 
 def process_fits(class_l1: str) -> Optional[dict]:
     background = "model/data/reference/background_allevents.fits"
-    solar = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data/flux/some.txt"
-    scatter_atable = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/scatter/some.fits"
+    solar = "data-generated/client/some.txt"
+    scatter_atable = "data-generated/client/some.fits"
 
     if not isfile(class_l1):
         print("Class L1 not found on path")

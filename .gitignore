@@ -633,3 +633,4 @@ Soumik/data/raw_energy/*
 automation_log.txt
 new.txt
 *.fits
+Soumik/data-generated/abundance_jsons/*
