@@ -103,6 +103,10 @@ def automate_ospex(file_list: list[str], output_dir: str, log_file: str = "autom
                     log.write(str(e) + "\n")
                     print(e)
 
+                    # create new child
+                    child = initialize_gdl(log)
+                    child.sendline("o->xinput")
+
             # Close the GDL environment
             close_gdl(child)
             print("Automation complete. Check the log file for details.")
