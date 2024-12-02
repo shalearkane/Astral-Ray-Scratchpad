@@ -61,4 +61,10 @@ df = pd.DataFrame({
 })
 # val1=df[['energy']==1.49]
 # print(val1)
-df.to_csv('weird_1.csv', index=False)
+# df.to_csv('weird_1.csv', index=False)
+# If you are searching for a value close to 1.49 in Column 2
+result = df[df['energy'].between(1.48, 1.50)]
+
+print(result)
+
+# avg_row=row['counts'].mean()
