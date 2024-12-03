@@ -4,7 +4,7 @@ import requests
 import multiprocessing
 from os.path import isfile, join
 from time import sleep
-from model.model_generic import process_abundance
+from model.model_generic import process_abundance_x2
 from json import dump
 
 # Configuration
@@ -24,7 +24,7 @@ def process_fits(class_l1: str) -> Optional[dict]:
         return None
 
     try:
-        abundance = process_abundance(class_l1, background, solar, scatter_atable)
+        abundance = process_abundance_x2(class_l1, background, solar, scatter_atable)
     except Exception as e:
         raise RuntimeError(f"Error processing FITS file {class_l1}: {e}")
     else:

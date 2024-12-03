@@ -1,13 +1,13 @@
-from xspec import *
+from helpers.xset_settings import set_xset_settings, reset_xspec
+from xspec import Spectrum, Model, Fit
 from astropy.io import fits
 from model.functions.xrf_localmodel import LocalModel_Parameters, create_xrf_localmodel
 
 
-def process_abundance(
+def process_abundance_x2(
     class_l1: str, background: str, solar: str, scatter_atable: str, bin_size: int = 2048, num_parallel_param: int = 2
 ) -> dict:
-    Xset.allowPrompting = False
-    # Xset.chatter = 0
+    set_xset_settings(num_parallel_param)
     ignore_erange = ["0.9", "4.2"]
     ignore_string = "0.0-" + ignore_erange[0] + " " + ignore_erange[1] + "-**"
 
@@ -23,14 +23,7 @@ def process_abundance(
     )
 
     # PyXspec Initialisation
-    AllData.clear()
-    AllModels.clear()
-
-    Xset.parallel.error = num_parallel_param
-    Xset.parallel.goodness = num_parallel_param
-    Xset.parallel.leven = num_parallel_param
-    Xset.parallel.steppar = num_parallel_param
-    Xset.parallel.walkers = num_parallel_param
+    reset_xspec()
 
     spec_data = Spectrum(
         class_l1,
@@ -78,7 +71,7 @@ if __name__ == "__main__":
     solar = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/flux/some.txt"
     scatter_atable = "model/data/reference/tbmodel_20210827T210316000_20210827T210332000.fits"
 
-    abundance = process_abundance(class_l1, background, solar, scatter_atable)
+    abundance = process_abundance_x2(class_l1, background, solar, scatter_atable)
 
     import pprint
 
