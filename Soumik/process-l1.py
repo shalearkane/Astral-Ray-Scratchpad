@@ -1,5 +1,6 @@
 from concurrent.futures import ALL_COMPLETED, ProcessPoolExecutor, wait
 from datetime import datetime, timezone
+from typing import Tuple
 from pymongo import MongoClient
 from itertools import batched
 from bson import ObjectId
@@ -66,7 +67,7 @@ def process_document_for_flare_class(doc: dict, collection: pymongo.collection.C
         save_flare_classified_document(doc, collection)
 
 
-def batched_process_document_for_flare_class(docs: list[dict]):
+def batched_process_document_for_flare_class(docs: Tuple[dict]):
     try:
         class_fits_flare_classified = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_CLASS_FITS_FLARE_CLASSIFIED]
 
@@ -116,7 +117,7 @@ def process_document_for_fitness(doc: dict):
 
 
 class_fits_all = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_CLASS_FITS]
-cursor = class_fits_all.find().batch_size(64000)
+cursor = class_fits_all.find().batch_size(24000)
 count = 0
 
 # for doc in cursor:
@@ -125,11 +126,11 @@ count = 0
 #     process_document_for_flare_class(doc, class_fits_flare_classified)
 
 with ProcessPoolExecutor() as executor:
-    for batch in batched(cursor, 4000):
-        future_to_doc = {executor.submit(batched_process_document_for_flare_class, doc): doc for doc in batch}
+    for batches in batched(cursor, 24000):
+        future_to_doc = {executor.submit(batched_process_document_for_flare_class, batch): batch for batch in batched(batches, 1500)}
         wait(future_to_doc, timeout=None, return_when=ALL_COMPLETED)
 
-        count += len(future_to_doc)
+        count += 24000
         print(count)
 
 print(f"Processed {count} documents")
