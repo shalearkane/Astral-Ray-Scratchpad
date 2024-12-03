@@ -20,7 +20,7 @@ def get_df_al_si_mg( class_file:str,bck:str):
     m1.gaussian.norm = 1       # Norm for Gaussian 1
     m1.gaussian.LineE.frozen=True
     # Setting values for Gaussian 2
-    m1.gaussian_2.LineE = 1.49  # LineE for Gaussian 2 (in keV)
+    m1.gaussian_2.LineE = 1.48  # LineE for Gaussian 2 (in keV)
     m1.gaussian_2.Sigma = 0.05   # Sigma for Gaussian 2 (in keV)
     m1.gaussian_2.norm = 1       # Norm for Gaussian 2
     m1.gaussian_2.LineE.frozen=True
