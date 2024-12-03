@@ -49,7 +49,7 @@ def load_ffast_data(file_path: str):
 
         if num_columns == 14:
             data.columns = [
-                "Energy",
+                "keV",
                 "F1",
                 "F2",
                 "MuRho",
@@ -66,7 +66,7 @@ def load_ffast_data(file_path: str):
             ]
         elif num_columns == 13:
             data.columns = [
-                "Energy",
+                "keV",
                 "F1",
                 "F2",
                 "MuRho",
@@ -83,7 +83,7 @@ def load_ffast_data(file_path: str):
         else:
             return None
 
-        data = data[["Energy", "F1", "F2", "MuRho", "SigmaRho"]].dropna()
+        data = data[["keV", "F1", "F2", "MuRho", "SigmaRho"]].dropna()
         data = data.apply(pd.to_numeric, errors="coerce")
 
         return data
@@ -92,7 +92,7 @@ def load_ffast_data(file_path: str):
 
 
 def interpolate_cross_section(data, energies):
-    interpolation_function = interp1d(data["Energy"], data["SigmaRho"], kind="linear", fill_value="extrapolate")  # type: ignore
+    interpolation_function = interp1d(data["keV"], data["SigmaRho"], kind="linear", fill_value="extrapolate")  # type: ignore
     return interpolation_function(energies)
 
 
@@ -117,10 +117,10 @@ def model_scattered_spectrum_with_density(ffast_data_dict: dict, incident_spectr
 
 def load_incident_spectrum(file_path: str) -> pd.DataFrame:
     incident_data = pd.read_csv(file_path, sep="\\s+", header=None)
-    incident_data.columns = ["Energy", "Column2", "Intensity"]
+    incident_data.columns = ["keV", "Column2", "Intensity"]
     incident_data = incident_data.drop(columns=["Column2"])
     incident_data = incident_data.apply(pd.to_numeric, errors="coerce")
-    return incident_data[["Energy", "Intensity"]]
+    return incident_data[["keV", "Intensity"]]
 
 
 def scatter_from_incident(data_folder_path: str, incident_solar_file_path: str) -> pd.DataFrame:
@@ -140,7 +140,7 @@ def scatter_from_incident(data_folder_path: str, incident_solar_file_path: str) 
 
     incident_spectrum = load_incident_spectrum(incident_solar_file_path)
 
-    energies = incident_spectrum["Energy"].values
+    energies = incident_spectrum["keV"].values
     incident_intensity = incident_spectrum["Intensity"].values
 
     total_scattered_spectrum = model_scattered_spectrum_with_density(ffast_data_dict, incident_intensity, energies)
