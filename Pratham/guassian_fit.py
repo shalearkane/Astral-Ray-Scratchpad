@@ -22,7 +22,7 @@ m1=Model("ga+ga+ga")
 
 # Setting values for Gaussian 1
 # Define the model with three Gaussians
-m1 = Model("ga+ga+ga")
+# m1 = Model("ga+ga+ga")
 
 # print(m1.componentNames)
 
