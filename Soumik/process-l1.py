@@ -22,17 +22,6 @@ def create_or_update_document(doc: dict, check_passed: bool):
     doc["_id"] = ObjectId(doc["_id"])
     class_fits_accepted.insert_one(doc)
 
-    # check if present, insert only if necessary
-    # if class_fits_accepted.find_one(filter={"_id": ObjectId(doc["_id"])}) is None:
-    #     doc[KEY_PASSED_CHECK] = check_passed
-    #     doc["_id"] = ObjectId(doc["_id"])
-    #     class_fits_accepted.insert_one(doc)
-    # else:
-    #     class_fits_accepted.find_one_and_update(
-    #         filter={"_id": ObjectId(doc["_id"])},
-    #         update={"$set": {KEY_PASSED_CHECK: check_passed}},
-    #     )
-
 
 # Define the processing function for each document
 def process_document(doc: dict):

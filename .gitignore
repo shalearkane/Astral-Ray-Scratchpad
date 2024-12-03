@@ -635,3 +635,4 @@ new.txt
 *.fits
 Soumik/data-generated/abundance_jsons/*
 Soumik/data-generated/flux/*
+*.png
