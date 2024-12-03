@@ -34,14 +34,8 @@ def filter_raw_energy_bin_file(file_path: str, start_time: datetime.datetime, en
         return filtered_df
 
 
-def get_flux_from_energy_bins(
-    input_file_path: str,
-    output_file_path: str,
-    start_time: datetime.datetime,
-    end_time: datetime.datetime,
-):
-    filtered_df = filter_raw_energy_bin_file(input_file_path, start_time, end_time)
-    sum_df = filtered_df.sum(axis=0, numeric_only=True)
+def output_flux_df_to_solar_model_file(df: pd.DataFrame, output_file_path: str):
+    sum_df = df.sum(axis=0, numeric_only=True)
 
     with open(output_file_path, "w") as f_out:
         for idx, value in zip(sum_df.index, sum_df.values):
@@ -51,6 +45,16 @@ def get_flux_from_energy_bins(
                 high = float(high)
                 mid = (high + low) / 2
                 f_out.write(f"{mid:.2f} 0.0 {value:.4f}\n")
+
+
+def get_flux_from_energy_bins(
+    input_file_path: str,
+    output_file_path: str,
+    start_time: datetime.datetime,
+    end_time: datetime.datetime,
+):
+    filtered_df = filter_raw_energy_bin_file(input_file_path, start_time, end_time)
+    output_flux_df_to_solar_model_file(filtered_df, output_file_path)
 
 
 def sum_flux_across_files(
@@ -59,31 +63,12 @@ def sum_flux_across_files(
     start_time: datetime.datetime,
     end_time: datetime.datetime,
 ):
-
     combined_df = pd.concat([filter_raw_energy_bin_file(file_path, start_time, end_time) for file_path in raw_energy_bin_files])
-
-    count_row = combined_df.shape[0]  # Gives number of rows
-    count_col = combined_df.shape[1]  # Gives number of columns
-
-    print(count_row)
-    print(count_col)
-
 
     # Preprocess and remove duplicates from the combined dataframe
     combined_df = preprocess_and_remove_duplicates(combined_df, key_column="time")
 
-    # Sum the combined dataframe values for numeric columns and normalize by the number of rows
-    sum_df = combined_df.sum(axis=0, numeric_only=True)
-
-    # Write the normalized flux to the output file
-    with open(output_file_path, "w") as f_out:
-        for idx, value in zip(sum_df.index, sum_df.values):
-            if "-" in idx:
-                low, high = idx.split("-")
-                low = float(low)
-                high = float(high)
-                mid = (high + low) / 2
-                f_out.write(f"{mid:.2f} 0.0 {value:.4f}\n")
+    output_flux_df_to_solar_model_file(combined_df, output_file_path)
 
 
 if __name__ == "__main__":
