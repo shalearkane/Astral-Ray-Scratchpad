@@ -2,38 +2,8 @@ import os
 from typing import Optional, Tuple
 import pandas as pd
 from astropy.io import fits
-from datetime import datetime
-
-
-def to_datetime_t(date_string: str) -> datetime:
-    return datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S.%f")
-
-
-solar_flares = pd.read_csv("../data-generated/goes/solar_flares_processed.csv")
-solar_flares["start_time"] = pd.to_datetime(solar_flares["start_time"])
-solar_flares["end_time"] = pd.to_datetime(solar_flares["end_time"])
-solar_flares.sort_values("start_time")
-solar_flares["class_alphabet"] = solar_flares["class_alphabet"].astype("category")
-
-
-def get_flare_class(start_time: datetime, end_time: Optional[datetime] = None) -> Tuple[str, float]:
-    """Finds the key for a given time in a DataFrame with 'start_time', 'end_time', and 'key' columns.
-
-    Args:
-      df: The pandas DataFrame.
-      time: The time to check.
-
-    Returns:
-      The key if found, otherwise None.
-    """
-
-    # Find the index of the first start_time greater than or equal to the given time
-    matching_rows = solar_flares[(solar_flares["start_time"] <= start_time) & (solar_flares["end_time"] >= end_time)]
-
-    if not matching_rows.empty:
-        return matching_rows["class_alphabet"].iloc[0], matching_rows["class_scale"].iloc[0]
-    else:
-        return "None", 0
+from helpers.utilities import to_datetime_t
+from criterion.goes_solar_flare import get_flare_class
 
 
 def photon_count_and_flare_class(fits_file, start_channel=15, end_channel=800) -> Optional[Tuple[int, str, float]]:

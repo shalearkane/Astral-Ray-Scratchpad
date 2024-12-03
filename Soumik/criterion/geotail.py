@@ -3,8 +3,8 @@ from datetime import datetime, timezone
 
 
 def check_if_not_in_geotail(dt: datetime) -> bool:
-    previous_fm = Date(previous_full_moon(dt)).datetime().replace(tzinfo=timezone.utc)
-    next_fm = Date(next_full_moon(dt)).datetime().replace(tzinfo=timezone.utc)
+    previous_fm = Date(previous_full_moon(dt)).datetime()
+    next_fm = Date(next_full_moon(dt)).datetime()
 
     if (abs(dt - previous_fm).days < 3) or (abs(next_fm - dt).days < 3):
         return False

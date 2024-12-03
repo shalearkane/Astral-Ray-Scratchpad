@@ -636,3 +636,4 @@ new.txt
 Soumik/data-generated/abundance_jsons/*
 Soumik/data-generated/flux/*
 *.png
+*.csv

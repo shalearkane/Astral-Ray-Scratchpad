@@ -5,6 +5,7 @@ MONGO_URI: Final[str] = "mongodb://localhost:27017"
 DATABASE_ISRO: Final[str] = "ISRO"
 COLLECTION_CLASS_FITS: Final[str] = "primary"
 COLLECTION_CLASS_FITS_ACCEPTED: Final[str] = "class_fits_accepted"
+COLLECTION_CLASS_FITS_FLARE_CLASSIFIED: Final[str] = "class_fits_flare_classified"
 COLLECTION_XSM_PRIMARY: Final[str] = "xsm_primary"
 
 KEY_PASSED_CHECK: Final[str] = "passed_check"
