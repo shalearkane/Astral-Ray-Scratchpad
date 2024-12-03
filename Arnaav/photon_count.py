@@ -22,7 +22,7 @@ def sum_counts_in_range(fits_file, start_channel=15, end_channel=800):
         print(f"An error occurred: {e}")
         return None
 
-#Proof of concept
-fits_file = "/home/av/Documents/Code/Inter-IIT/pivot/ch2_cla_l1_20240808T193544720_20240808T193552720_rebinned.fits"
-result = sum_counts_in_range(fits_file)
-print(f"Sum of counts from channel 15 to 800: {result}")
+# #Proof of concept
+# fits_file = "/home/av/Documents/Code/Inter-IIT/pivot/ch2_cla_l1_20240808T193544720_20240808T193552720_rebinned.fits"
+# result = sum_counts_in_range(fits_file)
+# print(f"Sum of counts from channel 15 to 800: {result}")
