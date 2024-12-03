@@ -17,7 +17,6 @@ respFile = "/home/pg/Documents/Astral-Ray-Scratchpad/Soumik/model/data/1024/clas
 def get_df_al_si_mg(class_file: str, bck: str):
 
     Xset.allowPrompting = False
-    Xset.chatter = 0
     s1 = Spectrum(class_file, backFile=bck, respFile=respFile, arfFile=arfFile)
     s1.ignore("0.0-0.9")
     s1.ignore("2.0-**")
@@ -85,9 +84,7 @@ def get_df_al_si_mg(class_file: str, bck: str):
 def get_df_ca(class_file: str, bck: str):
 
     Xset.allowPrompting = False
-    Xset.chatter = 0
-    s1 = Spectrum(class_file, backFile="USE_DEFAULT", respFile=respFile, arfFile=arfFile)
-    s1.background = bck
+    s1 = Spectrum(class_file, backFile=bck, respFile=respFile, arfFile=arfFile)
     s1.ignore("0.0-3.2")
     s1.ignore("4.2-**")
     m1 = Model("ga")
@@ -125,9 +122,7 @@ def get_df_ca(class_file: str, bck: str):
 def get_df_fe(class_file: str, bck: str):
 
     Xset.allowPrompting = False
-    Xset.chatter = 0
-    s1 = Spectrum(class_file, backFile="USE_DEFAULT", respFile=respFile, arfFile=arfFile)
-    s1.background = bck
+    s1 = Spectrum(class_file, backFile=bck, respFile=respFile, arfFile=arfFile)
     s1.ignore("0.0-6.1")
     s1.ignore("6.80-**")
     m1 = Model("ga")
@@ -164,7 +159,7 @@ def get_df_fe(class_file: str, bck: str):
 
 def dict_mg_al_si_ca(class_file: str, bck: str):
     mg, al, si = get_df_al_si_mg(class_file, bck)
-    # ca = get_df_ca(class_file, bck)
+    ca = get_df_ca(class_file, bck)
     # fe = get_df_fe(class_file, bck)
 
     dict = {"filename": class_file, "Wt_Mg": mg, "Wt_Al": al, "Wt_Si": si, "Wt_Ca": "ca", "Wt_Fe": "fe"}
