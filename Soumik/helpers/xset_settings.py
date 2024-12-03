@@ -16,10 +16,11 @@ def reset_xspec():
     AllModels.clear()
     AllChains.clear()
 
-def fit_and_plot() -> DataFrame:
+
+def fit_and_plot(plot_device: str = "/null") -> DataFrame:
     Fit.perform()
 
-    Plot.device = "/xs"
+    Plot.device = plot_device
     Plot.area = True
     Plot.xAxis = "KeV"
 
