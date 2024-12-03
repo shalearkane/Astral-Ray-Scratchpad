@@ -2,6 +2,7 @@ from typing import Final, List, Tuple
 
 import concurrent.futures
 
+from criterion.goes_solar_flare import is_during_a_solar_flare
 from helpers.download import download_file_from_file_server
 from helpers.combine_fits import combine_fits
 from helpers.query_class import get_class_fits_at_lat_lon
@@ -25,8 +26,9 @@ def generate_combined_fits_for_lat_lon(latitude: float, longitude: float, redo: 
         return True
 
     docs = get_class_fits_at_lat_lon(latitude, longitude)
+    filtered_docs = is_during_a_solar_flare(docs)
     file_paths: List[str] = list()
-    for doc in docs:
+    for doc in filtered_docs:
         if download_file_from_file_server(doc, "primary", download_folder):
             file_paths.append(f"{download_folder}/{doc["path"].split("/")[-1]}")
 
@@ -52,16 +54,18 @@ def do_in_parallel(lat_lon_pairs: List[Tuple[float, float]]):
 
 
 if __name__ == "__main__":
-    lat_lon_pairs: List[Tuple[float, float]] = list()
+    # lat_lon_pairs: List[Tuple[float, float]] = list()
 
-    latitude = latitude_start
-    while latitude < latitude_end:
-        latitude += increment
+    # latitude = latitude_start
+    # while latitude < latitude_end:
+    #     latitude += increment
 
-        longitude = longitude_start
-        while longitude < longitude_end:
-            longitude += increment
+    #     longitude = longitude_start
+    #     while longitude < longitude_end:
+    #         longitude += increment
 
-            lat_lon_pairs.append((latitude, longitude))
+    #         lat_lon_pairs.append((latitude, longitude))
 
-    do_in_parallel(lat_lon_pairs)
+    # do_in_parallel(lat_lon_pairs)
+
+    generate_combined_fits_for_lat_lon(16.10, -39.09, True)
