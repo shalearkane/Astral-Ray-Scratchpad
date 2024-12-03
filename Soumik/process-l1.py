@@ -61,9 +61,9 @@ def process_document_for_flare_class(doc: dict, collection: pymongo.collection.C
     c: bool = check_if_not_in_geotail(start_time)
     d: bool = check_if_not_in_geotail(end_time)
 
-    if c and d and flare_alphabet != "None":
+    if c and d and flare_alphabet != "None" and flare_scale != 0:
         doc["flare_alphabet"] = flare_alphabet
-        doc["flare_scale"] = float(flare_scale)
+        doc["flare_scale"] = flare_scale
         save_flare_classified_document(doc, collection)
 
 

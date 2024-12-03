@@ -7,8 +7,9 @@ from helpers.utilities import to_datetime
 solar_flares = pd.read_csv("data-generated/goes/solar_flares_class_split.csv")
 solar_flares["start_time"] = pd.to_datetime(solar_flares["start_time"])
 solar_flares["end_time"] = pd.to_datetime(solar_flares["end_time"])
-solar_flares.sort_values("start_time")
 solar_flares["class_alphabet"] = solar_flares["class_alphabet"].astype("category")
+solar_flares["class_scale"] = solar_flares["class_scale"].astype("float")
+solar_flares.sort_values("start_time")
 
 
 def get_flare_class(start_time: datetime, end_time: Optional[datetime] = None) -> Tuple[str, float]:
