@@ -21,7 +21,7 @@ def get_df_al_si_mg(class_file: str, bck: str):
     s1.ignore("0.0-0.9")
     s1.ignore("2.0-**")
     m1 = Model("ga+ga+ga")
-    # m1 = Model("ga+ga+ga")
+    m1 = Model("ga+ga+ga")
 
     # Setting values for Gaussian 1
     m1.gaussian.LineE = 1.25  # LineE for Gaussian 1 (in keV)
@@ -46,6 +46,7 @@ def get_df_al_si_mg(class_file: str, bck: str):
     Plot.xAxis = "KeV"
 
     Plot("data", "resid")
+    
 
     xVals = Plot.x()
     yVals = Plot.y()
@@ -77,6 +78,8 @@ def get_df_al_si_mg(class_file: str, bck: str):
     y1, y2 = row_before["counts"], row_after["counts"]
     # print(result)
     interpolated_value_si = y1 + (target_value_si - x1) * (y2 - y1) / (x2 - x1)
+    # Plot.commands=()
+
 
     return interpolated_value_mg, interpolated_value_al, interpolated_value_si
 
@@ -84,16 +87,20 @@ def get_df_al_si_mg(class_file: str, bck: str):
 def get_df_ca(class_file: str, bck: str):
 
     Xset.allowPrompting = False
-    s1 = Spectrum(class_file, backFile=bck, respFile=respFile, arfFile=arfFile)
-    s1.ignore("0.0-3.2")
-    s1.ignore("4.2-**")
-    m1 = Model("ga")
+    AllData.clear()
+    AllModels.clear()
+    s2 = Spectrum(class_file, backFile=bck, respFile=respFile, arfFile=arfFile)
+    s2.ignore("0.0-3.2")
+    s2.ignore("4.2-**")
+    m2 = Model("ga")
+
+    
 
     # Setting values for Gaussian 1
-    m1.gaussian.LineE = 3.69  # LineE for Gaussian 1 (in keV)
-    m1.gaussian.Sigma = 0.05  # Sigma for Gaussian 1 (in keV)
-    m1.gaussian.norm = 1  # Norm for Gaussian 1
-    m1.gaussian.LineE.frozen = True
+    m2.gaussian.LineE = 3.69  # LineE for Gaussian 1 (in keV)
+    m2.gaussian.Sigma = 0.05  # Sigma for Gaussian 1 (in keV)
+    m2.gaussian.norm = 1  # Norm for Gaussian 1
+    m2.gaussian.LineE.frozen = True
 
     Fit.perform()
 
@@ -107,7 +114,7 @@ def get_df_ca(class_file: str, bck: str):
     yVals = Plot.y()
 
     df = pd.DataFrame({"energy": xVals, "counts": yVals})
-
+    
     target_value_ca = 3.69
 
     row_before = df[df["energy"] <= target_value_ca].iloc[-1]  # The row just before the target value
@@ -122,16 +129,18 @@ def get_df_ca(class_file: str, bck: str):
 def get_df_fe(class_file: str, bck: str):
 
     Xset.allowPrompting = False
-    s1 = Spectrum(class_file, backFile=bck, respFile=respFile, arfFile=arfFile)
-    s1.ignore("0.0-6.1")
-    s1.ignore("6.80-**")
-    m1 = Model("ga")
+    AllData.clear()
+    AllModels.clear()
+    s3 = Spectrum(class_file, backFile=bck, respFile=respFile, arfFile=arfFile)
+    s3.ignore("0.0-6.1")
+    s3.ignore("6.6-**")
+    m3 = Model("ga")
 
     # Setting values for Gaussian 1
-    m1.gaussian.LineE = 6.40  # LineE for Gaussian 1 (in keV)
-    m1.gaussian.Sigma = 0.05  # Sigma for Gaussian 1 (in keV)
-    m1.gaussian.norm = 1  # Norm for Gaussian 1
-    m1.gaussian.LineE.frozen = True
+    m3.gaussian.LineE = 6.40  # LineE for Gaussian 1 (in keV)
+    m3.gaussian.Sigma = 0.05  # Sigma for Gaussian 1 (in keV)
+    m3.gaussian.norm = 1  # Norm for Gaussian 1
+    m3.gaussian.LineE.frozen = True
 
     Fit.perform()
 
@@ -146,8 +155,8 @@ def get_df_fe(class_file: str, bck: str):
 
     df = pd.DataFrame({"energy": xVals, "counts": yVals})
 
-    target_value_fe = 3.69
-
+    target_value_fe = 6.40
+    
     row_before = df[df["energy"] <= target_value_fe].iloc[-1]  # The row just before the target value
     row_after = df[df["energy"] >= target_value_fe].iloc[0]
     x1, x2 = row_before["energy"], row_after["energy"]
@@ -159,10 +168,14 @@ def get_df_fe(class_file: str, bck: str):
 
 def dict_mg_al_si_ca(class_file: str, bck: str):
     mg, al, si = get_df_al_si_mg(class_file, bck)
+    AllData.clear()
+    AllModels.clear()
     ca = get_df_ca(class_file, bck)
-    # fe = get_df_fe(class_file, bck)
+    AllData.clear()
+    AllModels.clear()
+    fe = get_df_fe(class_file, bck)
 
-    dict = {"filename": class_file, "Wt_Mg": mg, "Wt_Al": al, "Wt_Si": si, "Wt_Ca": "ca", "Wt_Fe": "fe"}
+    dict = {"filename": class_file, "Wt_Mg": mg, "Wt_Al": al, "Wt_Si": si, "Wt_Ca": ca, "Wt_Fe": fe}
 
     return dict
 
