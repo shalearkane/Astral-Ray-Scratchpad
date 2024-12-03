@@ -8,8 +8,8 @@ from constants.mongo import (
 from datetime import datetime, timezone
 
 
-def get_xsm_pha(start_time: datetime, end_time: datetime):
-    class_fits_accepted = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_XSM_PRIMARY]
+def query_xsm_pha_within_date_range(start_time: datetime, end_time: datetime):
+    xsm_collection = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_XSM_PRIMARY]
 
     filter = {
         "parsedStartTime": {
@@ -20,15 +20,33 @@ def get_xsm_pha(start_time: datetime, end_time: datetime):
     }
 
     project = {"_id": 1, "path": 1}
+    results = xsm_collection.find(filter=filter, projection=project)
 
-    result = class_fits_accepted.find(filter=filter, projection=project)
+    return [{"_id": result["_id"], "path": result["path"].split("/")[-1]} for result in results]
 
-    return [{"_id": doc["_id"], "path": doc["path"].split("/")[-1]} for doc in result]
+
+def query_relevant_xsm_pha(start_time: datetime, end_time: datetime):
+    xsm_collection = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_XSM_PRIMARY]
+
+    filter = {
+        "parsedStartTime": {
+            "$lte": start_time,
+        },
+        "parsedEndTime": {
+            "$gte": end_time,
+        },
+        "ext": "pha",
+    }
+
+    project = {"_id": 1, "path": 1}
+    results = xsm_collection.find(filter=filter, projection=project)
+
+    return [{"_id": result["_id"], "path": result["path"].split("/")[-1]} for result in results]
 
 
 if __name__ == "__main__":
     start_time = datetime(2024, 8, 27, 0, 0, 0, tzinfo=timezone.utc)
     end_time = datetime(2024, 9, 27, 23, 59, 59, tzinfo=timezone.utc)
-    list_of_docs = get_xsm_pha(start_time, end_time)
+    list_of_docs = query_xsm_pha_within_date_range(start_time, end_time)
     for doc in list_of_docs:
         download_file_from_file_server(doc, "xsm_primary", "data/xsm")

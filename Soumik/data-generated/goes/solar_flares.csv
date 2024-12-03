@@ -1,4 +1,4 @@
-GOES_Class,start_time,peak_time,end_time,NOAA_Active_Region
+class,start_time,peak_time,end_time,noaa_active_region
 A1.1,2019-07-15 11:40:00,2019-07-15 11:41:00,2019-07-15 11:42:00,0
 A1.1,2019-07-19 15:51:00,2019-07-19 15:52:00,2019-07-19 15:53:00,0
 A1.1,2019-08-04 13:14:00,2019-08-04 13:15:00,2019-08-04 13:16:00,0

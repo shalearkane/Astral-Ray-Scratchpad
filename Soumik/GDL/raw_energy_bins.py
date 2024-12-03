@@ -80,21 +80,31 @@ def automate_ospex(file_list: list[str], output_dir: str, log_file: str = "autom
 
     raw_energy_bin_files: list[str] = list()
     os.makedirs(output_dir, exist_ok=True)
+
     with open(log_file, "w") as log:
+
+        # only process files which are not yet processed
+        files_yet_to_process: list[str] = list()
+
+        for file_path in file_list:
+            # Check if output file already exists
+            output_filepath = get_output_filepath(file_path, output_dir)
+            if os.path.exists(output_filepath):
+                raw_energy_bin_files.append(output_filepath)
+                log.write(f"Skipping file (already processed): {file_path}\n")
+                print(f"Skipping file (already processed): {file_path}")
+            else:
+                files_yet_to_process.append(file_path)
+
+        if len(files_yet_to_process) == 0:
+            return raw_energy_bin_files
+
         try:
             # Initialize GDL and OSPEX environment
             child = initialize_gdl(log)
             child.sendline("o->xinput")
 
-            for file_path in file_list:
-                # Check if output file already exists
-                output_filepath = get_output_filepath(file_path, output_dir)
-                if os.path.exists(output_filepath):
-                    raw_energy_bin_files.append(output_filepath)
-                    log.write(f"Skipping file (already processed): {file_path}\n")
-                    print(f"Skipping file (already processed): {file_path}")
-                    continue
-
+            for file_path in files_yet_to_process:
                 try:
                     output_filepath = process_file(child, file_path, output_dir)
                     log.write(f"Processed file: {file_path} -> Output saved at: {output_filepath}\n")
