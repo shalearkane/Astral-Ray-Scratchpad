@@ -2,6 +2,34 @@ import os
 from typing import Optional
 import pandas as pd
 from astropy.io import fits
+import numpy as np
+
+def find_key(df, time):
+  """Finds the key for a given time in a DataFrame with 'start_time', 'end_time', and 'key' columns.
+
+  Args:
+    df: The pandas DataFrame.
+    time: The time to check.
+
+  Returns:
+    The key if found, otherwise None.
+  """
+
+  # Sort the DataFrame by start_time
+  df = df.sort_values('start_time')
+
+  # Convert time to datetime if necessary
+  time = pd.to_datetime(time)
+
+  # Find the index of the first start_time greater than or equal to the given time
+  index = np.searchsorted(df['start_time'].values, time)
+
+  # If the index is 0 or the time is not within the range of any interval, return None
+  if index == 0 or time < df['start_time'].iloc[index - 1]:
+    return None
+
+  # Otherwise, return the key at the previous index
+  return df['key'].iloc[index - 1]
 
 
 def sum_counts_in_range(fits_file, start_channel=15, end_channel=800) -> Optional[int]:
