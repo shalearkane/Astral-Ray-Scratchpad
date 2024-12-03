@@ -3,17 +3,19 @@ from astropy.io import fits
 from model.functions.xrf_localmodel import LocalModel_Parameters, create_xrf_localmodel
 
 
-def process_abundance(class_l1: str, background: str, solar: str, scatter_atable: str, bin_size: int = 2048, num_parallel_param: int = 2) -> dict:
+def process_abundance(
+    class_l1: str, background: str, solar: str, scatter_atable: str, bin_size: int = 2048, num_parallel_param: int = 2
+) -> dict:
     Xset.allowPrompting = False
-    Xset.chatter = 0
+    # Xset.chatter = 0
     ignore_erange = ["0.9", "4.2"]
     ignore_string = "0.0-" + ignore_erange[0] + " " + ignore_erange[1] + "-**"
 
     # Getting the information for making the static parameter file
     hdu_data = fits.open(class_l1)
     hdu_header = hdu_data[1].header  # type: ignore
-    latitude = hdu_header["TARG_LAT"]
-    longitude = hdu_header["TARG_LON"]
+    latitude = hdu_header.get("TARG_LAT", 0.0)
+    longitude = hdu_header.get("TARG_LON", 0.0)
     hdu_data.close()
 
     localmodel_params = LocalModel_Parameters(
@@ -23,12 +25,12 @@ def process_abundance(class_l1: str, background: str, solar: str, scatter_atable
     # PyXspec Initialisation
     AllData.clear()
     AllModels.clear()
+
     Xset.parallel.error = num_parallel_param
     Xset.parallel.goodness = num_parallel_param
     Xset.parallel.leven = num_parallel_param
     Xset.parallel.steppar = num_parallel_param
     Xset.parallel.walkers = num_parallel_param
-
 
     spec_data = Spectrum(
         class_l1,
@@ -73,10 +75,11 @@ def process_abundance(class_l1: str, background: str, solar: str, scatter_atable
 if __name__ == "__main__":
     class_l1 = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/combined-fits/35.2_85.2.fits"
     background = "model/data/reference/background_allevents.fits"
-    solar = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data/flux/some.txt"
+    solar = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/flux/some.txt"
     scatter_atable = "model/data/reference/tbmodel_20210827T210316000_20210827T210332000.fits"
 
     abundance = process_abundance(class_l1, background, solar, scatter_atable)
 
     import pprint
+
     pprint.pprint(abundance)
