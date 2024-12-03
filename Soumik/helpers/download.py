@@ -26,3 +26,7 @@ def download_file_from_file_server(doc: dict, collection: str, download_location
         return False
     else:
         return True
+
+
+if __name__ == "__main__":
+    pass
