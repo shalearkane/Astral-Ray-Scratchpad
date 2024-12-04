@@ -37,7 +37,7 @@ def worker(worker_id: int):
     while True:
         try:
             # Request a FITS file from the server
-            response = requests.get(SERVER_URL, headers={"fa": "M"}, timeout=10)
+            response = requests.get(SERVER_URL, headers={"fa": "C"}, timeout=20)
             response.raise_for_status()
 
             if not response.content:
@@ -60,7 +60,7 @@ def worker(worker_id: int):
             with open(f"data-generated/abundance_jsons_flares/{filename[:-5]}.json", "w") as f:
                 dump(abundance, f)
 
-            return_response = requests.post(RETURN_URL, headers={"id": id}, json=abundance, timeout=10)
+            return_response = requests.post(RETURN_URL, headers={"id": id}, json=abundance, timeout=20)
             return_response.raise_for_status()
             print(return_response.json())
 
