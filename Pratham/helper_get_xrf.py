@@ -165,6 +165,45 @@ def get_df_fe(class_file: str, bck: str):
 
     return interpolated_value_fe
 
+def get_df_ti(class_file: str, bck: str):
+
+    Xset.allowPrompting = False
+    AllData.clear()
+    AllModels.clear()
+    s3 = Spectrum(class_file, backFile=bck, respFile=respFile, arfFile=arfFile)
+    s3.ignore("0.0-4.2")
+    s3.ignore("5.0-**")
+    m3 = Model("ga")
+
+    # Setting values for Gaussian 1
+    m3.gaussian.LineE = 4.51  # LineE for Gaussian 1 (in keV)
+    m3.gaussian.Sigma = 0.05  # Sigma for Gaussian 1 (in keV)
+    m3.gaussian.norm = 1  # Norm for Gaussian 1
+    m3.gaussian.LineE.frozen = True
+
+    Fit.perform()
+
+    Plot.device = "/xs"
+    Plot.area = True
+    Plot.xAxis = "KeV"
+
+    Plot("data", "resid")
+
+    xVals = Plot.x()
+    yVals = Plot.y()
+
+    df = pd.DataFrame({"energy": xVals, "counts": yVals})
+
+    target_value_ti = 4.51
+    
+    row_before = df[df["energy"] <= target_value_ti].iloc[-1]  # The row just before the target value
+    row_after = df[df["energy"] >= target_value_ti].iloc[0]
+    x1, x2 = row_before["energy"], row_after["energy"]
+    y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
+    interpolated_value_ti = y1 + (target_value_ti - x1) * (y2 - y1) / (x2 - x1)
+
+    return interpolated_value_ti
+
 
 def dict_mg_al_si_ca(class_file: str, bck: str):
     mg, al, si = get_df_al_si_mg(class_file, bck)
@@ -174,8 +213,12 @@ def dict_mg_al_si_ca(class_file: str, bck: str):
     AllData.clear()
     AllModels.clear()
     fe = get_df_fe(class_file, bck)
+    AllData.clear()
+    AllModels.clear()
+    ti=get_df_ti(class_file,bck)
 
-    dict = {"filename": class_file, "Wt_Mg": mg, "Wt_Al": al, "Wt_Si": si, "Wt_Ca": ca, "Wt_Fe": fe}
+
+    dict = {"filename": class_file, "Wt_Mg": mg, "Wt_Al": al, "Wt_Si": si, "Wt_Ca": ca, "Wt_Fe": fe,"Wt_Ti":ti}
 
     return dict
 
