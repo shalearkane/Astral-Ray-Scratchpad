@@ -11,7 +11,7 @@ from json import dump
 # Configuration
 SERVER_URL = "http://172.20.59.218:8082/fits/new"
 RETURN_URL = "http://172.20.59.218:8082/fits/done"
-NUM_PROCESSES = 8
+NUM_PROCESSES = 16
 DOWNLOAD_DIR = "/tmp"
 
 
@@ -37,7 +37,7 @@ def worker(worker_id: int):
     while True:
         try:
             # Request a FITS file from the server
-            response = requests.get(SERVER_URL, headers={"fa": "C"}, timeout=20)
+            response = requests.get(SERVER_URL, headers={"fa": "B"}, timeout=20)
             response.raise_for_status()
 
             if not response.content:
