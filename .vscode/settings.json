@@ -1,5 +1,11 @@
 {
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.autoImportCompletions": true,
-    "black-formatter.args" : ["--line-length", "144"]
+    "black-formatter.args": [
+        "--line-length",
+        "144"
+    ],
+    "flake8.args": [
+        "--ignore=E501,W503,F401"
+    ]
 }
