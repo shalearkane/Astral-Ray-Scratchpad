@@ -6,7 +6,7 @@ from helpers.utilities import to_datetime_t
 from criterion.goes_solar_flare import get_flare_class
 
 
-def photon_count_and_flare_class(fits_file, start_channel=15, end_channel=800) -> Optional[Tuple[int, str, float]]:
+def photon_count_and_flare_class(fits_file: str, start_channel: int = 15, end_channel: int = 800) -> Optional[Tuple[int, str, float]]:
     """
     Sums the counts in the specified channel range for a given FITS file.
     """
@@ -33,7 +33,25 @@ def photon_count_and_flare_class(fits_file, start_channel=15, end_channel=800) -
         return None
 
 
-def process_folder(folder_month, start_channel=15, end_channel=800) -> pd.DataFrame:
+def photon_count(fits_file: str, start_channel: int = 37, end_channel: int = 800) -> int:
+    try:
+        with fits.open(fits_file) as hdul:
+            data = hdul[1].data  # type: ignore
+            channels = data["CHANNEL"]
+            counts = data["COUNTS"]
+
+            mask = (channels >= start_channel) & (channels <= end_channel)
+            counts_in_range = counts[mask]
+
+            return int(counts_in_range.sum())
+    except Exception:
+        import traceback
+
+        print(f"An error occurred while processing {fits_file}: {traceback.format_exc()}")
+        return -1
+
+
+def process_folder(folder_month: str, start_channel=15, end_channel=800) -> pd.DataFrame:
     results = []
 
     for day in range(1, 32):

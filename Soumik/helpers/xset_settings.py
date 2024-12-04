@@ -3,6 +3,7 @@ from pandas import DataFrame
 
 
 def set_xset_settings(parallelism: int = 2):
+    Xset.chatter = 0
     Xset.allowPrompting = False
     Xset.parallel.error = parallelism
     Xset.parallel.goodness = parallelism
@@ -18,6 +19,8 @@ def reset_xspec():
 
 
 def fit_and_plot(plot_device: str = "/null") -> DataFrame:
+    Xset.allowPrompting = False
+    Fit.nIterations = 1000
     Fit.perform()
 
     Plot.device = plot_device

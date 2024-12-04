@@ -635,5 +635,6 @@ new.txt
 *.fits
 Soumik/data-generated/abundance_jsons/*
 Soumik/data-generated/flux/*
+Soumik/data-generated/abundance_jsons_flares/*
 *.png
 *.csv
