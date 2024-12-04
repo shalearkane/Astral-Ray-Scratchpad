@@ -53,16 +53,14 @@ def worker(worker_id: int):
 
             abundance = process_fits(file_path)
             if abundance is not None:
-                abundance["filename"] = filename
                 abundance["photonCount"] = photon_count(file_path)
-                abundance["id"] = id
 
             # local persistence
             makedirs("data-generated/abundance_jsons_flares", exist_ok=True)
             with open(f"data-generated/abundance_jsons_flares/{filename[:-5]}.json", "w") as f:
                 dump(abundance, f)
 
-            return_response = requests.post(RETURN_URL, json=abundance, timeout=10)
+            return_response = requests.post(RETURN_URL, headers={"id": id}, json=abundance, timeout=10)
             return_response.raise_for_status()
             print(return_response.json())
 
