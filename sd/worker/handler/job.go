@@ -41,6 +41,7 @@ func (handler *Handler) HandleStartJob(c *fiber.Ctx) error {
 	// Publish to the queue
 	handler.Qm.Publish(file.Filename, int32((5 * time.Minute).Milliseconds()))
 
+	c.Set("filename", file.Filename)
 	c.Attachment(file.Filename)
 	return c.SendFile("./files/" + file.Filename)
 }

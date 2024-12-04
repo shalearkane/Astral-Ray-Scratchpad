@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"log/slog"
 	"os"
 	"sort"
 	"strconv"
@@ -16,7 +19,41 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+func getAlreadyDoneAbundanceData() (*map[string]*model.FileModel, error) {
+	files, err := os.ReadDir("./abundance_jsons")
+	if err != nil {
+		return nil, err
+	}
+
+	abundances := make(map[string]*model.FileModel)
+
+	for _, file := range files {
+		jsonFile, err := os.Open("./abundance_jsons/" + file.Name())
+		if err != nil {
+			slog.Error(err.Error())
+			continue
+		}
+
+		defer jsonFile.Close()
+
+		byteValue, _ := io.ReadAll(jsonFile)
+
+		var abundance model.FileModel
+		json.Unmarshal(byteValue, &abundance)
+
+		abundance.ProcessingState = model.PROCESSING_STATE_DONE
+		abundances[abundance.Filename] = &abundance
+	}
+
+	return &abundances, nil
+}
+
 func main() {
+	abundances, err := getAlreadyDoneAbundanceData()
+	if err != nil {
+		slog.Error(err.Error())
+	}
+
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI("mongodb://localhost:27017/ISRO").SetServerAPIOptions(serverAPI)
 	// Create a new client and connect to the server
@@ -81,10 +118,15 @@ func main() {
 
 	var docs []interface{}
 	for _, filename := range fileNames {
-		docs = append(docs, bson.M{
-			"filename":        filename,
-			"processingState": model.PROCESSING_STATE_NOT_DONE,
-		})
+		if (*abundances)[filename] == nil {
+			docs = append(docs, bson.M{
+				"filename":        filename,
+				"processingState": model.PROCESSING_STATE_NOT_DONE,
+			})
+		} else {
+			docs = append(docs, (*abundances)[filename])
+		}
+
 	}
 
 	result, err := client.Database(model.DB).Collection(model.COLLECTION).InsertMany(context.Background(), docs)

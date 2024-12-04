@@ -32,3 +32,19 @@ type FileModel struct {
 	Wt    *Element `bson:"wt" json:"wt"`
 	Error *Element `bson:"error" json:"error"`
 }
+
+type JobDoneInterface struct {
+	Id       string `bson:"_id" json:"filename"`
+	Filename string `bson:"filename" json:"filename"`
+
+	// Coordinate
+	Lat *float64 `bson:"lat" json:"lat"`
+	Lon *float64 `bson:"lon" json:"lon"`
+
+	// Abundance
+	Wt    *Element `bson:"wt" json:"wt"`
+	Error *Element `bson:"error" json:"error"`
+
+	// Metadata
+	PhotonCount int `bson:"photonCount" json:"photonCount"`
+}

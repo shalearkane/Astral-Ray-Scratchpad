@@ -34,7 +34,9 @@ func main() {
 	go queueManager.Consume()
 
 	// Initialize the server
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		Prefork: false,
+	})
 
 	// Initialize the handler
 	var mutex sync.Mutex
@@ -45,6 +47,9 @@ func main() {
 
 	app.Get("/new", handler.HandleStartJob)
 	app.Post("/done", handler.HandleDoneJob)
+
+	app.Get("/fits/new", handler.HandleStartFitsJob)
+	app.Post("/fits/done", handler.HandleFitsDoneJob)
 
 	app.Listen(":8082")
 }

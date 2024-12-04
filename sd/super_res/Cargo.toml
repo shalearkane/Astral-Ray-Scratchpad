@@ -4,4 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0.93"
+futures = "0.3.31"
 jord = "0.15.0"
+s2 = "0.0.13"
+tokio = { version = "1", features = ["full"] }
+nanoid = "0.4.0"
+serde_json = "1.0"
+serde = "1.0.215"
+csv = "1.3.1"
+indicatif = "0.17.9"
