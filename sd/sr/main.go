@@ -1,57 +1,66 @@
 package main
 
 import (
+	"fmt"
 	"math"
-	"sr/fs"
-	"sr/resolution"
 
-	"github.com/k0kubun/pp/v3"
+	geo "sr/geo"
+
+	"github.com/golang/geo/s2"
 )
 
+// Convert latitude and longitude (degrees) to s2.Point
+func latLonToPoint(lat, lon float64) s2.Point {
+	return s2.PointFromLatLng(s2.LatLngFromDegrees(lat, lon))
+}
+
+// Create an s2.Loop (representing a spherical polygon) from a list of lat/lon coordinates
+func createSphericalPolygon(coords [4][2]float64) *s2.Loop {
+	points := make([]s2.Point, len(coords))
+	for i, coord := range coords {
+		points[i] = latLonToPoint(coord[0], coord[1])
+	}
+	loop := s2.LoopFromPoints(points)
+	loop.Normalize() // Ensure the loop is well-formed
+	return loop
+}
+
+func computeOverlapArea(quad1, quad2 [4][2]float64) float64 {
+	// Create s2.Loops for the two quadrilaterals
+	loop1 := createSphericalPolygon(quad1)
+	loop2 := createSphericalPolygon(quad2)
+
+	// Create s2.Polygons from the loops
+	poly1 := s2.PolygonFromLoops([]*s2.Loop{loop1})
+	poly2 := s2.PolygonFromLoops([]*s2.Loop{loop2})
+
+	// Compute the intersection of the two polygons
+	intersectionAreaSteradians := geo.GetPolygonAreaOfIntersection(*poly1, *poly2)
+
+	// Calculate the area of the intersection in steradians
+
+	// Convert steradians to square meters (Earth radius = 6371 km)
+	moonRadius := 1737.5 // in meters
+	overlapAreaMeters := intersectionAreaSteradians * math.Pow(moonRadius, 2)
+
+	return overlapAreaMeters
+}
+
 func main() {
-	// pixels, err := fs.ReadJSONFile("./data.json")
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// resManager := resolution.NewResolutionManager(pixels, constants.RADIUS, constants.PIXEL_LEN)
-
-	// resManager.EnhancePixels()
-	// resManager.SaveCSV("./output.csv")
-
-	// polygon1 := gos.NewPolygonFromLoop(gos.NewLoopFromPath([]gos.Point{gos.PointFromLatLng(gos.LatLngFromDegrees(14.0, 10.0)), gos.PointFromLatLng(gos.LatLngFromDegrees(26.0, 20.0)), gos.PointFromLatLng(gos.LatLngFromDegrees(22.0, 25.0)), gos.PointFromLatLng(gos.LatLngFromDegrees(10.5, 25.0))}))
-	// polygon2 := gos.NewPolygonFromLoop(gos.NewLoopFromPath([]gos.Point{gos.PointFromLatLng(gos.LatLngFromDegrees(10.0, 10.0)), gos.PointFromLatLng(gos.LatLngFromDegrees(26.0, 20.0)), gos.PointFromLatLng(gos.LatLngFromDegrees(24.0, 25.0)), gos.PointFromLatLng(gos.LatLngFromDegrees(12.0, 25.0))}))
-	// // rect := s2.RectFromLatLng(s2.LatLngFromDegrees(10.0, 10.0)).AddPoint(s2.LatLngFromDegrees(26.0, 20.0)).AddPoint(s2.LatLngFromDegrees(24.0, 25.0))
-	// polygon1.InitToIntersection(polygon1, polygon2)
-	// loop := polygon1.Loop(0)
-	// pp.Println(gos.LatLngFromPoint(*loop.Vertex(0)).String(), gos.LatLngFromPoint(*loop.Vertex(1)).String(), gos.LatLngFromPoint(*loop.Vertex(2)).String(), gos.LatLngFromPoint(*loop.Vertex(3)).String())
-	//
-	// geoObj := geo.NewGeoFromLatLonWithUnitRadius(20, 30)
-	// boundingPolygon := geo.GetBoundingPolygon(12.5 * 1e-5 * 180 / (math.Pi))
-	// for li := 0; li < boundingPolygon.NumLoops(); li++ {
-	// 	loop := boundingPolygon.Loop(li)
-	// 	for vi := 0; vi < loop.NumVertices(); vi++ {
-	// 		pp.Println(s2.LatLngFromPoint(loop.Vertex(vi)).String())
-	// 	}
-	// 	pp.Println("\n")
-	// }
-	//
-
-	data, err := fs.ReadJSONFileToLatLngWt("./data.json")
-	if err != nil {
-		pp.Errorf(err.Error())
+	quad1 := [4][2]float64{
+		{0, 0},
+		{0, 0.41},
+		{0.41, 0.41},
+		{0.41, 0},
+	}
+	quad2 := [4][2]float64{
+		{0, 0},
+		{0, 0.41},
+		{0.41, 0.41},
+		{0.41, 0},
 	}
 
-	config := resolution.PointResolutionManagerConfig{
-		LatLngs:     data,
-		Radius:      1.0,
-		SubPixelLen: 12.5 * 1e-5 * 180 / (math.Pi),
-	}
-
-	// geo.PrintS2Polygon(geoObj.GetBoundingPolygon(12.5 * 1e-5 * 180 / (math.Pi)))
-
-	resManager := resolution.NewPointResolutionManager(config)
-	// geo.PrintS2Polygon(resManager.PointPixels[0].BoundingBox)
-	resManager.EnhancePixels()
-	resManager.SaveCSV("./output.csv")
+	// Compute the overlap area
+	overlapArea := computeOverlapArea(quad1, quad2)
+	fmt.Printf("Overlap Area: %.2f square meters\n", overlapArea)
 }
