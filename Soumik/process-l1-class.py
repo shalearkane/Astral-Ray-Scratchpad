@@ -12,9 +12,17 @@ import pymongo.collection
 from criterion.illumination import check_if_illuminated
 from criterion.geotail import check_if_not_in_geotail
 from criterion.goes_solar_flare import get_flare_class
-from constants.class_fits import *
-from constants.mongo import *
-from constants.misc import *
+from constants.class_fits import STARTIME, ENDTIME, V0_LAT, V2_LAT, V0_LON, V2_LON
+from constants.mongo import (
+    COLLECTION_CLASS_FITS,
+    MONGO_URI,
+    DATABASE_ISRO,
+    COLLECTION_CLASS_FITS_ACCEPTED,
+    COLLECTION_CLASS_FITS_FLARE_CLASSIFIED,
+    KEY_PASSED_CHECK,
+    KEY_IS_IN_GEOTAIL,
+)
+from constants.misc import STATISTICS_COMM_PIPE
 
 
 def save_accepted_document(doc: dict, check_passed: bool):

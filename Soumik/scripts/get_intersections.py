@@ -1,8 +1,7 @@
 import csv
 import json
-from typing import Any, List, Dict, Tuple
+from typing import Any, List, Dict, Optional, Tuple
 import geopandas as gpd
-from shapely import is_valid
 from shapely.geometry import Polygon
 
 
@@ -65,7 +64,7 @@ def get_area_percentage(query_polygon: Polygon, other_polygon: Polygon, query_po
     return area_percent
 
 
-def calculate_intersections(polygon_gdf: gpd.GeoDataFrame, doc: Dict[str, Any]) -> None:
+def calculate_intersections(polygon_gdf: gpd.GeoDataFrame, doc: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """
     Reads an array of JSON objects each containing four points, and calculates which of the polygons in the GeoDataFrame
     intersect with it, then prints the result.
@@ -74,6 +73,8 @@ def calculate_intersections(polygon_gdf: gpd.GeoDataFrame, doc: Dict[str, Any]) 
         polygon_gdf: The GeoDataFrame containing the polygons.
         json_data: A list of dictionaries, where each dictionary contains 'points' as a list of [x1, y1, x2, y2, x3, y3, x4, y4].
     """
+
+    print("----------")
 
     points: List[Tuple[float, float]] = [
         (doc["v0lon"], doc["v0lat"]),
@@ -94,6 +95,7 @@ def calculate_intersections(polygon_gdf: gpd.GeoDataFrame, doc: Dict[str, Any]) 
     avg_si_wt: float = 0
     avg_fe_wt: float = 0
     total_area_percent: float = 0
+    total_area_overlaps: int = 0
     if not intersecting_polygons.empty:
         for _, polygon in intersecting_polygons.iterrows():
             area_percent = get_area_percentage(query_polygon, polygon["geometry"], query_polygon_area)
@@ -104,12 +106,20 @@ def calculate_intersections(polygon_gdf: gpd.GeoDataFrame, doc: Dict[str, Any]) 
             avg_fe_wt += area_percent * polygon["fe_wt"]
 
             total_area_percent += area_percent
+            total_area_overlaps += 1
+
+            return {
+                "true_wt": {"mg": avg_mg_wt, "al": avg_al_wt, "si": avg_si_wt, "fe": avg_fe_wt},
+                "true_area_percent": area_percent,
+                "total_area_overlaps": total_area_overlaps,
+            }
 
     else:
         print(f"JSON record with points {points} does not intersect with any polygons.")
 
+        return None
 
-# Example Usage
+
 if __name__ == "__main__":
     csv_file = (
         "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data/isro/elemental_abundances_by_isro.csv"  # Replace with your CSV file path
