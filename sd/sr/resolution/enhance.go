@@ -93,7 +93,8 @@ func (rm *PointResolutionManager) enhancePixel(
 		}
 
 		area := geo.GetPolygonAreaOfIntersection(pixel.BoundingBox, p.BoundingBox)
-		if area > 0.0 {
+
+		if area > 0.00005 {
 			totalArea += area
 			wt = wt.Add(p.Wt.Multiply(area))
 		}

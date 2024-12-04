@@ -57,9 +57,9 @@ func (handler *Handler) HandleStartFitsJob(c *fiber.Ctx) error {
 func (handler *Handler) HandleFitsDoneJob(c *fiber.Ctx) error {
 	var request model.JobDoneInterface
 	c.BodyParser(&request)
-	id, _ := primitive.ObjectIDFromHex(request.Id)
+	id, _ := primitive.ObjectIDFromHex(c.Get("id", ""))
 
-	fitsModelUpdate := model.FitsModel{
+	fitsModelUpdate := model.JobDoneInterface{
 		Lat:             request.Lat,
 		Lon:             request.Lon,
 		ProcessingState: model.PROCESSING_STATE_DONE,
@@ -67,14 +67,16 @@ func (handler *Handler) HandleFitsDoneJob(c *fiber.Ctx) error {
 		Error:           request.Error,
 		PhotonCount:     request.PhotonCount,
 	}
-	handler.Qm.MongoClient.Database(model.DB).Collection(model.FITS_COLLECTION).FindOneAndUpdate(context.TODO(), bson.M{
+
+	var fitsModel model.FitsModel
+	err := handler.Qm.MongoClient.Database(model.DB).Collection(model.FITS_COLLECTION).FindOneAndUpdate(context.TODO(), bson.M{
 		"_id": id,
 	}, bson.M{
-		"$set": fitsModelUpdate, // It has the abundance data
-	}).Decode(request)
+		"$set": fitsModelUpdate,
+	}).Decode(&fitsModel)
 
 	return c.Status(200).JSON(fiber.Map{
-		"success": true,
-		"data":    request,
+		"data": fitsModel,
+		"err":  err,
 	})
 }

@@ -617,6 +617,18 @@ sd/img/*
 
 # Worker Server
 sd/worker/files/*
+sd/worker/abundance_jsons/*
+sd/worker/ISRO.class_fits_flare_classified.json
 
 # Process
 sd/process/test/*
+
+# Super res golang
+sd/sr/data.csv
+sd/sr/data.json
+sd/sr/output.csv
+
+# Super res Rust
+sd/super_res/data.csv
+sd/super_res/data.json
+sd/super_res/output.csv

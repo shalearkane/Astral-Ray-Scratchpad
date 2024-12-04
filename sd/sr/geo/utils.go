@@ -1,6 +1,8 @@
 package geo
 
 import (
+	"log"
+
 	gos "github.com/davidreynolds/gos2/s2"
 	"github.com/golang/geo/s2"
 	"github.com/k0kubun/pp/v3"
@@ -50,6 +52,15 @@ func ConvertGos2ToS2Point(point gos.Point) s2.Point {
 }
 
 func GetPolygonAreaOfIntersection(a, b s2.Polygon) float64 {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("panic occurred:", err)
+			PrintS2Polygon(a)
+		}
+	}()
+	if a.Validate() != nil || b.Validate() != nil {
+		return 0.0
+	}
 	aVertices := GetS2PolygonVertexPoints(a)
 	bVertices := GetS2PolygonVertexPoints(b)
 
@@ -62,13 +73,23 @@ func GetPolygonAreaOfIntersection(a, b s2.Polygon) float64 {
 	for _, point := range bVertices {
 		bGosVertices = append(bGosVertices, ConvertS2ToGos2Point(point))
 	}
-	aPolygon := gos.NewPolygonFromLoop(gos.NewLoopFromPath(aGosVertices))
-	bPolygon := gos.NewPolygonFromLoop(gos.NewLoopFromPath(bGosVertices))
+	loopA := gos.NewLoopFromPath(aGosVertices)
+	loopB := gos.NewLoopFromPath(bGosVertices)
+
+	loopA.Normalize()
+	loopB.Normalize()
+	aPolygon := gos.NewPolygonFromLoop(loopA)
+	bPolygon := gos.NewPolygonFromLoop(loopB)
 
 	// Intersection
 	aPolygon.InitToIntersection(aPolygon, bPolygon)
 
 	intersectionPolygon := ConvertGos2ToS2Polygon(aPolygon)
+
+	err := intersectionPolygon.Validate()
+	if err != nil {
+		return 0.0
+	}
 
 	return intersectionPolygon.Area()
 }

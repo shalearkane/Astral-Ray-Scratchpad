@@ -42,19 +42,45 @@ func (g Geo) GetBoundingBox(padding float64) s2.Rect {
 }
 
 func (g Geo) GetBoundingPolygon(padding float64) s2.Polygon {
-
 	rect := s2.RectFromCenterSize(g.ToLatLng(), s2.LatLngFromDegrees(padding, padding))
 
 	centerTop := s2.Interpolate(0.5, s2.PointFromLatLng(rect.Vertex(2)), s2.PointFromLatLng(rect.Vertex(3)))
 	centerBottom := s2.Interpolate(0.5, s2.PointFromLatLng(rect.Vertex(0)), s2.PointFromLatLng(rect.Vertex(1)))
 
+	// Get the width right
 	topRightPoint := s2.InterpolateAtDistance(s1.Angle(padding/2), centerTop, s2.PointFromLatLng(rect.Vertex(2)))
 	topLeftPoint := s2.InterpolateAtDistance(s1.Angle(padding/2), centerTop, s2.PointFromLatLng(rect.Vertex(3)))
 	bottomRightPoint := s2.InterpolateAtDistance(s1.Angle(padding/2), centerBottom, s2.PointFromLatLng(rect.Vertex(1)))
 	bottomLeftPoint := s2.InterpolateAtDistance(s1.Angle(padding/2), centerBottom, s2.PointFromLatLng(rect.Vertex(0)))
 
+	// leftHeight := topLeftPoint.Distance(bottomLeftPoint)
+	// rightHeight := topRightPoint.Distance(bottomRightPoint)
+	// height := centerTop.Distance(centerBottom)
+
+	// Get the height right
+	newTopRightPoint := s2.InterpolateAtDistance(s1.Angle(padding/2), bottomRightPoint, topRightPoint)
+	newBottomRightPoint := s2.InterpolateAtDistance(s1.Angle(padding/2), topRightPoint, bottomRightPoint)
+	newTopLeftPoint := s2.InterpolateAtDistance(s1.Angle(padding/2), bottomLeftPoint, topLeftPoint)
+	newBottomLeftPoint := s2.InterpolateAtDistance(s1.Angle(padding/2), topLeftPoint, bottomLeftPoint)
+
+	// newTopRightPoint := s2.InterpolateAtDistance(s1.Angle((padding+rightHeight.Degrees())/2), bottomRightPoint, topRightPoint)
+	// newBottomRightPoint := s2.InterpolateAtDistance(s1.Angle((padding+rightHeight.Degrees())/2), topRightPoint, bottomRightPoint)
+	// newTopLeftPoint := s2.InterpolateAtDistance(s1.Angle((padding+leftHeight.Degrees())/2), bottomLeftPoint, topLeftPoint)
+	// newBottomLeftPoint := s2.InterpolateAtDistance(s1.Angle((padding+leftHeight.Degrees())/2), topLeftPoint, bottomLeftPoint)
+
+	// // 2nd Approach
+	// centerTop := s2.InterpolateAtDistance(s1.Angle((padding)/2), s2.PointFromLatLng(g.ToLatLng()), s2.PointFromLatLng(s2.LatLngFromDegrees(90, g.Lon)))
+	// centerBottom := s2.InterpolateAtDistance(-s1.Angle((padding)/2), s2.PointFromLatLng(g.ToLatLng()), s2.PointFromLatLng(s2.LatLngFromDegrees(90, g.Lon)))
+	// // centerLeft := s2.InterpolateAtDistance(s1.Angle((padding)/2), s2.PointFromLatLng(g.ToLatLng()), s2.PointFromLatLng(s2.LatLngFromDegrees(g.Lon, -180)))
+	// // centerRight := s2.InterpolateAtDistance(s1.Angle((padding)/2), s2.PointFromLatLng(g.ToLatLng()), s2.PointFromLatLng(s2.LatLngFromDegrees(g.Lon, 180)))
+
+	// newBottomLeftPoint := s2.InterpolateAtDistance(-s1.Angle(padding/2), centerBottom, s2.PointFromLatLng(s2.LatLngFromDegrees(float64(s2.LatLngFromPoint(centerBottom).Lat), 180)))
+	// newBottomRightPoint := s2.InterpolateAtDistance(s1.Angle(padding/2), centerBottom, s2.PointFromLatLng(s2.LatLngFromDegrees(float64(s2.LatLngFromPoint(centerBottom).Lat), 180)))
+	// newTopRightPoint := s2.InterpolateAtDistance(-s1.Angle(padding/2), centerTop, s2.PointFromLatLng(s2.LatLngFromDegrees(float64(s2.LatLngFromPoint(centerTop).Lat), 180)))
+	// newTopLeftPoint := s2.InterpolateAtDistance(s1.Angle(padding/2), centerTop, s2.PointFromLatLng(s2.LatLngFromDegrees(float64(s2.LatLngFromPoint(centerTop).Lat), 180)))
+
 	loop := s2.LoopFromPoints([]s2.Point{
-		bottomLeftPoint, bottomRightPoint, topRightPoint, topLeftPoint,
+		newBottomLeftPoint, newBottomRightPoint, newTopRightPoint, newTopLeftPoint,
 	})
 
 	return *s2.PolygonFromLoops([]*s2.Loop{loop})

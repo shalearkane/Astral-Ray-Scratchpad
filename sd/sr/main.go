@@ -26,7 +26,7 @@ func main() {
 	// loop := polygon1.Loop(0)
 	// pp.Println(gos.LatLngFromPoint(*loop.Vertex(0)).String(), gos.LatLngFromPoint(*loop.Vertex(1)).String(), gos.LatLngFromPoint(*loop.Vertex(2)).String(), gos.LatLngFromPoint(*loop.Vertex(3)).String())
 	//
-	// geo := geo.NewGeoFromLatLonWithUnitRadius(-89.0, 11.0)
+	// geoObj := geo.NewGeoFromLatLonWithUnitRadius(20, 30)
 	// boundingPolygon := geo.GetBoundingPolygon(12.5 * 1e-5 * 180 / (math.Pi))
 	// for li := 0; li < boundingPolygon.NumLoops(); li++ {
 	// 	loop := boundingPolygon.Loop(li)
@@ -45,10 +45,13 @@ func main() {
 	config := resolution.PointResolutionManagerConfig{
 		LatLngs:     data,
 		Radius:      1.0,
-		SubPixelLen: 25 * 1e-5 * 180 / (math.Pi),
+		SubPixelLen: 12.5 * 1e-5 * 180 / (math.Pi),
 	}
 
+	// geo.PrintS2Polygon(geoObj.GetBoundingPolygon(12.5 * 1e-5 * 180 / (math.Pi)))
+
 	resManager := resolution.NewPointResolutionManager(config)
+	// geo.PrintS2Polygon(resManager.PointPixels[0].BoundingBox)
 	resManager.EnhancePixels()
 	resManager.SaveCSV("./output.csv")
 }

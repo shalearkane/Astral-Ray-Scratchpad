@@ -39,12 +39,13 @@ type FitsDataWithManualDate struct {
 }
 
 func (fits *FitsDataWithManualDate) ToFitsModel() model.FitsModel {
-	startTime, _ := time.Parse(time.RFC3339, fits.StartTime.Date)
-	endTime, _ := time.Parse(time.RFC3339, fits.EndTime.Date)
+	startTime, _ := time.Parse("2006-01-02T15:04:05.000Z", fits.StartTime.Date)
+	endTime, _ := time.Parse("2006-01-02T15:04:05.000Z", fits.EndTime.Date)
 
 	return model.FitsModel{
-		StartTime:       primitive.DateTime(startTime.Unix()),
-		EndTime:         primitive.DateTime(endTime.Unix()),
+		Id:              primitive.NewObjectID(),
+		StartTime:       primitive.NewDateTimeFromTime(startTime),
+		EndTime:         primitive.NewDateTimeFromTime(endTime),
 		ProcessingState: model.PROCESSING_STATE_NOT_DONE,
 		Path:            strings.ReplaceAll(fits.Path, "../files/", "../class_data/files/"),
 		FlareAlphabet:   fits.FlareAlphabet,

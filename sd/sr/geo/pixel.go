@@ -45,7 +45,6 @@ type PointPixel struct {
 func NewPointPixel(lat float64, lon float64, wt Element, padding float64) PointPixel {
 	geo := NewGeoFromLatLon(lat, lon, 1.0)
 	boundingBox := geo.GetBoundingPolygon(padding)
-
 	return PointPixel{
 		BoundingBox: boundingBox,
 		Wt:          wt,

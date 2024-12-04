@@ -34,7 +34,6 @@ type FileModel struct {
 }
 
 type JobDoneInterface struct {
-	Id       string `bson:"_id" json:"filename"`
 	Filename string `bson:"filename" json:"filename"`
 
 	// Coordinate
@@ -44,6 +43,8 @@ type JobDoneInterface struct {
 	// Abundance
 	Wt    *Element `bson:"wt" json:"wt"`
 	Error *Element `bson:"error" json:"error"`
+
+	ProcessingState ProcessingState `bson:"processingState" json:"processingState"`
 
 	// Metadata
 	PhotonCount int `bson:"photonCount" json:"photonCount"`
