@@ -11,7 +11,7 @@ from json import dump
 # Configuration
 SERVER_URL = "http://172.20.59.218:8082/fits/new"
 RETURN_URL = "http://172.20.59.218:8082/fits/done"
-NUM_PROCESSES = 1
+NUM_PROCESSES = 8
 DOWNLOAD_DIR = "/tmp"
 
 
