@@ -2,6 +2,7 @@ from typing import Final, List, Tuple
 
 import concurrent.futures
 
+from constants.mongo import COLLECTION_CLASS_FITS
 from criterion.goes_solar_flare import is_during_a_solar_flare
 from helpers.download import download_file_from_file_server
 from helpers.combine_fits import combine_fits
@@ -29,7 +30,7 @@ def generate_combined_fits_for_lat_lon(latitude: float, longitude: float, redo: 
     filtered_docs = is_during_a_solar_flare(docs)
     file_paths: List[str] = list()
     for doc in filtered_docs:
-        if download_file_from_file_server(doc, "primary", download_folder):
+        if download_file_from_file_server(doc, COLLECTION_CLASS_FITS, download_folder):
             file_paths.append(f"{download_folder}/{doc["path"].split("/")[-1]}")
 
     metadata = {"lat": latitude, "lon": longitude}

@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+from constants.output_dirs import OUTPUT_DIR_XSM_PHA
 from helpers.download import download_file_from_file_server
 from constants.mongo import (
     MONGO_URI,
@@ -49,4 +50,4 @@ if __name__ == "__main__":
     end_time = datetime(2024, 9, 27, 23, 59, 59, tzinfo=timezone.utc)
     list_of_docs = query_xsm_pha_within_date_range(start_time, end_time)
     for doc in list_of_docs:
-        download_file_from_file_server(doc, "xsm_primary", "data/xsm")
+        download_file_from_file_server(doc, COLLECTION_XSM_PRIMARY, OUTPUT_DIR_XSM_PHA)

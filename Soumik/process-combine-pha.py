@@ -3,6 +3,7 @@ import os
 import datetime
 from typing import Tuple
 
+from constants.mongo import COLLECTION_XSM_PRIMARY
 from helpers.utilities import to_datetime
 from constants.output_dirs import OUTPUT_DIR_SOLAR_MODEL, OUTPUT_DIR_XSM_PHA, OUTPUT_DIR_XSM_RAW_BINS
 from helpers.download import download_file_from_file_server
@@ -24,7 +25,7 @@ def download_xsm_files_within_date_range(start_time: datetime.datetime, end_time
     file_paths: list[str] = list()
 
     for doc in docs:
-        if download_file_from_file_server(doc, "xsm_primary", output_dir):
+        if download_file_from_file_server(doc, COLLECTION_XSM_PRIMARY, output_dir):
             file_paths.append(os.path.join(output_dir, doc["path"]))
 
     return file_paths
@@ -38,7 +39,7 @@ def download_relevant_xsm_files(start_time: datetime.datetime, end_time: datetim
     file_paths: list[str] = list()
 
     for doc in docs:
-        if download_file_from_file_server(doc, "xsm_primary", output_dir):
+        if download_file_from_file_server(doc, COLLECTION_XSM_PRIMARY, output_dir):
             file_paths.append(os.path.join(output_dir, doc["path"]))
 
     return file_paths

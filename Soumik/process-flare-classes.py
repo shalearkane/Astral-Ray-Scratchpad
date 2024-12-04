@@ -1,3 +1,4 @@
+from constants.mongo import COLLECTION_CLASS_FITS
 from constants.output_dirs import OUTPUT_DIR_CLASS_FITS, TO_PROCESS_FILE_INDEXES
 from helpers.download import download_file_from_file_server
 from helpers.query_class import get_class_fits_for_flare_class
@@ -11,7 +12,7 @@ def download_flare_classes(flare_class: str = "X", minimum_flare_scale: float = 
     file_paths: list[str] = list()
 
     for fits_file in class_fits:
-        if download_file_from_file_server(fits_file, "primary", OUTPUT_DIR_CLASS_FITS):
+        if download_file_from_file_server(fits_file, COLLECTION_CLASS_FITS, OUTPUT_DIR_CLASS_FITS):
             file_paths.append(os.path.join(OUTPUT_DIR_CLASS_FITS, fits_file["path"].split("/")[-1]))
 
     return file_paths

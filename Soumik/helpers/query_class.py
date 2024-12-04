@@ -1,7 +1,9 @@
 from typing import Any, List, Tuple, Dict
+from constants.output_dirs import OUTPUT_DIR_CLASS_FITS
 from helpers.download import download_file_from_file_server
 from constants.class_fits import V0_LAT, V0_LON, V1_LAT, V1_LON, V2_LAT, V2_LON, V3_LAT, V3_LON
 from constants.mongo import (
+    COLLECTION_CLASS_FITS,
     COLLECTION_CLASS_FITS_FLARE_CLASSIFIED,
     MONGO_URI,
     DATABASE_ISRO,
@@ -46,7 +48,7 @@ if __name__ == "__main__":
     list_of_docs = get_class_fits_at_lat_lon(20, 130)
     list_of_land_patches: List[List[Tuple[float, float]]] = list()
     for doc in list_of_docs:
-        download_file_from_file_server(doc, "primary", "data/class")
+        download_file_from_file_server(doc, COLLECTION_CLASS_FITS,OUTPUT_DIR_CLASS_FITS)
 
         list_of_land_patches.append(
             [
