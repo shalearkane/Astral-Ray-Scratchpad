@@ -19,7 +19,7 @@ def rad_to_deg(radians: float) -> float:
     return (radians * 180.0) / math.pi
 
 
-def process_hdul(hdul, ideology: str) -> Tuple[np.ndarray, float, float, float, float, float]:
+def process_hdul(hdul, method: str) -> Tuple[np.ndarray, float, float, float, float, float]:
     data = hdul["SPECTRUM"].data
     photon_counts = data["COUNTS"]
     table = Table.read(hdul["SPECTRUM"])
@@ -32,18 +32,18 @@ def process_hdul(hdul, ideology: str) -> Tuple[np.ndarray, float, float, float, 
     solar_zenith = 1.0 / math.sin(deg_to_rad(solar_zenith_angle))
     emission = 1.0 / math.sin(deg_to_rad(emission_angle))
 
-    if ideology == "sum":
+    if method == "average":
         return photon_counts, solar_zenith, emission, altitude, exposure, mid_utc
 
-    elif ideology == "rms":
+    elif method == "rms":
         return photon_counts**2, solar_zenith**2, emission**2, altitude**2, exposure**2, mid_utc
 
-    elif ideology == "weighted_average":
+    elif method == "weighted_average":
         weight = photon_count_from_hdul(hdul)
         return photon_counts * weight, solar_zenith * weight, emission * weight, altitude * weight, exposure * weight, mid_utc
 
     else:
-        raise ValueError(f"Unknown ideology: {ideology}")
+        raise ValueError(f"Unknown method: {method}")
 
 
 def calculate_aggregate(
@@ -57,22 +57,22 @@ def calculate_aggregate(
     weights_sum: float,
     method: str,
 ) -> Tuple[np.ndarray, float, float, float, float, float]:
-    if method == "sum":
+    if method == "average":
+        photon_counts_avg = photon_counts_sum / files_used
         solar_zenith_angles_cosec_avg = solar_zenith_angles_cosec_sum / files_used
         emission_angles_cosec_avg = emission_angles_cosec_sum / files_used
         altitude_avg = altitude_sum / files_used
         exposure_avg = exposure_sum / files_used
 
     elif method == "rms":
-        photon_counts_sum = np.sqrt(photon_counts_sum / files_used)
+        photon_counts_avg = np.sqrt(photon_counts_sum / files_used)
         solar_zenith_angles_cosec_avg = math.sqrt(solar_zenith_angles_cosec_sum / files_used)
         emission_angles_cosec_avg = math.sqrt(emission_angles_cosec_sum / files_used)
         altitude_avg = math.sqrt(altitude_sum / files_used)
         exposure_avg = math.sqrt(exposure_sum / files_used)
 
     elif method == "weighted_average":
-        if weights_sum == 0:
-            raise ValueError("Weighted average cannot be calculated: total weights sum to zero.")
+        photon_counts_avg = photon_counts_sum / weights_sum
         solar_zenith_angles_cosec_avg = solar_zenith_angles_cosec_sum / weights_sum
         emission_angles_cosec_avg = emission_angles_cosec_sum / weights_sum
         altitude_avg = altitude_sum / weights_sum
@@ -85,10 +85,10 @@ def calculate_aggregate(
     emission_angle = rad_to_deg(math.asin(1.0 / emission_angles_cosec_avg))
     mid_utc_in_seconds_avg = mid_utc_in_seconds_sum / files_used
 
-    return photon_counts_sum, solar_zenith_angle, emission_angle, altitude_avg, exposure_avg, mid_utc_in_seconds_avg
+    return photon_counts_avg, solar_zenith_angle, emission_angle, altitude_avg, exposure_avg, mid_utc_in_seconds_avg
 
 
-def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict, minimum_photon_count: int = 3000) -> bool:
+def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict, minimum_photon_count: int = 3000, method: str = "rms") -> bool:
     try:
         if len(fits_files) == 0:
             return False
@@ -101,8 +101,6 @@ def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict, m
         mid_utc_in_seconds_sum = 0
         weights_sum = 0
         files_used = 0
-
-        method = "rms"
 
         for file_path in fits_files:
             with fits.open(file_path) as hdul:
@@ -162,6 +160,7 @@ def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict, m
 
     except Exception:
         import traceback
+
         print(traceback.format_exc())
         return False
     else:

@@ -21,8 +21,8 @@ longitude_start: Final[float] = 80
 longitude_end: Final[float] = 100
 
 
-def generate_combined_fits_for_lat_lon(latitude: float, longitude: float, redo: bool) -> bool:
-    combined_fits_path = f"{OUTPUT_DIR_FIBONACCI_FITS}/{latitude:.3f}_{longitude:.3f}.fits"
+def generate_combined_fits_for_lat_lon(latitude: float, longitude: float, redo: bool, method: str = "average") -> bool:
+    combined_fits_path = f"{OUTPUT_DIR_FIBONACCI_FITS}/{latitude:.3f}_{longitude:.3f}_{method}.fits"
     if not redo and isfile(combined_fits_path):
         print(f"already generated: {combined_fits_path}")
         return True
@@ -36,7 +36,7 @@ def generate_combined_fits_for_lat_lon(latitude: float, longitude: float, redo: 
             file_paths.append(f"{OUTPUT_DIR_CLASS_FITS}/{doc["path"].split("/")[-1]}")
 
     metadata = {"lat": latitude, "lon": longitude}
-    if combine_fits(file_paths, combined_fits_path, metadata):
+    if combine_fits(file_paths, combined_fits_path, metadata, 3000, method):
         print(f"generated: {combined_fits_path}")
         return True
     else:
@@ -84,4 +84,5 @@ if __name__ == "__main__":
 
     # do_in_parallel(lat_lon_pairs)
 
-    generate_combined_fits_for_lat_lon(16.10, -39.09, True)
+    for method in ["average", "rms", "weighted_average"]:
+        generate_combined_fits_for_lat_lon(16.10, -39.09, True, method)
