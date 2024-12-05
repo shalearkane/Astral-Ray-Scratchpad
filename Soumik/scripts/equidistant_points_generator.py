@@ -1,5 +1,9 @@
 import math
+import matplotlib
+import matplotlib.pyplot as plt
 from typing import List, Tuple
+
+matplotlib.use("Agg")
 
 
 def fibonacci_sphere(samples: int = 1000) -> List[Tuple[float, float]]:
@@ -23,6 +27,18 @@ def fibonacci_sphere(samples: int = 1000) -> List[Tuple[float, float]]:
 
 
 if __name__ == "__main__":
-    samples = 200000  # Number of points to generate
+    samples = 10000  # Number of points to generate
     equidistant_points = fibonacci_sphere(samples)
     print(equidistant_points[:10])
+
+    latitudes = [point[0] for point in equidistant_points]
+    longitudes = [point[1] for point in equidistant_points]
+
+    # Plot the points on a 2D map
+    plt.figure(figsize=(10, 6))
+    plt.scatter(longitudes, latitudes, s=1, color="blue")  # Small dots for each point
+    plt.title("Equidistant Points on the Sphere (Fibonacci Lattice)", fontsize=14)
+    plt.xlabel("Longitude (°)", fontsize=12)
+    plt.ylabel("Latitude (°)", fontsize=12)
+    plt.grid(True)
+    plt.savefig("some.png")

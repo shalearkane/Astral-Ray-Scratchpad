@@ -3,10 +3,10 @@ from typing import Final, List, Tuple
 
 import concurrent.futures
 
+from criterion.geotail import is_not_during_geotail
 from scripts.equidistant_points_generator import fibonacci_sphere
 from constants.output_dirs import OUTPUT_DIR_CLASS_FITS, OUTPUT_DIR_FIBONACCI_FITS
 from constants.mongo import COLLECTION_CLASS_FITS
-from criterion.goes_solar_flare import is_during_a_solar_flare
 from helpers.download import download_file_from_file_server
 from helpers.combine_fits import combine_fits
 from helpers.query_class import get_class_fits_at_lat_lon
@@ -28,9 +28,10 @@ def generate_combined_fits_for_lat_lon(latitude: float, longitude: float, redo: 
         return True
 
     docs = get_class_fits_at_lat_lon(latitude, longitude)
+    filtered_docs = is_not_during_geotail(docs)
     # filtered_docs = is_during_a_solar_flare(docs)
     file_paths: List[str] = list()
-    for doc in docs:
+    for doc in filtered_docs:
         if download_file_from_file_server(doc, COLLECTION_CLASS_FITS, OUTPUT_DIR_CLASS_FITS):
             file_paths.append(f"{OUTPUT_DIR_CLASS_FITS}/{doc["path"].split("/")[-1]}")
 

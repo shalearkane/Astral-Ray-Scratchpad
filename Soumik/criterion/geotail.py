@@ -1,5 +1,6 @@
+from typing import Any, Dict, List
 from ephem import Date, previous_full_moon, next_full_moon
-from datetime import datetime, timezone
+from datetime import datetime
 
 
 def check_if_not_in_geotail(dt: datetime) -> bool:
@@ -10,6 +11,19 @@ def check_if_not_in_geotail(dt: datetime) -> bool:
         return False
 
     return True
+
+
+def is_not_during_geotail(docs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    results: List[Dict[str, Any]] = list()
+
+    for class_observation in docs:
+        start_time = class_observation["parsedStartTime"]
+        end_time = class_observation["parsedEndTime"]
+
+        if check_if_not_in_geotail(start_time) and check_if_not_in_geotail(end_time):
+            results.append(class_observation)
+
+    return results
 
 
 if __name__ == "__main__":
