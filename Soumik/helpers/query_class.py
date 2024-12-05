@@ -14,7 +14,8 @@ from pymongo import MongoClient
 
 
 def get_class_fits_at_lat_lon(lat: float, lon: float) -> list[Dict[str, Any]]:
-    class_fits_accepted = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_CLASS_FITS_ACCEPTED]
+    # class_fits_accepted = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_CLASS_FITS_ACCEPTED]
+    class_fits_accepted = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_CLASS_FITS]
 
     filter = {
         "$and": [
@@ -26,7 +27,7 @@ def get_class_fits_at_lat_lon(lat: float, lon: float) -> list[Dict[str, Any]]:
             {V2_LON: {"$gte": lon}},
             {V3_LAT: {"$gte": lat}},
             {V3_LON: {"$gte": lon}},
-            {"is_in_geotail": False},
+            # {"is_in_geotail": False},
         ]
     }
 
@@ -48,7 +49,7 @@ if __name__ == "__main__":
     list_of_docs = get_class_fits_at_lat_lon(20, 130)
     list_of_land_patches: List[List[Tuple[float, float]]] = list()
     for doc in list_of_docs:
-        download_file_from_file_server(doc, COLLECTION_CLASS_FITS,OUTPUT_DIR_CLASS_FITS)
+        download_file_from_file_server(doc, COLLECTION_CLASS_FITS, OUTPUT_DIR_CLASS_FITS)
 
         list_of_land_patches.append(
             [

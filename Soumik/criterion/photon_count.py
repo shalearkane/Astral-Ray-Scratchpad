@@ -1,5 +1,6 @@
 import os
 from typing import Optional, Tuple
+from astropy.io.fits.hdu.hdulist import HDUList
 import pandas as pd
 from astropy.io import fits
 from helpers.utilities import to_datetime_t
@@ -26,24 +27,26 @@ def photon_count_and_flare_class(fits_file: str, start_channel: int = 15, end_ch
             flare_class, flare_scale = get_flare_class(start_time, end_time)
 
             return int(counts_in_range.sum()), flare_class, flare_scale
-    except Exception as e:
+    except Exception:
         import traceback
 
         print(f"An error occurred while processing {fits_file}: {traceback.format_exc()}")
         return None
 
 
+def photon_count_from_hdul(hdul: HDUList, start_channel: int = 37, end_channel: int = 800) -> int:
+    data = hdul[1].data  # type: ignore
+    channels = data["CHANNEL"]
+    counts = data["COUNTS"]
+    mask = (channels >= start_channel) & (channels <= end_channel)
+    counts_in_range = counts[mask]
+    return int(counts_in_range.sum())
+
+
 def photon_count(fits_file: str, start_channel: int = 37, end_channel: int = 800) -> int:
     try:
         with fits.open(fits_file) as hdul:
-            data = hdul[1].data  # type: ignore
-            channels = data["CHANNEL"]
-            counts = data["COUNTS"]
-
-            mask = (channels >= start_channel) & (channels <= end_channel)
-            counts_in_range = counts[mask]
-
-            return int(counts_in_range.sum())
+            return photon_count_from_hdul(hdul, start_channel, end_channel)
     except Exception:
         import traceback
 

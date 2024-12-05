@@ -5,6 +5,7 @@ OUTPUT_DIR_XSM_RAW_BINS = "data/raw_energy"
 OUTPUT_DIR_SOLAR_MODEL = "data-generated/flux"
 OUTPUT_DIR_ABUNDANCE_JSONS = "data-generated/abundance_json"
 OUTPUT_DIR_COMBINED_FITS = "data-generated/combined-fits"
+OUTPUT_DIR_FIBONACCI_FITS = "data-generated/fibonacci-fits"
 OUTPUT_DIR_GOES = "data-generated/goes"
 
 TO_PROCESS_FILE_INDEXES = "data-generated/file_indexes"

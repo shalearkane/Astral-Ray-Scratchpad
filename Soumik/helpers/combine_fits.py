@@ -8,6 +8,8 @@ from typing import Final, List
 from astropy.table import Table
 from datetime import datetime
 
+from criterion.photon_count import photon_count_from_hdul
+
 
 CHANNELS: Final[int] = 2048
 
@@ -39,12 +41,10 @@ def rad_to_deg(radians: float) -> float:
     return (radians * 180.0) / math.pi
 
 
-def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict) -> bool:
+def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict, minimum_photon_count: int = 3000) -> bool:
     try:
-        file_count = len(fits_files)
-
-        if file_count == 0:
-            print("no input files provided")
+        if len(fits_files) == 0:
+            print(f"No input files provided for {metadata.get("lat", 0.0)} {metadata.get("lat", 0.0)}")
             return False
 
         photon_counts_sum = np.zeros(CHANNELS, dtype=np.float64)
@@ -53,12 +53,20 @@ def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict) -
         altitude_sum: float = 0
         exposure_sum: float = 0
         mid_utc_in_seconds_sum: float = 0
+        files_used: int = 0
 
         for file_path in fits_files:
             with fits.open(file_path) as hdul:
                 data = hdul["SPECTRUM"].data  # type: ignore
                 photon_counts = data["COUNTS"]
                 energy_channel = data["CHANNEL"]
+
+                # if photon count if below threshold, don't use it
+                if photon_count_from_hdul(hdul) < minimum_photon_count:
+                    continue
+                else:
+                    files_used += 1
+
                 photon_counts_sum += photon_counts
 
                 table = Table.read(hdul["SPECTRUM"])
@@ -69,10 +77,14 @@ def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict) -
                 exposure_sum += float(table.meta["EXPOSURE"])
                 mid_utc_in_seconds_sum += datetime.strptime(table.meta["MID_UTC"], "%Y-%m-%dT%H:%M:%S.%f").timestamp()
 
-        solar_zenith_angles_cosec_avg = solar_zenith_angles_cosec_sum / file_count
-        emission_angles_cosec_avg = emission_angles_cosec_sum / file_count
-        altitude_avg = altitude_sum / file_count
-        mid_utc_in_seconds_avg = mid_utc_in_seconds_sum / file_count
+        if files_used == 0:
+            print(f"No input files with {minimum_photon_count} photon count at {metadata.get("lat", 0.0)} {metadata.get("lat", 0.0)}")
+            return False
+
+        solar_zenith_angles_cosec_avg = solar_zenith_angles_cosec_sum / files_used
+        emission_angles_cosec_avg = emission_angles_cosec_sum / files_used
+        altitude_avg = altitude_sum / files_used
+        mid_utc_in_seconds_avg = mid_utc_in_seconds_sum / files_used
 
         solar_zenith_angle = rad_to_deg(math.asin(1.0 / solar_zenith_angles_cosec_avg))
         emission_angle = rad_to_deg(math.asin(1.0 / emission_angles_cosec_avg))
@@ -146,7 +158,7 @@ def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict) -
         hdu.header["EMISNANG"] = emission_angle
 
         # custom header
-        hdu.header["FILE_CNT"] = file_count
+        hdu.header["FILE_CNT"] = files_used
         hdu.header["TARG_LAT"] = float(metadata.get("lat", 0.0))
         hdu.header["TARG_LON"] = float(metadata.get("lon", 0.0))
 
