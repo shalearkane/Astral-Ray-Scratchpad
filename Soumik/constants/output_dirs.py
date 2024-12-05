@@ -8,4 +8,6 @@ OUTPUT_DIR_COMBINED_FITS = "data-generated/combined-fits"
 OUTPUT_DIR_FIBONACCI_FITS = "data-generated/fibonacci-fits"
 OUTPUT_DIR_GOES = "data-generated/goes"
 
+OUTPUT_DIR_TMP = "/tmp"
+
 TO_PROCESS_FILE_INDEXES = "data-generated/file_indexes"
