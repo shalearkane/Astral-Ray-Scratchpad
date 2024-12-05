@@ -69,7 +69,7 @@ def do_in_parallel(lat_lon_pairs: List[Tuple[float, float]]):
 if __name__ == "__main__":
     lat_lon_pairs: List[Tuple[float, float]] = fibonacci_sphere(400000)
 
-    lat_lon_pairs = lat_lon_pairs[:300]
+    lat_lon_pairs = lat_lon_pairs[:40000]  # get only 10% of data
 
     # latitude = latitude_start
     # while latitude < latitude_end:
