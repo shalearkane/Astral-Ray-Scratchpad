@@ -15,7 +15,7 @@ def bin_fits_file(original_fits, binned_fits, binning_factor=2):
         binned_channels = np.arange(num_bins, dtype=int)
 
         # Compute the binned counts by averaging the original counts
-        binned_counts = counts[:len(counts) // binning_factor * binning_factor].reshape(-1, binning_factor).mean(axis=1)
+        binned_counts = counts[:len(counts) // binning_factor * binning_factor].reshape(-1, binning_factor).sum(axis=1)
 
         # Create a new binary table HDU with the binned data
         binned_data = fits.BinTableHDU.from_columns([
