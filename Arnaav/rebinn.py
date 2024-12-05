@@ -29,7 +29,8 @@ def bin_fits_file(original_fits, binned_fits, binning_factor=2):
         binned_data.header['TLMAX1'] = binned_channels[-1]
         binned_data.header['DETCHANS'] = 1024 
         binned_data.header['RESPFILE'] = "class_rmf_v1.rmf"
-        binned_data.header['ANCRFILE'] = "class_arf_v1.arf" # Update DETCHANS to 1024
+        binned_data.header['ANCRFILE'] = "class_arf_v1.arf"
+        binned_data.header['GAIN USE'] = 27.0
 
         # Write the binned data to a new FITS file
         hdul_out = fits.HDUList([hdul[0], binned_data])
