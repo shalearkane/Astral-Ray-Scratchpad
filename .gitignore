@@ -627,6 +627,8 @@ sd/process/test/*
 sd/sr/data.csv
 sd/sr/data.json
 sd/sr/output.csv
+sd/sr/ISRO.test_fits.json
+sd/sr/missing.csv
 
 # Super res Rust
 sd/super_res/data.csv

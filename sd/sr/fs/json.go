@@ -34,14 +34,14 @@ func ReadJSONFile(filePath string) ([]geo.RectPixel, error) {
 	for _, abund := range abundances {
 		boundingBox := geo.Geo{Lat: abund.Lat, Lon: abund.Lon, Radius: constants.RADIUS}.GetBoundingBox(constants.PIXEL_LEN)
 		pixels = append(pixels, geo.RectPixel{
-			BoundingBox: boundingBox,
+			BoundingBox: &boundingBox,
 			Wt:          abund.Wt,
 		})
 	}
 	return pixels, nil
 }
 
-func ReadJSONFileToLatLngWt(filePath string) ([]resolution.LatLonWt, error) {
+func ReadJSONFileToLatLngWt(filePath string) ([]*resolution.LatLonWt, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
@@ -53,9 +53,9 @@ func ReadJSONFileToLatLngWt(filePath string) ([]resolution.LatLonWt, error) {
 		return nil, err
 	}
 
-	var latlons []resolution.LatLonWt
+	var latlons []*resolution.LatLonWt
 	for _, abund := range abundances {
-		latlons = append(latlons, resolution.LatLonWt{
+		latlons = append(latlons, &resolution.LatLonWt{
 			LatLngs: s2.LatLngFromDegrees(abund.Lat, abund.Lon),
 			Wt:      abund.Wt,
 		})

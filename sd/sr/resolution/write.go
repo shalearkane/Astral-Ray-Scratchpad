@@ -61,7 +61,7 @@ func (rm *PointResolutionManager) SaveCSV(filename string) error {
 		return err
 	}
 
-	for _, pixel := range rm.PointPixels {
+	for _, pixel := range *rm.PointPixels {
 		// Placeholder for converting bounding box vertices to lat/lon
 		record := []string{
 			fmt.Sprintf("%f", s2.LatLngFromPoint(pixel.BoundingBox.Loop(0).Vertex(0)).Lat.Degrees()),

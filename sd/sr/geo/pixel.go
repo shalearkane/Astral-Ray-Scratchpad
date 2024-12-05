@@ -6,12 +6,12 @@ import (
 )
 
 type RectPixel struct {
-	BoundingBox s2.Rect
+	BoundingBox *s2.Rect
 	Wt          Element
 	ID          string
 }
 
-func NewRectPixel(boundingBox s2.Rect, wt Element) RectPixel {
+func NewRectPixel(boundingBox *s2.Rect, wt Element) RectPixel {
 	return RectPixel{
 		BoundingBox: boundingBox,
 		Wt:          wt,
@@ -40,14 +40,16 @@ type PointPixel struct {
 	BoundingBox s2.Polygon
 	Wt          Element
 	ID          string
+	Center      s2.LatLng
 }
 
-func NewPointPixel(lat float64, lon float64, wt Element, padding float64) PointPixel {
+func NewPointPixel(lat float64, lon float64, wt Element, padding float64) *PointPixel {
 	geo := NewGeoFromLatLon(lat, lon, 1.0)
 	boundingBox := geo.GetBoundingPolygon(padding)
-	return PointPixel{
+	return &PointPixel{
 		BoundingBox: boundingBox,
 		Wt:          wt,
 		ID:          uuid.NewString(),
+		Center:      s2.LatLngFromDegrees(lat, lon),
 	}
 }

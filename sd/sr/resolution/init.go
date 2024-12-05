@@ -19,7 +19,7 @@ func NewPixelResolutionManager(pixels []geo.RectPixel, radius, subPixelLen float
 			geo.GetSubRectangles(pixel.GetGeoBoundingBox(radius), constants.PIXEL_LEN, constants.RADIUS)
 
 		for _, rectangle := range subRectangles {
-			sub_pixels = append(sub_pixels, geo.NewRectPixel(rectangle, pixel.Wt))
+			sub_pixels = append(sub_pixels, geo.NewRectPixel(&rectangle, pixel.Wt))
 		}
 	}
 
@@ -27,7 +27,8 @@ func NewPixelResolutionManager(pixels []geo.RectPixel, radius, subPixelLen float
 }
 
 type PointResolutionManager struct {
-	PointPixels []geo.PointPixel
+	PointPixels  *[]*geo.PointPixel
+	PatchManager *PatchManager
 }
 
 type LatLonWt struct {
@@ -36,16 +37,19 @@ type LatLonWt struct {
 }
 
 type PointResolutionManagerConfig struct {
-	LatLngs     []LatLonWt
+	LatLngs     []*LatLonWt
 	Radius      float64
 	SubPixelLen float64
 }
 
 func NewPointResolutionManager(config PointResolutionManagerConfig) *PointResolutionManager {
-	var pointPixel []geo.PointPixel
+	var pointPixels []*geo.PointPixel
 	for _, latlng := range config.LatLngs {
-		pointPixel = append(pointPixel, geo.NewPointPixel(latlng.LatLngs.Lat.Degrees(), latlng.LatLngs.Lng.Degrees(), latlng.Wt, config.SubPixelLen))
+		pointPixels = append(pointPixels, geo.NewPointPixel(latlng.LatLngs.Lat.Degrees(), latlng.LatLngs.Lng.Degrees(), latlng.Wt, config.SubPixelLen))
 	}
 
-	return &PointResolutionManager{PointPixels: pointPixel}
+	patchManager := NewPatchManager()
+	// patchManager.ComputePatches(pointPixels)
+
+	return &PointResolutionManager{PointPixels: &pointPixels, PatchManager: patchManager}
 }

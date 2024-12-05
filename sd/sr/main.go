@@ -37,21 +37,25 @@ func main() {
 	// }
 	//
 
-	data, err := fs.ReadJSONFileToLatLngWt("./data.json")
+	// geo.PrintS2Polygon(geoObj.GetBoundingPolygon(12.5 * 1e-5 * 180 / (math.Pi)))
+	// geo.PrintS2Polygon(resManager.PointPixels[0].BoundingBox)
+
+	// Actual Code
+	data, err := fs.ReadJSONFileToLatLngWt("./ISRO.test_fits.json")
 	if err != nil {
 		pp.Errorf(err.Error())
 	}
 
 	config := resolution.PointResolutionManagerConfig{
+		// LatLngs: []resolution.LatLonWt{{
+		// 	LatLngs: s2.LatLngFromDegrees(26.0, 20.0),
+		// 	Wt:      geo.Element{Mg: 3},
+		// }},
 		LatLngs:     data,
 		Radius:      1.0,
 		SubPixelLen: 12.5 * 1e-5 * 180 / (math.Pi),
 	}
-
-	// geo.PrintS2Polygon(geoObj.GetBoundingPolygon(12.5 * 1e-5 * 180 / (math.Pi)))
-
 	resManager := resolution.NewPointResolutionManager(config)
-	// geo.PrintS2Polygon(resManager.PointPixels[0].BoundingBox)
 	resManager.EnhancePixels()
 	resManager.SaveCSV("./output.csv")
 }
