@@ -12,18 +12,18 @@ def generate_visible_peaks(hdul: HDUList) -> Dict[str, float]:
     try:
         data = hdul[1].data  # type: ignore
 
-        channels = data["CHANNEL"][70:510]
-        counts = data["COUNTS"][70:510]
+        channels = data["CHANNEL"][60:485]
+        smooth_counts = data["COUNTS"][60:485]
 
-        min_value = np.min(counts)
-        max_value = np.max(counts)
-        normalized_data = 100 * (counts - min_value) / (max_value - min_value)
-        counts = savgol_filter(normalized_data, window_length=20, polyorder=4)
+        min_value = np.min(smooth_counts)
+        max_value = np.max(smooth_counts)
+        normalized_counts = (100 * (smooth_counts - min_value)) / (max_value - min_value)
+        smooth_counts = savgol_filter(normalized_counts, window_length=20, polyorder=4)
 
         gain = 13.61 / 1000.0
         energy = channels * gain
 
-        peaks, peak_properties = find_peaks(counts, distance=20, height=4)
+        peaks, peak_properties = find_peaks(smooth_counts, distance=20, height=4)
         peak_energies: np.ndarray = energy[peaks]
 
         results: Dict[str, float] = {}
