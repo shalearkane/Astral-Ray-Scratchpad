@@ -8,7 +8,7 @@ from scripts.equidistant_points_generator import fibonacci_sphere
 from constants.output_dirs import OUTPUT_DIR_CLASS_FITS, OUTPUT_DIR_FIBONACCI_FITS
 from constants.mongo import COLLECTION_CLASS_FITS
 from helpers.download import download_file_from_file_server
-from helpers.combine_fits import combine_fits
+from helpers.combine_fits_mod import combine_fits
 from helpers.query_class import get_class_fits_at_lat_lon
 from os.path import isfile
 
@@ -82,6 +82,6 @@ if __name__ == "__main__":
 
     #         lat_lon_pairs.append((latitude, longitude))
 
-    do_in_parallel(lat_lon_pairs)
+    # do_in_parallel(lat_lon_pairs)
 
-    # generate_combined_fits_for_lat_lon(16.10, -39.09, True)
+    generate_combined_fits_for_lat_lon(16.10, -39.09, True)
