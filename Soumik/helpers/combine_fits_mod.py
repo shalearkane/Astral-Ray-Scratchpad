@@ -88,7 +88,7 @@ def calculate_aggregate(
     return photon_counts_avg, solar_zenith_angle, emission_angle, altitude_avg, exposure_avg, mid_utc_in_seconds_avg
 
 
-def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict, minimum_photon_count: int = 3000, method: str = "weighted_average") -> bool:
+def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict, method: str = "weighted_average") -> bool:
     try:
         if len(fits_files) == 0:
             return False
@@ -104,8 +104,6 @@ def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict, m
 
         for file_path in fits_files:
             with fits.open(file_path) as hdul:
-                if photon_count_from_hdul(hdul) < minimum_photon_count:
-                    continue
 
                 files_used += 1
                 photon_counts, solar_zenith, emission, altitude, exposure, mid_utc = process_hdul(hdul, method)

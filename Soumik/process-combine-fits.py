@@ -23,7 +23,7 @@ longitude_end: Final[float] = 100
 
 
 def generate_combined_fits_for_lat_lon(latitude: float, longitude: float, redo: bool, method: str = "weighted_average") -> bool:
-    combined_fits_path = f"{OUTPUT_DIR_TRUTH_FITS}/{latitude:.3f}_{longitude:.3f}_{method}.fits"
+    combined_fits_path = f"{OUTPUT_DIR_FIBONACCI_FITS}/{latitude:.3f}_{longitude:.3f}_{method}.fits"
     if not redo and isfile(combined_fits_path):
         print(f"already generated: {combined_fits_path}")
         return True
@@ -36,6 +36,8 @@ def generate_combined_fits_for_lat_lon(latitude: float, longitude: float, redo: 
         for key in doc["visible_peaks"].keys():
             visible_element_peaks.add(key)
 
+    print(visible_element_peaks)
+
     file_paths: List[str] = list()
 
     for doc in docs:
@@ -43,7 +45,7 @@ def generate_combined_fits_for_lat_lon(latitude: float, longitude: float, redo: 
             file_paths.append(f"{OUTPUT_DIR_CLASS_FITS}/{doc["path"].split("/")[-1]}")
 
     metadata = {"latitude": latitude, "longitude": longitude, "visible_peaks": visible_element_peaks}
-    if combine_fits(file_paths, combined_fits_path, metadata, 3000, method):
+    if combine_fits(file_paths, combined_fits_path, metadata, method):
         print(f"generated: {combined_fits_path}")
         return True
     else:
@@ -92,9 +94,10 @@ if __name__ == "__main__":
 
     #         lat_lon_pairs.append((latitude, longitude))
 
-    lat_lon_pairs = read_lat_lon_file("data-generated/script_inputs/points.csv")
+    lat_lon_pairs = read_lat_lon_file("data-generated/script_inputs/fibonacci-points.csv")
 
-    do_in_parallel(lat_lon_pairs)
+    # do_in_parallel(lat_lon_pairs)
 
-    # for method in ["average", "rms", "weighted_average"]:
-    #     generate_combined_fits_for_lat_lon(16.10, -39.09, True, method)
+
+    for method in ["average", "rms", "weighted_average"]:
+        generate_combined_fits_for_lat_lon(16.10, -39.09, True, method)
