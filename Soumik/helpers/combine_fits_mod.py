@@ -88,7 +88,7 @@ def calculate_aggregate(
     return photon_counts_avg, solar_zenith_angle, emission_angle, altitude_avg, exposure_avg, mid_utc_in_seconds_avg
 
 
-def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict, minimum_photon_count: int = 3000, method: str = "rms") -> bool:
+def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict, minimum_photon_count: int = 3000, method: str = "weighted_average") -> bool:
     try:
         if len(fits_files) == 0:
             return False
@@ -152,8 +152,11 @@ def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict, m
 
         # custom header
         hdu.header["FILE_CNT"] = files_used
-        hdu.header["TARG_LAT"] = float(metadata.get("lat", 0.0))
-        hdu.header["TARG_LON"] = float(metadata.get("lon", 0.0))
+        hdu.header["TARG_LAT"] = float(metadata.get("latitude", 0.0))
+        hdu.header["TARG_LON"] = float(metadata.get("longitude", 0.0))
+
+        elements_list: str = "_".join(metadata.get("visible_peaks", []))
+        hdu.header["VIS_ELEM"] = elements_list
 
         hdu = set_default_values_to_class_fits(hdu)
         hdu.writeto(output_fits_path, overwrite=True)

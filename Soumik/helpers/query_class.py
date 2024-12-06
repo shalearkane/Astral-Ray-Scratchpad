@@ -7,14 +7,12 @@ from constants.mongo import (
     COLLECTION_CLASS_FITS_FLARE_CLASSIFIED,
     MONGO_URI,
     DATABASE_ISRO,
-    COLLECTION_CLASS_FITS_ACCEPTED,
 )
 
 from pymongo import MongoClient
 
 
 def get_class_fits_at_lat_lon(lat: float, lon: float) -> list[Dict[str, Any]]:
-    # class_fits_accepted = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_CLASS_FITS_ACCEPTED]
     class_fits_accepted = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_CLASS_FITS]
 
     filter = {
@@ -27,7 +25,7 @@ def get_class_fits_at_lat_lon(lat: float, lon: float) -> list[Dict[str, Any]]:
             {V2_LON: {"$gte": lon}},
             {V3_LAT: {"$gte": lat}},
             {V3_LON: {"$gte": lon}},
-            # {"is_in_geotail": False},
+            {"$and": [{"visible_peaks.Al": {"$exists": True}}, {"visible_peaks.Si": {"$exists": True}}]},
         ]
     }
 
