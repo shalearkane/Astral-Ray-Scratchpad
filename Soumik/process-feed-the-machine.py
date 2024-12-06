@@ -7,7 +7,7 @@ import concurrent.futures
 from helpers.combine_fits_with_metadata import combine_fits_with_meta, hdul_meta_to_dict
 from model.model_handcrafted import process_abundance_h
 from constants.misc import STATISTICS_COMM_PIPE
-from constants.output_dirs import OUTPUT_DIR_CLASS_FITS, OUTPUT_DIR_FIBONACCI_FITS
+from constants.output_dirs import OUTPUT_DIR_CLASS_FITS
 from constants.mongo import COLLECTION_CLASS_FITS, COLLECTION_DATA_COLLECTION, DATABASE_ISRO, MONGO_URI
 from helpers.download import download_file_from_file_server
 from helpers.query_class import get_class_fits_at_lat_lon
@@ -29,66 +29,72 @@ def save_to_mongo(filepath: str, doc: Dict[str, Any]):
 
 
 def generate_combined_fits_for_lat_lon(latitude: float, longitude: float, redo: bool) -> bool:
-    combined_fits_filename = f"{latitude:.2f}_{longitude:.2f}.fits"
-    combined_fits_path = f"{OUTPUT_DIR_FIBONACCI_FITS}/{combined_fits_filename}"
-    if not redo and isfile(combined_fits_path):
-        print(f"already generated: {combined_fits_path}")
-        return True
+    try:
+        combined_fits_filename = f"{latitude:.2f}_{longitude:.2f}.fits"
+        combined_fits_path = f"{OUTPUT_DIR_CLASS_FITS}/{combined_fits_filename}"
+        if not redo and isfile(combined_fits_path):
+            print(f"already generated: {combined_fits_path}")
+            return True
 
-    docs = get_class_fits_at_lat_lon(latitude, longitude)
+        docs = get_class_fits_at_lat_lon(latitude, longitude)
 
-    visible_element_peaks: Set[str] = set()
+        visible_element_peaks: Set[str] = set()
 
-    for doc in docs:
-        for key in doc["visible_peaks"].keys():
-            visible_element_peaks.add(key)
+        for doc in docs:
+            for key in doc["visible_peaks"].keys():
+                visible_element_peaks.add(key)
 
-    file_paths: List[str] = list()
-    doc_list: List[Dict[str, Any]] = list()
+        file_paths: List[str] = list()
+        doc_list: List[Dict[str, Any]] = list()
 
-    for doc in docs:
-        if download_file_from_file_server(doc, COLLECTION_CLASS_FITS, OUTPUT_DIR_CLASS_FITS):
-            file_paths.append(f"{OUTPUT_DIR_CLASS_FITS}/{doc["path"].split("/")[-1]}")
-            doc_list.append(doc)
+        for doc in docs:
+            if download_file_from_file_server(doc, COLLECTION_CLASS_FITS, OUTPUT_DIR_CLASS_FITS):
+                file_paths.append(f"{OUTPUT_DIR_CLASS_FITS}/{doc["path"].split("/")[-1]}")
+                doc_list.append(doc)
 
-    metadata = {"latitude": latitude, "longitude": longitude, "visible_peaks": visible_element_peaks}
-    success, computed_metadata = combine_fits_with_meta(file_paths, doc_list, combined_fits_path, metadata)
-    if success:
-        print(f"generated: {combined_fits_path}")
-        abundance_dict = process_abundance_h(combined_fits_path)
+        metadata = {"latitude": latitude, "longitude": longitude, "visible_peaks": visible_element_peaks}
+        success, computed_metadata = combine_fits_with_meta(file_paths, doc_list, combined_fits_path, metadata)
+        if success:
+            print(f"generated: {combined_fits_path}")
+            abundance_dict = process_abundance_h(combined_fits_path)
 
-        mongo_doc: Dict[str, Any] = {
-            "wt": abundance_dict["wt"],
-            "chi_2": abundance_dict["chi_2"],
-            "dof": abundance_dict["dof"],
-            "photon_count": int(computed_metadata.photon_counts.sum()),
-            "computed_metadata": hdul_meta_to_dict(computed_metadata),
-            "latitude": latitude,
-            "longitude": longitude,
-        }
+            mongo_doc: Dict[str, Any] = {
+                "wt": abundance_dict["wt"],
+                "chi_2": abundance_dict["chi_2"],
+                "dof": abundance_dict["dof"],
+                "photon_count": int(computed_metadata.photon_counts.sum()),
+                "computed_metadata": hdul_meta_to_dict(computed_metadata),
+                "latitude": latitude,
+                "longitude": longitude,
+            }
 
-        save_to_mongo(combined_fits_filename, mongo_doc)
+            save_to_mongo(combined_fits_filename, mongo_doc)
 
-        # with open(STATISTICS_COMM_PIPE, "w") as pipe:
-        #     pipe.write(
-        #         (
-        #             f"{latitude:.3f},{longitude:.3f},"
-        #             f"{wt_mg:.2f},{wt_al:.2f},{wt_si:.2f},{wt_ca:.2f},{wt_fe:.2f},"
-        #             f"{int(computed_metadata.photon_counts.sum())},{computed_metadata.solar_zenith_angle:.2f},{computed_metadata.altitude:.2f},{computed_metadata.exposure:.2f},{computed_metadata.mid_utc},"
-        #             f"{computed_metadata.peak_na_c},{computed_metadata.peak_na_h:.2f},"
-        #             f"{computed_metadata.peak_mg_c},{computed_metadata.peak_mg_h:.2f},"
-        #             f"{computed_metadata.peak_al_c},{computed_metadata.peak_al_h:.2f},"
-        #             f"{computed_metadata.peak_si_c},{computed_metadata.peak_si_h:.2f},"
-        #             f"{computed_metadata.peak_ca_c},{computed_metadata.peak_ca_h:.2f},"
-        #             f"{computed_metadata.peak_ti_c},{computed_metadata.peak_ti_h:.2f},"
-        #             f"{computed_metadata.peak_fe_c},{computed_metadata.peak_fe_h:.2f}"
-        #             f"\n"
-        #         )
-        #     )
+            # with open(STATISTICS_COMM_PIPE, "w") as pipe:
+            #     pipe.write(
+            #         (
+            #             f"{latitude:.3f},{longitude:.3f},"
+            #             f"{wt_mg:.2f},{wt_al:.2f},{wt_si:.2f},{wt_ca:.2f},{wt_fe:.2f},"
+            #             f"{int(computed_metadata.photon_counts.sum())},{computed_metadata.solar_zenith_angle:.2f},{computed_metadata.altitude:.2f},{computed_metadata.exposure:.2f},{computed_metadata.mid_utc},"
+            #             f"{computed_metadata.peak_na_c},{computed_metadata.peak_na_h:.2f},"
+            #             f"{computed_metadata.peak_mg_c},{computed_metadata.peak_mg_h:.2f},"
+            #             f"{computed_metadata.peak_al_c},{computed_metadata.peak_al_h:.2f},"
+            #             f"{computed_metadata.peak_si_c},{computed_metadata.peak_si_h:.2f},"
+            #             f"{computed_metadata.peak_ca_c},{computed_metadata.peak_ca_h:.2f},"
+            #             f"{computed_metadata.peak_ti_c},{computed_metadata.peak_ti_h:.2f},"
+            #             f"{computed_metadata.peak_fe_c},{computed_metadata.peak_fe_h:.2f}"
+            #             f"\n"
+            #         )
+            #     )
 
-        return True
-    else:
-        print(f"could not generate: {combined_fits_path}")
+            return True
+        else:
+            print(f"could not generate: {combined_fits_path}")
+            return False
+    except Exception:
+        import traceback
+
+        print(traceback.format_exc())
         return False
 
 
