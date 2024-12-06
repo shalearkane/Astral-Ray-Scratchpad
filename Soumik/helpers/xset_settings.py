@@ -1,3 +1,4 @@
+from typing import Tuple
 from xspec import Xset, AllData, AllModels, AllChains, Fit, Plot
 from pandas import DataFrame
 
@@ -18,7 +19,7 @@ def reset_xspec():
     AllChains.clear()
 
 
-def fit_and_plot(plot_device: str = "/null") -> DataFrame:
+def fit_and_plot(plot_device: str = "/null") -> Tuple[DataFrame, float, float]:
     Xset.allowPrompting = False
     Fit.nIterations = 1000
     Fit.perform()
@@ -28,9 +29,9 @@ def fit_and_plot(plot_device: str = "/null") -> DataFrame:
     Plot.xAxis = "KeV"
 
     Plot("data", "resid")
-    chi_2=Fit.statistic
-    dof=Fit.dof
+    chi_2 = Fit.statistic
+    dof = Fit.dof
     xVals = Plot.x()
     yVals = Plot.y()
 
-    return DataFrame({"energy": xVals, "counts": yVals,"Chi_2":chi_2,"dof":dof})
+    return DataFrame({"energy": xVals, "counts": yVals}), chi_2, dof

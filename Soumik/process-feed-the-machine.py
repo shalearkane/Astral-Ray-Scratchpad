@@ -56,27 +56,15 @@ def generate_combined_fits_for_lat_lon(latitude: float, longitude: float, redo: 
     if success:
         print(f"generated: {combined_fits_path}")
         abundance_dict = process_abundance_h(combined_fits_path)
-        print(abundance_dict)
-        wt_na = abundance_dict["wt"].get("Wt_Na", -1)
-        wt_mg = abundance_dict["wt"].get("Wt_Mg", -1)
-        wt_al = abundance_dict["wt"].get("Wt_Al", -1)
-        wt_si = abundance_dict["wt"].get("Wt_Si", -1)
-        wt_ca = abundance_dict["wt"].get("Wt_Ca", -1)
-        wt_ti = abundance_dict["wt"].get("Wt_Ti", -1)
-        wt_fe = abundance_dict["wt"].get("Wt_Fe", -1)
 
         mongo_doc: Dict[str, Any] = {
-            "wt": {
-                "na": wt_na,
-                "mg": wt_mg,
-                "al": wt_al,
-                "si": wt_si,
-                "ca": wt_ca,
-                "fe": wt_fe,
-                "ti": wt_ti,
-            },
+            "wt": abundance_dict["wt"],
+            "chi_2": abundance_dict["chi_2"],
+            "dof": abundance_dict["dof"],
             "photon_count": int(computed_metadata.photon_counts.sum()),
             "computed_metadata": hdul_meta_to_dict(computed_metadata),
+            "latitude": latitude,
+            "longitude": longitude,
         }
 
         save_to_mongo(combined_fits_filename, mongo_doc)

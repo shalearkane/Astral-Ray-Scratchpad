@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict, Tuple
 from helpers.xset_settings import reset_xspec, fit_and_plot, set_xset_settings
 from xspec import Spectrum, Model
 
@@ -8,7 +8,7 @@ respFile = f"model/data/{bin_factor}/class_rmf_v1.rmf"
 background = "model/data/reference/background_allevents.fits"
 
 
-def get_df_mg(class_file: str) -> float:
+def get_df_mg(class_file: str) -> Tuple[float, float, float]:
     reset_xspec()
 
     s2 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
@@ -21,7 +21,7 @@ def get_df_mg(class_file: str) -> float:
     m2.gaussian.norm = 1  # type: ignore
     m2.gaussian.LineE.frozen = True  # type: ignore
 
-    df = fit_and_plot()
+    df, chi_2, dof = fit_and_plot()
 
     target_value_mg = 1.25
 
@@ -31,10 +31,10 @@ def get_df_mg(class_file: str) -> float:
     y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
     interpolated_value_mg = y1 + (target_value_mg - x1) * (y2 - y1) / (x2 - x1)
 
-    return interpolated_value_mg
+    return interpolated_value_mg, chi_2, dof
 
 
-def get_df_al(class_file: str) -> float:
+def get_df_al(class_file: str) -> Tuple[float, float, float]:
     reset_xspec()
 
     s2 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
@@ -48,7 +48,7 @@ def get_df_al(class_file: str) -> float:
     m2.gaussian.norm = 1  # type: ignore
     m2.gaussian.LineE.frozen = True  # type: ignore
 
-    df = fit_and_plot()
+    df, chi_2, dof = fit_and_plot()
 
     target_value_al = 1.49
 
@@ -58,10 +58,10 @@ def get_df_al(class_file: str) -> float:
     y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
     interpolated_value_al = y1 + (target_value_al - x1) * (y2 - y1) / (x2 - x1)
 
-    return interpolated_value_al
+    return interpolated_value_al, chi_2, dof
 
 
-def get_df_si(class_file: str) -> float:
+def get_df_si(class_file: str) -> Tuple[float, float, float]:
     reset_xspec()
 
     s2 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
@@ -75,7 +75,7 @@ def get_df_si(class_file: str) -> float:
     m2.gaussian.norm = 1  # type: ignore
     m2.gaussian.LineE.frozen = True  # type: ignore
 
-    df = fit_and_plot()
+    df, chi_2, dof = fit_and_plot()
 
     target_value_si = 1.74
 
@@ -85,10 +85,10 @@ def get_df_si(class_file: str) -> float:
     y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
     interpolated_value_si = y1 + (target_value_si - x1) * (y2 - y1) / (x2 - x1)
 
-    return interpolated_value_si
+    return interpolated_value_si, chi_2, dof
 
 
-def get_df_ca(class_file: str) -> float:
+def get_df_ca(class_file: str) -> Tuple[float, float, float]:
     reset_xspec()
 
     s2 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
@@ -102,7 +102,7 @@ def get_df_ca(class_file: str) -> float:
     m2.gaussian.norm = 1  # type: ignore
     m2.gaussian.LineE.frozen = True  # type: ignore
 
-    df = fit_and_plot()
+    df, chi_2, dof = fit_and_plot()
 
     target_value_ca = 3.69
 
@@ -112,10 +112,10 @@ def get_df_ca(class_file: str) -> float:
     y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
     interpolated_value_ca = y1 + (target_value_ca - x1) * (y2 - y1) / (x2 - x1)
 
-    return interpolated_value_ca
+    return interpolated_value_ca, chi_2, dof
 
 
-def get_df_fe(class_file: str) -> float:
+def get_df_fe(class_file: str) -> Tuple[float, float, float]:
     reset_xspec()
 
     s3 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
@@ -129,7 +129,7 @@ def get_df_fe(class_file: str) -> float:
     m3.gaussian.norm = 1  # type: ignore
     m3.gaussian.LineE.frozen = True  # type: ignore
 
-    df = fit_and_plot()
+    df, chi_2, dof = fit_and_plot()
 
     target_value_fe = 6.40
 
@@ -139,10 +139,10 @@ def get_df_fe(class_file: str) -> float:
     y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
     interpolated_value_fe = y1 + (target_value_fe - x1) * (y2 - y1) / (x2 - x1)
 
-    return interpolated_value_fe
+    return interpolated_value_fe, chi_2, dof
 
 
-def get_df_ti(class_file: str) -> float:
+def get_df_ti(class_file: str) -> Tuple[float, float, float]:
     reset_xspec()
 
     s3 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
@@ -156,7 +156,7 @@ def get_df_ti(class_file: str) -> float:
     m3.gaussian.norm = 1  # type: ignore
     m3.gaussian.LineE.frozen = True  # type: ignore
 
-    df = fit_and_plot()
+    df, chi_2, dof = fit_and_plot()
 
     target_value_ti = 4.51
 
@@ -166,20 +166,25 @@ def get_df_ti(class_file: str) -> float:
     y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
     interpolated_value_ti = y1 + (target_value_ti - x1) * (y2 - y1) / (x2 - x1)
 
-    return interpolated_value_ti
+    return interpolated_value_ti, chi_2, dof
 
 
-def process_abundance_h(class_file: str) -> Dict[str, float]:
+def process_abundance_h(class_file: str) -> Dict[str, Dict[str, float]]:
     set_xset_settings()
 
-    mg = get_df_mg(class_file)
-    al = get_df_al(class_file)
-    si = get_df_si(class_file)
-    ca = get_df_ca(class_file)
-    ti = get_df_ti(class_file)
-    fe = get_df_fe(class_file)
+    mg, mg_chi_2, mg_dof = get_df_mg(class_file)
+    al, al_chi_2, al_dof = get_df_al(class_file)
+    si, si_chi_2, si_dof = get_df_si(class_file)
+    ca, ca_chi_2, ca_dof = get_df_ca(class_file)
+    ti, ti_chi_2, ti_dof = get_df_ti(class_file)
+    fe, fe_chi_2, fe_dof = get_df_fe(class_file)
 
-    dict = {"filename": class_file, "Wt_Mg": mg, "Wt_Al": al, "Wt_Si": si, "Wt_Ca": ca, "Wt_Fe": fe, "Wt_Ti": ti}
+    dict = {
+        "filename": {"class_file": class_file},
+        "wt": {"mg": mg, "al": al, "si": si, "ca": ca, "ti": ti, "fe": fe},
+        "chi_2": {"mg": mg_chi_2, "al": al_chi_2, "si": si_chi_2, "ca": ca_chi_2, "ti": ti_chi_2, "fe": fe_chi_2},
+        "dof": {"mg": mg_dof, "al": al_dof, "si": si_dof, "ca": ca_dof, "ti": ti_dof, "fe": fe_dof},
+    }
 
     return dict
 

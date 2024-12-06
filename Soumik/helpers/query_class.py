@@ -26,7 +26,6 @@ def get_class_fits_at_lat_lon(lat: float, lon: float) -> list[Dict[str, Any]]:
             {V3_LAT: {"$gte": lat}},
             {V3_LON: {"$gte": lon}},
             {"geotail": False},
-            {"visible_peaks.Al": {"$exists": True}},
             {"visible_peaks.Si": {"$exists": True}},
         ]
     }
