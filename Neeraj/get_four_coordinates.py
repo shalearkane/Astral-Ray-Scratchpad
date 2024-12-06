@@ -24,4 +24,4 @@ def main():
 
 if __name__ == "__main__":
     v = main()
-    # print(v)
+    print(len(v))

@@ -62,6 +62,119 @@ def get_df_al_si_mg(class_file: str) -> Tuple[float, float, float]:
 
     return interpolated_value_mg, interpolated_value_al, interpolated_value_si
 
+def get_df_mg(class_file: str) -> float:
+    reset_xspec()
+
+    s2 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
+    s2.ignore("0.0-1.1")
+    s2.ignore("1.37-**")
+    m2 = Model("ga")
+
+    # Setting values for Gaussian 1
+    m2.gaussian.LineE = 1.25  # type: ignore
+    m2.gaussian.Sigma = 0.05  # type: ignore
+    m2.gaussian.norm = 1  # type: ignore
+    m2.gaussian.LineE.frozen = True  # type: ignore
+
+    df = fit_and_plot()
+
+    target_value_mg = 1.25
+
+    row_before = df[df["energy"] <= target_value_mg].iloc[-1]  # The row just before the target value
+    row_after = df[df["energy"] >= target_value_mg].iloc[0]
+    x1, x2 = row_before["energy"], row_after["energy"]
+    y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
+    interpolated_value_mg = y1 + (target_value_mg - x1) * (y2 - y1) / (x2 - x1)
+
+    return interpolated_value_mg
+
+
+
+
+def get_df_al(class_file: str) -> float:
+    reset_xspec()
+
+    s2 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
+    s2.ignore("0.0-1.37")
+    s2.ignore("1.62-**")
+    m2 = Model("ga")
+
+    # Setting values for Gaussian 1
+    m2.gaussian.LineE = 1.49  # type: ignore
+    m2.gaussian.Sigma = 0.05  # type: ignore
+    m2.gaussian.norm = 1  # type: ignore
+    m2.gaussian.LineE.frozen = True  # type: ignore
+
+    df = fit_and_plot()
+
+    target_value_al = 1.49
+
+    row_before = df[df["energy"] <= target_value_al].iloc[-1]  # The row just before the target value
+    row_after = df[df["energy"] >= target_value_al].iloc[0]
+    x1, x2 = row_before["energy"], row_after["energy"]
+    y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
+    interpolated_value_al = y1 + (target_value_al - x1) * (y2 - y1) / (x2 - x1)
+
+    return interpolated_value_al
+
+
+
+
+def get_df_si(class_file: str) -> float:
+    reset_xspec()
+
+    s2 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
+    s2.ignore("0.0-1.62")
+    s2.ignore("1.9-**")
+    m2 = Model("ga")
+
+    # Setting values for Gaussian 1
+    m2.gaussian.LineE = 1.74  # type: ignore
+    m2.gaussian.Sigma = 0.05  # type: ignore
+    m2.gaussian.norm = 1  # type: ignore
+    m2.gaussian.LineE.frozen = True  # type: ignore
+
+    df = fit_and_plot()
+
+    target_value_si = 1.74
+
+    row_before = df[df["energy"] <= target_value_si].iloc[-1]  # The row just before the target value
+    row_after = df[df["energy"] >= target_value_si].iloc[0]
+    x1, x2 = row_before["energy"], row_after["energy"]
+    y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
+    interpolated_value_si = y1 + (target_value_si - x1) * (y2 - y1) / (x2 - x1)
+
+    return interpolated_value_si
+
+
+def get_df_ti(class_file: str) -> float:
+    reset_xspec()
+
+    s2 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
+    s2.ignore("0.0-4.3")
+    s2.ignore("4.7-**")
+    m2 = Model("ga")
+
+    # Setting values for Gaussian 1
+    m2.gaussian.LineE = 4.51  # type: ignore
+    m2.gaussian.Sigma = 0.05  # type: ignore
+    m2.gaussian.norm = 1  # type: ignore
+    m2.gaussian.LineE.frozen = True  # type: ignore
+
+    df = fit_and_plot()
+
+    target_value_ti = 4.51
+
+    row_before = df[df["energy"] <= target_value_ti].iloc[-1]  # The row just before the target value
+    row_after = df[df["energy"] >= target_value_ti].iloc[0]
+    x1, x2 = row_before["energy"], row_after["energy"]
+    y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
+    interpolated_value_ti = y1 + (target_value_ti - x1) * (y2 - y1) / (x2 - x1)
+
+    return interpolated_value_ti
+
+
+
 
 def get_df_ca(class_file: str) -> float:
     reset_xspec()
@@ -120,6 +233,10 @@ def get_df_fe(class_file: str) -> float:
 def process_abundance_h(class_file: str):
     set_xset_settings()
     mg, al, si = get_df_al_si_mg(class_file)
+    mg = get_df_mg
+    al = get_df_al
+    si = get_df_si
+    ti = get_df_ti
     ca = get_df_ca(class_file)
     fe = get_df_fe(class_file)
 
