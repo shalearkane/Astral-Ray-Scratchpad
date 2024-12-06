@@ -53,7 +53,7 @@ class HDUL_META:
     peak_fe_c: int = 0
 
 
-def process_hdul(hdul, metadata: Dict[str, Any], method: str = "weighted_average") -> HDUL_META:
+def process_hdul(hdul, metadata: Dict[str, Any], weight: int, method: str = "weighted_average") -> HDUL_META:
     computed_metadata = HDUL_META()
 
     data = hdul["SPECTRUM"].data
@@ -116,8 +116,6 @@ def process_hdul(hdul, metadata: Dict[str, Any], method: str = "weighted_average
         computed_metadata.peak_fe_h **= 2
 
     elif method == "weighted_average":
-        weight = photon_count_from_hdul(hdul)
-
         computed_metadata.photon_counts *= weight
         computed_metadata.solar_zenith_angle_cosec *= weight
         computed_metadata.emission_angle_cosec *= weight
@@ -250,11 +248,12 @@ def combine_fits_with_meta(
             with fits.open(file_path) as hdul:
 
                 files_used += 1
-                computed_metadata = process_hdul(hdul, metadata, method)
+                weight = photon_count_from_hdul(hdul)
+                computed_metadata = process_hdul(hdul, metadata, weight, method)
                 comp_meta_avg = add_to_computed_metadata_average(comp_meta_avg, computed_metadata)
 
                 if method == "weighted_average":
-                    weights_sum += photon_count_from_hdul(hdul)
+                    weights_sum += weight
 
         if files_used == 0:
             return False, comp_meta_avg
