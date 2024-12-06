@@ -13,7 +13,7 @@ def download_file_from_file_server(doc: dict, collection: str, download_location
         if isfile(on_disk_path):
             return True
 
-        response = requests.get(f"{FILE_SERVER}/{collection}/{doc["_id"]}")
+        response = requests.get(f"{FILE_SERVER}/{collection}/{doc["_id"]}", timeout=360)
         response.raise_for_status()
 
         with open(on_disk_path, "wb") as f:
