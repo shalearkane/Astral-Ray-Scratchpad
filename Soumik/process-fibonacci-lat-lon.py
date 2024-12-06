@@ -96,16 +96,15 @@ def generate_combined_fits_for_lat_lon(worker_id: int, redo: bool) -> bool:
 
 def do_in_parallel():
     count = 0
-
-    with concurrent.futures.ProcessPoolExecutor() as executor:
+    try:
         while True:
-            try:
+            with concurrent.futures.ProcessPoolExecutor() as executor:
                 future_to_doc = {executor.submit(generate_combined_fits_for_lat_lon, worker_id, False): worker_id for worker_id in range(0, 16)}
                 concurrent.futures.wait(future_to_doc, timeout=None, return_when=concurrent.futures.ALL_COMPLETED)
                 count += 32
                 print(count)
-            except Exception as e:
-                print(e)
+    except Exception as e:
+        print(e)
 
 
 if __name__ == "__main__":
