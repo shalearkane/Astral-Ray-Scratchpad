@@ -53,6 +53,33 @@ class HDUL_META:
     peak_fe_c: int = 0
 
 
+def hdul_meta_to_dict(hdul_meta: HDUL_META) -> dict:
+    return {
+        "photon_counts": int(hdul_meta.photon_counts.sum()),
+        "solar_zenith_angle": hdul_meta.solar_zenith_angle,
+        "emission_angle": hdul_meta.emission_angle,
+        "solar_zenith_angle_cosec": hdul_meta.solar_zenith_angle_cosec,
+        "emission_angle_cosec": hdul_meta.emission_angle_cosec,
+        "altitude": hdul_meta.altitude,
+        "exposure": hdul_meta.exposure,
+        "mid_utc": hdul_meta.mid_utc,
+        "peak_na_h": hdul_meta.peak_na_h,
+        "peak_na_c": hdul_meta.peak_na_c,
+        "peak_mg_h": hdul_meta.peak_mg_h,
+        "peak_mg_c": hdul_meta.peak_mg_c,
+        "peak_al_h": hdul_meta.peak_al_h,
+        "peak_al_c": hdul_meta.peak_al_c,
+        "peak_si_h": hdul_meta.peak_si_h,
+        "peak_si_c": hdul_meta.peak_si_c,
+        "peak_ca_h": hdul_meta.peak_ca_h,
+        "peak_ca_c": hdul_meta.peak_ca_c,
+        "peak_ti_h": hdul_meta.peak_ti_h,
+        "peak_ti_c": hdul_meta.peak_ti_c,
+        "peak_fe_h": hdul_meta.peak_fe_h,
+        "peak_fe_c": hdul_meta.peak_fe_c,
+    }
+
+
 def process_hdul(hdul, metadata: Dict[str, Any], weight: int, method: str = "weighted_average") -> HDUL_META:
     computed_metadata = HDUL_META()
 
