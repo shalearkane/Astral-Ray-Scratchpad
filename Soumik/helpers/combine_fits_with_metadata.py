@@ -264,11 +264,11 @@ def combine_fits_with_meta(
     files_used = 0
     try:
         if len(fits_files) == 0:
-            print("No input files provided for {lat_lon_meta}")
+            print(f"No input files provided for {lat_lon_meta["latitude"]} {lat_lon_meta["longitude"]}")
             return False, comp_meta_avg
 
         if len(fits_files) != len(fits_docs):
-            print(f"File List and Doc List mismatch for {lat_lon_meta}")
+            print(f"File List and Doc List mismatch for {lat_lon_meta["latitude"]} {lat_lon_meta["longitude"]}")
             return False, comp_meta_avg
 
         for file_path, metadata in zip(fits_files, fits_docs):
