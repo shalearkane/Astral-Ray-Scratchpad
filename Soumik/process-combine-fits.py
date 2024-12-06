@@ -4,9 +4,7 @@ from csv import DictReader
 
 import concurrent.futures
 
-from criterion.geotail import is_not_during_geotail
-from scripts.equidistant_points_generator import fibonacci_sphere
-from constants.output_dirs import OUTPUT_DIR_CLASS_FITS, OUTPUT_DIR_FIBONACCI_FITS, OUTPUT_DIR_TRUTH_FITS
+from constants.output_dirs import OUTPUT_DIR_CLASS_FITS, OUTPUT_DIR_TRUTH_FITS
 from constants.mongo import COLLECTION_CLASS_FITS
 from helpers.download import download_file_from_file_server
 from helpers.combine_fits_mod import combine_fits
