@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Dict
 from helpers.xset_settings import reset_xspec, fit_and_plot, set_xset_settings
 from xspec import Spectrum, Model
 
@@ -8,29 +8,18 @@ respFile = f"model/data/{bin_factor}/class_rmf_v1.rmf"
 background = "model/data/reference/background_allevents.fits"
 
 
-def get_df_al_si_mg(class_file: str) -> Tuple[float, float, float]:
+def get_df_mg(class_file: str) -> float:
     reset_xspec()
 
-    s1 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
-    s1.ignore("0.0-0.9")
-    s1.ignore("2.0-**")
-    m1 = Model("ga+ga+ga")
+    s2 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
+    s2.ignore("0.0-1.10")
+    s2.ignore("1.37-**")
+    m2 = Model("ga")
 
-    # Setting values for Gaussian 1
-    m1.gaussian.LineE = 1.25  # type: ignore
-    m1.gaussian.Sigma = 0.05  # type: ignore
-    m1.gaussian.norm = 1  # type: ignore
-    m1.gaussian.LineE.frozen = True  # type: ignore
-    # Setting values for Gaussian 2
-    m1.gaussian_2.LineE = 1.48  # type: ignore
-    m1.gaussian_2.Sigma = 0.05  # type: ignore
-    m1.gaussian_2.norm = 1  # type: ignore
-    m1.gaussian_2.LineE.frozen = True  # type: ignore
-    # Setting values for Gaussian 3
-    m1.gaussian_3.LineE = 1.74  # type: ignore
-    m1.gaussian_3.Sigma = 0.05  # type: ignore
-    m1.gaussian_3.norm = 1  # type: ignore
-    m1.gaussian_3.LineE.frozen = True  # type: ignore
+    m2.gaussian.LineE = 1.25  # type: ignore
+    m2.gaussian.Sigma = 0.05  # type: ignore
+    m2.gaussian.norm = 1  # type: ignore
+    m2.gaussian.LineE.frozen = True  # type: ignore
 
     df = fit_and_plot()
 
@@ -42,25 +31,61 @@ def get_df_al_si_mg(class_file: str) -> Tuple[float, float, float]:
     y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
     interpolated_value_mg = y1 + (target_value_mg - x1) * (y2 - y1) / (x2 - x1)
 
+    return interpolated_value_mg
+
+
+def get_df_al(class_file: str) -> float:
+    reset_xspec()
+
+    s2 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
+    s2.ignore("0.0-1.30")
+    s2.ignore("1.62-**")
+    m2 = Model("ga")
+
+    # Setting values for Gaussian 1
+    m2.gaussian.LineE = 1.49  # type: ignore
+    m2.gaussian.Sigma = 0.05  # type: ignore
+    m2.gaussian.norm = 1  # type: ignore
+    m2.gaussian.LineE.frozen = True  # type: ignore
+
+    df = fit_and_plot()
+
     target_value_al = 1.49
 
     row_before = df[df["energy"] <= target_value_al].iloc[-1]  # The row just before the target value
     row_after = df[df["energy"] >= target_value_al].iloc[0]
     x1, x2 = row_before["energy"], row_after["energy"]
-    y1, y2 = row_before["counts"], row_after["counts"]
-    # print(result)
+    y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
     interpolated_value_al = y1 + (target_value_al - x1) * (y2 - y1) / (x2 - x1)
+
+    return interpolated_value_al
+
+
+def get_df_si(class_file: str) -> float:
+    reset_xspec()
+
+    s2 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
+    s2.ignore("0.0-1.62")
+    s2.ignore("1.9-**")
+    m2 = Model("ga")
+
+    # Setting values for Gaussian 1
+    m2.gaussian.LineE = 1.74  # type: ignore
+    m2.gaussian.Sigma = 0.05  # type: ignore
+    m2.gaussian.norm = 1  # type: ignore
+    m2.gaussian.LineE.frozen = True  # type: ignore
+
+    df = fit_and_plot()
 
     target_value_si = 1.74
 
     row_before = df[df["energy"] <= target_value_si].iloc[-1]  # The row just before the target value
     row_after = df[df["energy"] >= target_value_si].iloc[0]
     x1, x2 = row_before["energy"], row_after["energy"]
-    y1, y2 = row_before["counts"], row_after["counts"]
-
+    y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
     interpolated_value_si = y1 + (target_value_si - x1) * (y2 - y1) / (x2 - x1)
 
-    return interpolated_value_mg, interpolated_value_al, interpolated_value_si
+    return interpolated_value_si
 
 
 def get_df_ca(class_file: str) -> float:
@@ -117,18 +142,51 @@ def get_df_fe(class_file: str) -> float:
     return interpolated_value_fe
 
 
-def process_abundance_h(class_file: str):
+def get_df_ti(class_file: str) -> float:
+    reset_xspec()
+
+    s3 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
+    s3.ignore("0.0-4.2")
+    s3.ignore("5.0-**")
+    m3 = Model("ga")
+
+    # Setting values for Gaussian 1
+    m3.gaussian.LineE = 4.51  # type: ignore
+    m3.gaussian.Sigma = 0.05  # type: ignore
+    m3.gaussian.norm = 1  # type: ignore
+    m3.gaussian.LineE.frozen = True  # type: ignore
+
+    df = fit_and_plot()
+
+    target_value_ti = 4.51
+
+    row_before = df[df["energy"] <= target_value_ti].iloc[-1]  # The row just before the target value
+    row_after = df[df["energy"] >= target_value_ti].iloc[0]
+    x1, x2 = row_before["energy"], row_after["energy"]
+    y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
+    interpolated_value_ti = y1 + (target_value_ti - x1) * (y2 - y1) / (x2 - x1)
+
+    return interpolated_value_ti
+
+
+def process_abundance_h(class_file: str) -> Dict[str, float]:
     set_xset_settings()
-    mg, al, si = get_df_al_si_mg(class_file)
+
+    mg = get_df_mg(class_file)
+    al = get_df_al(class_file)
+    si = get_df_si(class_file)
     ca = get_df_ca(class_file)
+    ti = get_df_ti(class_file)
     fe = get_df_fe(class_file)
 
-    dict = {"filename": class_file, "wt": {"Wt_Mg": mg, "Wt_Al": al, "Wt_Si": si, "Wt_Ca": ca, "Wt_Fe": fe}}
+    dict = {"filename": class_file, "Wt_Mg": mg, "Wt_Al": al, "Wt_Si": si, "Wt_Ca": ca, "Wt_Fe": fe, "Wt_Ti": ti}
 
     return dict
 
 
 if __name__ == "__main__":
-    dict = process_abundance_h("/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data/class/ch2_cla_l1_20191022T112444865_20191022T112452865.fits")
+    dict = process_abundance_h(
+        "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data/class/ch2_cla_l1_20191022T112444865_20191022T112452865.fits"
+    )
 
     print(dict)
