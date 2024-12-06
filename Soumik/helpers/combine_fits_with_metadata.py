@@ -1,8 +1,9 @@
+from dataclasses import dataclass
 import numpy as np
 import os
 import math
 from astropy.io import fits
-from typing import List, Tuple, Final
+from typing import Any, Dict, List, Final
 from astropy.table import Table
 from datetime import datetime
 from helpers.utilities import set_default_values_to_class_fits
@@ -19,101 +20,244 @@ def rad_to_deg(radians: float) -> float:
     return (radians * 180.0) / math.pi
 
 
-def process_hdul(hdul, method: str) -> Tuple[np.ndarray, float, float, float, float, float]:
+@dataclass()
+class HDUL_META:
+    photon_counts: np.ndarray = np.zeros(CHANNELS, dtype=np.float64)
+
+    solar_zenith_angle: float = 0
+    emission_angle: float = 0
+    solar_zenith_angle_cosec: float = 0
+    emission_angle_cosec: float = 0
+
+    altitude: float = 0
+    exposure: float = 0
+    mid_utc: float = 0
+
+    peak_na_h: float = 0
+    peak_na_c: int = 0
+
+    peak_mg_h: float = 0
+    peak_mg_c: int = 0
+
+    peak_al_h: float = 0
+    peak_al_c: int = 0
+
+    peak_si_h: float = 0
+    peak_si_c: int = 0
+
+    peak_ca_h: float = 0
+    peak_ca_c: int = 0
+
+    peak_ti_h: float = 0
+    peak_ti_c: int = 0
+
+    peak_fe_h: float = 0
+    peak_fe_c: int = 0
+
+
+def process_hdul(hdul, metadata: Dict[str, Any], method: str) -> HDUL_META:
+    computed_metadata = HDUL_META()
+
     data = hdul["SPECTRUM"].data
-    photon_counts = data["COUNTS"]
+    computed_metadata.photon_counts = data["COUNTS"]
     table = Table.read(hdul["SPECTRUM"])
+
     solar_zenith_angle = float(table.meta["SOLARANG"])
     emission_angle = float(table.meta["EMISNANG"])
-    altitude = float(table.meta["SAT_ALT"])
-    exposure = float(table.meta["EXPOSURE"])
-    mid_utc = datetime.strptime(table.meta["MID_UTC"], "%Y-%m-%dT%H:%M:%S.%f").timestamp()
+    computed_metadata.solar_zenith_angle_cosec = 1.0 / math.sin(deg_to_rad(solar_zenith_angle))
+    computed_metadata.emission_angle_cosec = 1.0 / math.sin(deg_to_rad(emission_angle))
 
-    solar_zenith = 1.0 / math.sin(deg_to_rad(solar_zenith_angle))
-    emission = 1.0 / math.sin(deg_to_rad(emission_angle))
+    computed_metadata.altitude = float(table.meta["SAT_ALT"])
+    computed_metadata.exposure = float(table.meta["EXPOSURE"])
+    computed_metadata.mid_utc = datetime.strptime(table.meta["MID_UTC"], "%Y-%m-%dT%H:%M:%S.%f").timestamp()
+
+    if metadata.get("Na", False):
+        computed_metadata.peak_na_c = 1
+        computed_metadata.peak_na_h = metadata.get("Na", 0)
+
+    if metadata.get("Mg", False):
+        computed_metadata.peak_mg_c = 1
+        computed_metadata.peak_mg_h = metadata.get("Mg", 0)
+
+    if metadata.get("Al", False):
+        computed_metadata.peak_al_c = 1
+        computed_metadata.peak_al_h = metadata.get("Al", 0)
+
+    if metadata.get("Si", False):
+        computed_metadata.peak_si_c = 1
+        computed_metadata.peak_si_h = metadata.get("Si", 0)
+
+    if metadata.get("Ca", False):
+        computed_metadata.peak_ca_c = 1
+        computed_metadata.peak_ca_h = metadata.get("Ca", 0)
+
+    if metadata.get("Ti", False):
+        computed_metadata.peak_ti_c = 1
+        computed_metadata.peak_ti_h = metadata.get("Ti", 0)
+
+    if metadata.get("Fe", False):
+        computed_metadata.peak_fe_c = 1
+        computed_metadata.peak_fe_h = metadata.get("Fe", 0)
 
     if method == "average":
-        return photon_counts, solar_zenith, emission, altitude, exposure, mid_utc
+        return computed_metadata
 
     elif method == "rms":
-        return photon_counts**2, solar_zenith**2, emission**2, altitude**2, exposure**2, mid_utc
+        computed_metadata.photon_counts **= 2
+        computed_metadata.solar_zenith_angle_cosec **= 2
+        computed_metadata.emission_angle_cosec **= 2
+        computed_metadata.altitude **= 2
+        computed_metadata.exposure **= 2
+
+        computed_metadata.peak_na_h **= 2
+        computed_metadata.peak_mg_h **= 2
+        computed_metadata.peak_al_h **= 2
+        computed_metadata.peak_si_h **= 2
+        computed_metadata.peak_ca_h **= 2
+        computed_metadata.peak_ti_h **= 2
+        computed_metadata.peak_fe_h **= 2
+
+        return computed_metadata
 
     elif method == "weighted_average":
         weight = photon_count_from_hdul(hdul)
-        return photon_counts * weight, solar_zenith * weight, emission * weight, altitude * weight, exposure * weight, mid_utc
+
+        computed_metadata.photon_counts *= weight
+        computed_metadata.solar_zenith_angle_cosec *= weight
+        computed_metadata.emission_angle_cosec *= weight
+        computed_metadata.altitude *= weight
+        computed_metadata.exposure *= weight
+
+        computed_metadata.peak_na_h *= weight
+        computed_metadata.peak_mg_h *= weight
+        computed_metadata.peak_al_h *= weight
+        computed_metadata.peak_si_h *= weight
+        computed_metadata.peak_ca_h *= weight
+        computed_metadata.peak_ti_h *= weight
+        computed_metadata.peak_fe_h *= weight
+
+        return computed_metadata
 
     else:
         raise ValueError(f"Unknown method: {method}")
 
 
+def add_to_computed_metadata_average(comp_meta_avg: HDUL_META, computed_metadata: HDUL_META) -> HDUL_META:
+    comp_meta_avg.photon_counts += computed_metadata.photon_counts
+    comp_meta_avg.solar_zenith_angle_cosec += computed_metadata.solar_zenith_angle_cosec
+    comp_meta_avg.emission_angle_cosec += computed_metadata.emission_angle_cosec
+    comp_meta_avg.altitude += computed_metadata.altitude
+    comp_meta_avg.exposure += computed_metadata.exposure
+    comp_meta_avg.mid_utc += computed_metadata.mid_utc
+
+    comp_meta_avg.peak_na_h = computed_metadata.peak_na_h
+    comp_meta_avg.peak_na_c = computed_metadata.peak_na_c
+
+    comp_meta_avg.peak_mg_h = computed_metadata.peak_mg_h
+    comp_meta_avg.peak_mg_c = computed_metadata.peak_mg_c
+
+    comp_meta_avg.peak_al_h = computed_metadata.peak_al_h
+    comp_meta_avg.peak_al_c = computed_metadata.peak_al_c
+
+    comp_meta_avg.peak_si_h = computed_metadata.peak_si_h
+    comp_meta_avg.peak_si_c = computed_metadata.peak_si_c
+
+    comp_meta_avg.peak_ca_h = computed_metadata.peak_ca_h
+    comp_meta_avg.peak_ca_c = computed_metadata.peak_ca_c
+
+    comp_meta_avg.peak_ti_h = computed_metadata.peak_ti_h
+    comp_meta_avg.peak_ti_c = computed_metadata.peak_ti_c
+
+    comp_meta_avg.peak_fe_h = computed_metadata.peak_fe_h
+    comp_meta_avg.peak_fe_c = computed_metadata.peak_fe_c
+
+    return comp_meta_avg
+
+
 def calculate_aggregate(
     files_used: int,
-    photon_counts_sum: np.ndarray,
-    solar_zenith_angles_cosec_sum: float,
-    emission_angles_cosec_sum: float,
-    altitude_sum: float,
-    exposure_sum: float,
-    mid_utc_in_seconds_sum: float,
+    computed_metadata: HDUL_META,
     weights_sum: float,
     method: str,
-) -> Tuple[np.ndarray, float, float, float, float, float]:
+) -> HDUL_META:
+    comp_meta_avg = HDUL_META()
     if method == "average":
-        photon_counts_avg = photon_counts_sum / files_used
-        solar_zenith_angles_cosec_avg = solar_zenith_angles_cosec_sum / files_used
-        emission_angles_cosec_avg = emission_angles_cosec_sum / files_used
-        altitude_avg = altitude_sum / files_used
-        exposure_avg = exposure_sum / files_used
+        comp_meta_avg.photon_counts = np.sqrt(computed_metadata.photon_counts / files_used)
+        comp_meta_avg.solar_zenith_angle_cosec = computed_metadata.solar_zenith_angle_cosec / files_used
+        comp_meta_avg.emission_angle_cosec = computed_metadata.emission_angle_cosec / files_used
+        comp_meta_avg.altitude = computed_metadata.altitude / files_used
+        comp_meta_avg.exposure = computed_metadata.exposure / files_used
+
+        comp_meta_avg.peak_na_h = comp_meta_avg.peak_na_h / files_used
+        comp_meta_avg.peak_mg_h = comp_meta_avg.peak_mg_h / files_used
+        comp_meta_avg.peak_al_h = comp_meta_avg.peak_al_h / files_used
+        comp_meta_avg.peak_si_h = comp_meta_avg.peak_si_h / files_used
+        comp_meta_avg.peak_ca_h = comp_meta_avg.peak_ca_h / files_used
+        comp_meta_avg.peak_ti_h = comp_meta_avg.peak_ti_h / files_used
+        comp_meta_avg.peak_fe_h = comp_meta_avg.peak_fe_h / files_used
 
     elif method == "rms":
-        photon_counts_avg = np.sqrt(photon_counts_sum / files_used)
-        solar_zenith_angles_cosec_avg = math.sqrt(solar_zenith_angles_cosec_sum / files_used)
-        emission_angles_cosec_avg = math.sqrt(emission_angles_cosec_sum / files_used)
-        altitude_avg = math.sqrt(altitude_sum / files_used)
-        exposure_avg = math.sqrt(exposure_sum / files_used)
+        comp_meta_avg.photon_counts = np.sqrt(math.sqrt(computed_metadata.photon_counts / files_used))
+        comp_meta_avg.solar_zenith_angle_cosec = math.sqrt(computed_metadata.solar_zenith_angle_cosec / files_used)
+        comp_meta_avg.emission_angle_cosec = math.sqrt(computed_metadata.emission_angle_cosec / files_used)
+        comp_meta_avg.altitude = math.sqrt(computed_metadata.altitude / files_used)
+        comp_meta_avg.exposure = math.sqrt(computed_metadata.exposure / files_used)
+
+        comp_meta_avg.peak_na_h = math.sqrt(comp_meta_avg.peak_na_h / files_used)
+        comp_meta_avg.peak_mg_h = math.sqrt(comp_meta_avg.peak_mg_h / files_used)
+        comp_meta_avg.peak_al_h = math.sqrt(comp_meta_avg.peak_al_h / files_used)
+        comp_meta_avg.peak_si_h = math.sqrt(comp_meta_avg.peak_si_h / files_used)
+        comp_meta_avg.peak_ca_h = math.sqrt(comp_meta_avg.peak_ca_h / files_used)
+        comp_meta_avg.peak_ti_h = math.sqrt(comp_meta_avg.peak_ti_h / files_used)
+        comp_meta_avg.peak_fe_h = math.sqrt(comp_meta_avg.peak_fe_h / files_used)
 
     elif method == "weighted_average":
-        photon_counts_avg = photon_counts_sum / weights_sum
-        solar_zenith_angles_cosec_avg = solar_zenith_angles_cosec_sum / weights_sum
-        emission_angles_cosec_avg = emission_angles_cosec_sum / weights_sum
-        altitude_avg = altitude_sum / weights_sum
-        exposure_avg = exposure_sum / weights_sum
+        comp_meta_avg.photon_counts = computed_metadata.photon_counts / weights_sum
+        comp_meta_avg.solar_zenith_angle_cosec = computed_metadata.solar_zenith_angle_cosec / weights_sum
+        comp_meta_avg.emission_angle_cosec = computed_metadata.emission_angle_cosec / weights_sum
+        comp_meta_avg.altitude = computed_metadata.altitude / weights_sum
+        comp_meta_avg.exposure = computed_metadata.exposure / weights_sum
+
+        comp_meta_avg.peak_na_h = comp_meta_avg.peak_na_h / weights_sum
+        comp_meta_avg.peak_mg_h = comp_meta_avg.peak_mg_h / weights_sum
+        comp_meta_avg.peak_al_h = comp_meta_avg.peak_al_h / weights_sum
+        comp_meta_avg.peak_si_h = comp_meta_avg.peak_si_h / weights_sum
+        comp_meta_avg.peak_ca_h = comp_meta_avg.peak_ca_h / weights_sum
+        comp_meta_avg.peak_ti_h = comp_meta_avg.peak_ti_h / weights_sum
+        comp_meta_avg.peak_fe_h = comp_meta_avg.peak_fe_h / weights_sum
 
     else:
         raise ValueError(f"Unknown ideology: {method}")
 
-    solar_zenith_angle = rad_to_deg(math.asin(1.0 / solar_zenith_angles_cosec_avg))
-    emission_angle = rad_to_deg(math.asin(1.0 / emission_angles_cosec_avg))
-    mid_utc_in_seconds_avg = mid_utc_in_seconds_sum / files_used
+    comp_meta_avg.solar_zenith_angle = rad_to_deg(math.asin(1.0 / comp_meta_avg.solar_zenith_angle_cosec))
+    comp_meta_avg.emission_angle = rad_to_deg(math.asin(1.0 / comp_meta_avg.emission_angle_cosec))
+    comp_meta_avg.mid_utc = comp_meta_avg.mid_utc / files_used
 
-    return photon_counts_avg, solar_zenith_angle, emission_angle, altitude_avg, exposure_avg, mid_utc_in_seconds_avg
+    return comp_meta_avg
 
 
-def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict, method: str = "weighted_average") -> bool:
+def combine_fits_with_meta(
+    fits_files: List[str], fits_docs: List[Dict[str, Any]], output_fits_path: str, lat_lon_meta: dict, method: str = "weighted_average"
+) -> bool:
     try:
         if len(fits_files) == 0:
+            print("No input files provided for {lat_lon_meta}")
             return False
 
-        photon_counts_sum = np.zeros(CHANNELS, dtype=np.float64)
-        solar_zenith_angles_cosec_sum = 0
-        emission_angles_cosec_sum = 0
-        altitude_sum = 0
-        exposure_sum = 0
-        mid_utc_in_seconds_sum = 0
+        if len(fits_files) != len(fits_docs):
+            print(f"File List and Doc List mismatch for {lat_lon_meta}")
+            return False
+
+        comp_meta_avg = HDUL_META()
         weights_sum = 0
         files_used = 0
 
-        for file_path in fits_files:
+        for file_path, metadata in zip(fits_files, fits_docs):
             with fits.open(file_path) as hdul:
 
                 files_used += 1
-                photon_counts, solar_zenith, emission, altitude, exposure, mid_utc = process_hdul(hdul, method)
-
-                photon_counts_sum += photon_counts
-                solar_zenith_angles_cosec_sum += solar_zenith
-                emission_angles_cosec_sum += emission
-                altitude_sum += altitude
-                exposure_sum += exposure
-                mid_utc_in_seconds_sum += mid_utc
+                computed_metadata = process_hdul(hdul, metadata, method)
+                comp_meta_avg = add_to_computed_metadata_average(comp_meta_avg, computed_metadata)
 
                 if method == "weighted_average":
                     weights_sum += photon_count_from_hdul(hdul)
@@ -121,40 +265,53 @@ def combine_fits(fits_files: List[str], output_fits_path: str, metadata: dict, m
         if files_used == 0:
             return False
 
-        photon_counts, solar_zenith_angle, emission_angle, altitude_avg, exposure_avg, mid_utc_in_seconds_avg = calculate_aggregate(
+        comp_meta_avg = calculate_aggregate(
             files_used,
-            photon_counts_sum,
-            solar_zenith_angles_cosec_sum,
-            emission_angles_cosec_sum,
-            altitude_sum,
-            exposure_sum,
-            mid_utc_in_seconds_sum,
+            comp_meta_avg,
             weights_sum,
             method,
         )
 
-        mid_utc = datetime.fromtimestamp(mid_utc_in_seconds_avg).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+        mid_utc = datetime.fromtimestamp(comp_meta_avg.mid_utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 
         hdu = fits.BinTableHDU.from_columns(
             [
                 fits.Column(name="CHANNEL", format="1I", array=np.arange(CHANNELS)),
-                fits.Column(name="COUNTS", format="1D", array=photon_counts),
+                fits.Column(name="COUNTS", format="1D", array=comp_meta_avg.photon_counts),
             ]
         )
 
-        hdu.header["SOLARANG"] = solar_zenith_angle
-        hdu.header["EMISNANG"] = emission_angle
+        hdu.header["SOLARANG"] = comp_meta_avg.solar_zenith_angle
+        hdu.header["EMISNANG"] = comp_meta_avg.emission_angle
         hdu.header["MID_UTC"] = mid_utc
-        hdu.header["SAT_ALT"] = altitude_avg
-        hdu.header["EXPOSURE"] = exposure_avg
+        hdu.header["SAT_ALT"] = comp_meta_avg.altitude
+        hdu.header["EXPOSURE"] = comp_meta_avg.exposure
+
+        hdu.header["PEAKC_NA"] = comp_meta_avg.peak_na_c
+        hdu.header["PEAKH_NA"] = comp_meta_avg.peak_na_h
+
+        hdu.header["PEAKC_MG"] = comp_meta_avg.peak_mg_c
+        hdu.header["PEAKH_MG"] = comp_meta_avg.peak_mg_h
+
+        hdu.header["PEAKC_AL"] = comp_meta_avg.peak_al_c
+        hdu.header["PEAKH_AL"] = comp_meta_avg.peak_al_h
+
+        hdu.header["PEAKC_SI"] = comp_meta_avg.peak_si_c
+        hdu.header["PEAKH_SI"] = comp_meta_avg.peak_si_h
+
+        hdu.header["PEAKC_CA"] = comp_meta_avg.peak_ca_c
+        hdu.header["PEAKH_CA"] = comp_meta_avg.peak_ca_h
+
+        hdu.header["PEAKC_TI"] = comp_meta_avg.peak_ti_c
+        hdu.header["PEAKH_TI"] = comp_meta_avg.peak_ti_h
+
+        hdu.header["PEAKC_FE"] = comp_meta_avg.peak_fe_c
+        hdu.header["PEAKH_FE"] = comp_meta_avg.peak_fe_h
 
         # custom header
         hdu.header["FILE_CNT"] = files_used
-        hdu.header["TARG_LAT"] = float(metadata.get("latitude", 0.0))
-        hdu.header["TARG_LON"] = float(metadata.get("longitude", 0.0))
-
-        elements_list: str = "_".join(metadata.get("visible_peaks", []))
-        hdu.header["VIS_ELEM"] = elements_list
+        hdu.header["TARG_LAT"] = float(lat_lon_meta.get("latitude", 0.0))
+        hdu.header["TARG_LON"] = float(lat_lon_meta.get("longitude", 0.0))
 
         hdu = set_default_values_to_class_fits(hdu)
         hdu.writeto(output_fits_path, overwrite=True)
@@ -172,4 +329,4 @@ if __name__ == "__main__":
     folder_path = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data/class"
     output_fits_path = "combined.fits"
     fits_files = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith(".fits")]
-    combine_fits(fits_files, output_fits_path, {})
+    combine_fits_with_meta(fits_files, [], output_fits_path, {})
