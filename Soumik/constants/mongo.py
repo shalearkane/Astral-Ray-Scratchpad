@@ -10,5 +10,7 @@ COLLECTION_CLASS_FITS_FLARE_CLASSIFIED: Final[str] = "class_fits_flare_classifie
 COLLECTION_XSM_PRIMARY: Final[str] = "xsm_primary"
 COLLECTION_DATA_COLLECTION: Final[str] = "data_collection"
 
+COLLECTION_FIBONACCI_LAT_LON: Final[str] = "fibnacci_lat_lon"
+
 KEY_PASSED_CHECK: Final[str] = "passed_check"
 KEY_IS_IN_GEOTAIL: Final[str] = "is_in_geotail"

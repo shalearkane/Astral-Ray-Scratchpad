@@ -23,7 +23,7 @@ def get_job_from_mongo(fibonacci_collection: Collection) -> Tuple[str, str]:
     time_threshold = now - timedelta(minutes=4)
 
     one_job = fibonacci_collection.find_one_and_update(
-        {"STATUS": False, "request_count": {"$lt": 5}, "last_served": {"$lte": time_threshold}},
+        {"status": False, "request_count": {"$lt": 5}, "last_served": {"$lte": time_threshold}},
         {
             "$set": {"status": True},
             "$inc": {"request_count": 1},
@@ -35,11 +35,13 @@ def get_job_from_mongo(fibonacci_collection: Collection) -> Tuple[str, str]:
     return one_job["latitude"], one_job["longitude"]
 
 
-def generate_combined_fits_for_lat_lon(worker_id: int, redo: bool):
+def generate_combined_fits_for_lat_lon(worker_id: int, redo: bool) -> bool:
     print(f"restarting worker {worker_id}")
 
     fibonacci_collection = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_FIBONACCI_LAT_LON]
     latitude_str, longitude_str = get_job_from_mongo(fibonacci_collection)
+
+    print(f"{latitude_str} - {longitude_str}")
 
     try:
         combined_fits_filename = f"{latitude_str}_{longitude_str}.fits"
@@ -80,12 +82,16 @@ def generate_combined_fits_for_lat_lon(worker_id: int, redo: bool):
             }
 
             save_to_mongo(latitude_str, longitude_str, mongo_doc, fibonacci_collection)
+            return True
         else:
             print(f"could not generate: {combined_fits_path}")
+            return False
     except Exception:
         import traceback
 
         print(traceback.format_exc())
+
+        return True
 
 
 def do_in_parallel():
@@ -100,4 +106,5 @@ def do_in_parallel():
 
 
 if __name__ == "__main__":
-    do_in_parallel()
+    # do_in_parallel()
+    generate_combined_fits_for_lat_lon(1, True)
