@@ -110,7 +110,7 @@ def do_in_parallel(lat_lon_dicts: List[Tuple[float, float]]):
     with concurrent.futures.ProcessPoolExecutor() as executor:
         for lat_lon_dict_batch in batched(lat_lon_dicts, 32):
             future_to_doc = {
-                executor.submit(generate_combined_fits_for_lat_lon, lat, lon, True): (lat, lon) for (lat, lon) in lat_lon_dict_batch
+                executor.submit(generate_combined_fits_for_lat_lon, lat, lon, False): (lat, lon) for (lat, lon) in lat_lon_dict_batch
             }
             concurrent.futures.wait(future_to_doc, timeout=None, return_when=concurrent.futures.ALL_COMPLETED)
 
