@@ -11,7 +11,7 @@ matplotlib.use("Agg")
 
 def process_fits(file_path, output_image="filtered_plot.png"):
     tolerance = 0.05
-    targets = {"Mg": 1.25, "Al": 1.48, "Si": 1.74, "Ca": 3.69}
+    targets = {"Na": 1.04, "Mg": 1.25, "Al": 1.48, "Si": 1.74, "Ca": 3.69, "Ti": 4.51, "Fe": 6.40}
 
     output_image = os.path.join(f"output_pics/{file_path.split("/")[-1][:-5]}.png")
 
@@ -24,8 +24,8 @@ def process_fits(file_path, output_image="filtered_plot.png"):
 
             min_value = np.min(counts)
             max_value = np.max(counts)
-            normalized_data = 100 * (counts - min_value) / (max_value - min_value)
-            counts = savgol_filter(normalized_data, window_length=25, polyorder=7)
+            normalized_counts = 100 * (counts - min_value) / (max_value - min_value)
+            counts = savgol_filter(normalized_counts, window_length=20, polyorder=4)
 
             gain = 13.61 / 1000.0
             energy = channels * gain
@@ -39,6 +39,7 @@ def process_fits(file_path, output_image="filtered_plot.png"):
                     if abs(peak - target) <= tolerance:
                         results[element] = True
 
+            print(results)
             plt.plot(channels, counts, color="red", label="Peaks", zorder=5)
 
             for peak in peaks:
@@ -62,12 +63,8 @@ def process_fits(file_path, output_image="filtered_plot.png"):
 
 
 if __name__ == "__main__":
-    file_path = "-79.257_75.287.fits"
+    file_path = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/x-class.fits"
     result = process_fits(file_path)
     print(result)
 
-    directory = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/fibonacci-fits"
-
-    for filename in os.scandir(directory):
-        if filename.is_file():
-            process_fits(filename.path, "")
+    # directory = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/fibonacci-fits"

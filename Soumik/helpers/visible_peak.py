@@ -23,7 +23,7 @@ def generate_visible_peaks(hdul: HDUList) -> Dict[str, float]:
         gain = 13.61 / 1000.0
         energy = channels * gain
 
-        peaks, peak_properties = find_peaks(smooth_counts, distance=20, height=4)
+        peaks, peak_properties = find_peaks(smooth_counts, distance=10, height=4)
         peak_energies: np.ndarray = energy[peaks]
 
         results: Dict[str, float] = {}
@@ -44,5 +44,5 @@ def generate_visible_peaks(hdul: HDUList) -> Dict[str, float]:
 if __name__ == "__main__":
     directory = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/fibonacci-fits"
 
-    with fits.open("/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/fibonacci-fits/-79.531_156.653.fits") as hdul:
+    with fits.open("/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/x-class.fits") as hdul:
         generate_visible_peaks(hdul)

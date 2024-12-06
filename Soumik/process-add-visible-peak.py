@@ -18,23 +18,18 @@ from constants.mongo import (
 from io import BytesIO
 
 class_fits_all = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_CLASS_FITS]
-cursor = class_fits_all.find(
-    {"photon_count": {"$gte": 3000}, "visible_peaks": {"$exists": False}}, {"_id": 1, "path": 1, "parsedStartTime": 1, "parsedEndTime": 1}
-).batch_size(24000)
+cursor = class_fits_all.find({"photon_count": {"$gte": 3000}}, {"_id": 1}).batch_size(24000)
 count = 0
 
 
 def update_document(
     _id: ObjectId,
     visible_peaks: Dict[str, float],
-    is_not_in_geotail: bool,
-    flare_alphabet: str,
-    flare_scale: float,
     class_fits: collection.Collection,
 ):
     class_fits.find_one_and_update(
         {"_id": _id},
-        {"$set": {"visible_peaks": visible_peaks, "geotail": not is_not_in_geotail, "fl_alpha": flare_alphabet, "fl_scale": flare_scale}},
+        {"$set": {"visible_peaks": visible_peaks}},
     )
 
 
@@ -48,9 +43,9 @@ def batched_process_document_for_setting_photon_count(docs: Tuple[dict]):
             if success:
                 with fits.open(BytesIO(fits_bytes)) as hdul:
                     visible_peaks = generate_visible_peaks(hdul)
-                    is_not_in_geotail = check_if_not_in_geotail(doc["parsedStartTime"]) and check_if_not_in_geotail(doc["parsedEndTime"])
-                    flare_alphabet, flare_scale = get_flare_class(doc["parsedStartTime"], doc["parsedEndTime"])
-                    update_document(ObjectId(doc["_id"]), visible_peaks, is_not_in_geotail, flare_alphabet, flare_scale, class_fits)
+                    # is_not_in_geotail = check_if_not_in_geotail(doc["parsedStartTime"]) and check_if_not_in_geotail(doc["parsedEndTime"])
+                    # flare_alphabet, flare_scale = get_flare_class(doc["parsedStartTime"], doc["parsedEndTime"])
+                    update_document(ObjectId(doc["_id"]), visible_peaks, class_fits)
 
     except Exception:
         from traceback import format_exc
@@ -65,11 +60,11 @@ def batched_process_document_for_setting_photon_count(docs: Tuple[dict]):
 #     process_document_for_flare_class(doc, class_fits_flare_classified)
 
 with ProcessPoolExecutor() as executor:
-    for batches in batched(cursor, 100):
-        future_to_doc = {executor.submit(batched_process_document_for_setting_photon_count, batch): batch for batch in batched(batches, 10)}
+    for batches in batched(cursor, 24000):
+        future_to_doc = {executor.submit(batched_process_document_for_setting_photon_count, batch): batch for batch in batched(batches, 1500)}
         wait(future_to_doc, timeout=None, return_when=ALL_COMPLETED)
 
-        count += 100
+        count += 24000
         print(count)
 
 print(f"Processed {count} documents")

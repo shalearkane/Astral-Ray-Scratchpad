@@ -11,4 +11,4 @@
 - Generate 4,00,000 points uniformly on the surface of moon
 - Combine fits files using weighted_average for a specific point
     - for the fits file check if visual peaks are present
-- Apply corrective factor due to sun's intensity to boost mg's ratios
+- Apply corrective factor due to sun's intensity to lower mg's ratios

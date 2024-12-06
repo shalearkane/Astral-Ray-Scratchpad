@@ -30,7 +30,7 @@ def download_file_from_file_server(doc: dict, collection: str, download_location
 
 
 def stream_file_from_file_server(doc: dict, collection: str) -> Tuple[bool, bytes]:
-    if "_id" not in doc.keys() or "path" not in doc.keys():
+    if "_id" not in doc.keys():
         raise Exception("pass doc with _id and path. project if necessary")
 
     try:
