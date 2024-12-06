@@ -1,9 +1,8 @@
-from dataclasses import dataclass
 import numpy as np
 import os
 import math
 from astropy.io import fits
-from typing import Any, Dict, List, Final
+from typing import Any, Dict, List, Final, Tuple
 from astropy.table import Table
 from datetime import datetime
 from helpers.utilities import set_default_values_to_class_fits
@@ -20,7 +19,6 @@ def rad_to_deg(radians: float) -> float:
     return (radians * 180.0) / math.pi
 
 
-@dataclass()
 class HDUL_META:
     photon_counts: np.ndarray = np.zeros(CHANNELS, dtype=np.float64)
 
@@ -55,7 +53,7 @@ class HDUL_META:
     peak_fe_c: int = 0
 
 
-def process_hdul(hdul, metadata: Dict[str, Any], method: str) -> HDUL_META:
+def process_hdul(hdul, metadata: Dict[str, Any], method: str = "weighted_average") -> HDUL_META:
     computed_metadata = HDUL_META()
 
     data = hdul["SPECTRUM"].data
@@ -71,36 +69,36 @@ def process_hdul(hdul, metadata: Dict[str, Any], method: str) -> HDUL_META:
     computed_metadata.exposure = float(table.meta["EXPOSURE"])
     computed_metadata.mid_utc = datetime.strptime(table.meta["MID_UTC"], "%Y-%m-%dT%H:%M:%S.%f").timestamp()
 
-    if metadata.get("Na", False):
+    if metadata["visible_peaks"].get("Na", False):
         computed_metadata.peak_na_c = 1
-        computed_metadata.peak_na_h = metadata.get("Na", 0)
+        computed_metadata.peak_na_h = metadata["visible_peaks"].get("Na", 0)
 
-    if metadata.get("Mg", False):
+    if metadata["visible_peaks"].get("Mg", False):
         computed_metadata.peak_mg_c = 1
-        computed_metadata.peak_mg_h = metadata.get("Mg", 0)
+        computed_metadata.peak_mg_h = metadata["visible_peaks"].get("Mg", 0)
 
-    if metadata.get("Al", False):
+    if metadata["visible_peaks"].get("Al", False):
         computed_metadata.peak_al_c = 1
-        computed_metadata.peak_al_h = metadata.get("Al", 0)
+        computed_metadata.peak_al_h = metadata["visible_peaks"].get("Al", 0)
 
-    if metadata.get("Si", False):
+    if metadata["visible_peaks"].get("Si", False):
         computed_metadata.peak_si_c = 1
-        computed_metadata.peak_si_h = metadata.get("Si", 0)
+        computed_metadata.peak_si_h = metadata["visible_peaks"].get("Si", 0)
 
-    if metadata.get("Ca", False):
+    if metadata["visible_peaks"].get("Ca", False):
         computed_metadata.peak_ca_c = 1
-        computed_metadata.peak_ca_h = metadata.get("Ca", 0)
+        computed_metadata.peak_ca_h = metadata["visible_peaks"].get("Ca", 0)
 
-    if metadata.get("Ti", False):
+    if metadata["visible_peaks"].get("Ti", False):
         computed_metadata.peak_ti_c = 1
-        computed_metadata.peak_ti_h = metadata.get("Ti", 0)
+        computed_metadata.peak_ti_h = metadata["visible_peaks"].get("Ti", 0)
 
-    if metadata.get("Fe", False):
+    if metadata["visible_peaks"].get("Fe", False):
         computed_metadata.peak_fe_c = 1
-        computed_metadata.peak_fe_h = metadata.get("Fe", 0)
+        computed_metadata.peak_fe_h = metadata["visible_peaks"].get("Fe", 0)
 
     if method == "average":
-        return computed_metadata
+        pass
 
     elif method == "rms":
         computed_metadata.photon_counts **= 2
@@ -116,8 +114,6 @@ def process_hdul(hdul, metadata: Dict[str, Any], method: str) -> HDUL_META:
         computed_metadata.peak_ca_h **= 2
         computed_metadata.peak_ti_h **= 2
         computed_metadata.peak_fe_h **= 2
-
-        return computed_metadata
 
     elif method == "weighted_average":
         weight = photon_count_from_hdul(hdul)
@@ -136,10 +132,10 @@ def process_hdul(hdul, metadata: Dict[str, Any], method: str) -> HDUL_META:
         computed_metadata.peak_ti_h *= weight
         computed_metadata.peak_fe_h *= weight
 
-        return computed_metadata
-
     else:
         raise ValueError(f"Unknown method: {method}")
+
+    return computed_metadata
 
 
 def add_to_computed_metadata_average(comp_meta_avg: HDUL_META, computed_metadata: HDUL_META) -> HDUL_META:
@@ -150,43 +146,42 @@ def add_to_computed_metadata_average(comp_meta_avg: HDUL_META, computed_metadata
     comp_meta_avg.exposure += computed_metadata.exposure
     comp_meta_avg.mid_utc += computed_metadata.mid_utc
 
-    comp_meta_avg.peak_na_h = computed_metadata.peak_na_h
-    comp_meta_avg.peak_na_c = computed_metadata.peak_na_c
+    comp_meta_avg.peak_na_h += computed_metadata.peak_na_h
+    comp_meta_avg.peak_na_c += computed_metadata.peak_na_c
 
-    comp_meta_avg.peak_mg_h = computed_metadata.peak_mg_h
-    comp_meta_avg.peak_mg_c = computed_metadata.peak_mg_c
+    comp_meta_avg.peak_mg_h += computed_metadata.peak_mg_h
+    comp_meta_avg.peak_mg_c += computed_metadata.peak_mg_c
 
-    comp_meta_avg.peak_al_h = computed_metadata.peak_al_h
-    comp_meta_avg.peak_al_c = computed_metadata.peak_al_c
+    comp_meta_avg.peak_al_h += computed_metadata.peak_al_h
+    comp_meta_avg.peak_al_c += computed_metadata.peak_al_c
 
-    comp_meta_avg.peak_si_h = computed_metadata.peak_si_h
-    comp_meta_avg.peak_si_c = computed_metadata.peak_si_c
+    comp_meta_avg.peak_si_h += computed_metadata.peak_si_h
+    comp_meta_avg.peak_si_c += computed_metadata.peak_si_c
 
-    comp_meta_avg.peak_ca_h = computed_metadata.peak_ca_h
-    comp_meta_avg.peak_ca_c = computed_metadata.peak_ca_c
+    comp_meta_avg.peak_ca_h += computed_metadata.peak_ca_h
+    comp_meta_avg.peak_ca_c += computed_metadata.peak_ca_c
 
-    comp_meta_avg.peak_ti_h = computed_metadata.peak_ti_h
-    comp_meta_avg.peak_ti_c = computed_metadata.peak_ti_c
+    comp_meta_avg.peak_ti_h += computed_metadata.peak_ti_h
+    comp_meta_avg.peak_ti_c += computed_metadata.peak_ti_c
 
-    comp_meta_avg.peak_fe_h = computed_metadata.peak_fe_h
-    comp_meta_avg.peak_fe_c = computed_metadata.peak_fe_c
+    comp_meta_avg.peak_fe_h += computed_metadata.peak_fe_h
+    comp_meta_avg.peak_fe_c += computed_metadata.peak_fe_c
 
     return comp_meta_avg
 
 
 def calculate_aggregate(
     files_used: int,
-    computed_metadata: HDUL_META,
+    comp_meta_avg: HDUL_META,
     weights_sum: float,
     method: str,
 ) -> HDUL_META:
-    comp_meta_avg = HDUL_META()
     if method == "average":
-        comp_meta_avg.photon_counts = np.sqrt(computed_metadata.photon_counts / files_used)
-        comp_meta_avg.solar_zenith_angle_cosec = computed_metadata.solar_zenith_angle_cosec / files_used
-        comp_meta_avg.emission_angle_cosec = computed_metadata.emission_angle_cosec / files_used
-        comp_meta_avg.altitude = computed_metadata.altitude / files_used
-        comp_meta_avg.exposure = computed_metadata.exposure / files_used
+        comp_meta_avg.photon_counts = np.sqrt(comp_meta_avg.photon_counts / files_used)
+        comp_meta_avg.solar_zenith_angle_cosec = comp_meta_avg.solar_zenith_angle_cosec / files_used
+        comp_meta_avg.emission_angle_cosec = comp_meta_avg.emission_angle_cosec / files_used
+        comp_meta_avg.altitude = comp_meta_avg.altitude / files_used
+        comp_meta_avg.exposure = comp_meta_avg.exposure / files_used
 
         comp_meta_avg.peak_na_h = comp_meta_avg.peak_na_h / files_used
         comp_meta_avg.peak_mg_h = comp_meta_avg.peak_mg_h / files_used
@@ -197,11 +192,11 @@ def calculate_aggregate(
         comp_meta_avg.peak_fe_h = comp_meta_avg.peak_fe_h / files_used
 
     elif method == "rms":
-        comp_meta_avg.photon_counts = np.sqrt(math.sqrt(computed_metadata.photon_counts / files_used))
-        comp_meta_avg.solar_zenith_angle_cosec = math.sqrt(computed_metadata.solar_zenith_angle_cosec / files_used)
-        comp_meta_avg.emission_angle_cosec = math.sqrt(computed_metadata.emission_angle_cosec / files_used)
-        comp_meta_avg.altitude = math.sqrt(computed_metadata.altitude / files_used)
-        comp_meta_avg.exposure = math.sqrt(computed_metadata.exposure / files_used)
+        comp_meta_avg.photon_counts = np.sqrt(comp_meta_avg.photon_counts / files_used)
+        comp_meta_avg.solar_zenith_angle_cosec = math.sqrt(comp_meta_avg.solar_zenith_angle_cosec / files_used)
+        comp_meta_avg.emission_angle_cosec = math.sqrt(comp_meta_avg.emission_angle_cosec / files_used)
+        comp_meta_avg.altitude = math.sqrt(comp_meta_avg.altitude / files_used)
+        comp_meta_avg.exposure = math.sqrt(comp_meta_avg.exposure / files_used)
 
         comp_meta_avg.peak_na_h = math.sqrt(comp_meta_avg.peak_na_h / files_used)
         comp_meta_avg.peak_mg_h = math.sqrt(comp_meta_avg.peak_mg_h / files_used)
@@ -212,11 +207,11 @@ def calculate_aggregate(
         comp_meta_avg.peak_fe_h = math.sqrt(comp_meta_avg.peak_fe_h / files_used)
 
     elif method == "weighted_average":
-        comp_meta_avg.photon_counts = computed_metadata.photon_counts / weights_sum
-        comp_meta_avg.solar_zenith_angle_cosec = computed_metadata.solar_zenith_angle_cosec / weights_sum
-        comp_meta_avg.emission_angle_cosec = computed_metadata.emission_angle_cosec / weights_sum
-        comp_meta_avg.altitude = computed_metadata.altitude / weights_sum
-        comp_meta_avg.exposure = computed_metadata.exposure / weights_sum
+        comp_meta_avg.photon_counts = comp_meta_avg.photon_counts / weights_sum
+        comp_meta_avg.solar_zenith_angle_cosec = comp_meta_avg.solar_zenith_angle_cosec / weights_sum
+        comp_meta_avg.emission_angle_cosec = comp_meta_avg.emission_angle_cosec / weights_sum
+        comp_meta_avg.altitude = comp_meta_avg.altitude / weights_sum
+        comp_meta_avg.exposure = comp_meta_avg.exposure / weights_sum
 
         comp_meta_avg.peak_na_h = comp_meta_avg.peak_na_h / weights_sum
         comp_meta_avg.peak_mg_h = comp_meta_avg.peak_mg_h / weights_sum
@@ -229,8 +224,8 @@ def calculate_aggregate(
     else:
         raise ValueError(f"Unknown ideology: {method}")
 
-    comp_meta_avg.solar_zenith_angle = rad_to_deg(math.asin(1.0 / comp_meta_avg.solar_zenith_angle_cosec))
-    comp_meta_avg.emission_angle = rad_to_deg(math.asin(1.0 / comp_meta_avg.emission_angle_cosec))
+    comp_meta_avg.solar_zenith_angle = rad_to_deg(math.asin(1.0 / max(abs(comp_meta_avg.solar_zenith_angle_cosec), 1)))
+    comp_meta_avg.emission_angle = rad_to_deg(math.asin(1.0 / max(abs(comp_meta_avg.emission_angle_cosec), 1)))
     comp_meta_avg.mid_utc = comp_meta_avg.mid_utc / files_used
 
     return comp_meta_avg
@@ -238,19 +233,18 @@ def calculate_aggregate(
 
 def combine_fits_with_meta(
     fits_files: List[str], fits_docs: List[Dict[str, Any]], output_fits_path: str, lat_lon_meta: dict, method: str = "weighted_average"
-) -> bool:
+) -> Tuple[bool, HDUL_META]:
+    comp_meta_avg = HDUL_META()
+    weights_sum = 0
+    files_used = 0
     try:
         if len(fits_files) == 0:
             print("No input files provided for {lat_lon_meta}")
-            return False
+            return False, comp_meta_avg
 
         if len(fits_files) != len(fits_docs):
             print(f"File List and Doc List mismatch for {lat_lon_meta}")
-            return False
-
-        comp_meta_avg = HDUL_META()
-        weights_sum = 0
-        files_used = 0
+            return False, comp_meta_avg
 
         for file_path, metadata in zip(fits_files, fits_docs):
             with fits.open(file_path) as hdul:
@@ -263,7 +257,7 @@ def combine_fits_with_meta(
                     weights_sum += photon_count_from_hdul(hdul)
 
         if files_used == 0:
-            return False
+            return False, comp_meta_avg
 
         comp_meta_avg = calculate_aggregate(
             files_used,
@@ -320,9 +314,9 @@ def combine_fits_with_meta(
         import traceback
 
         print(traceback.format_exc())
-        return False
+        return False, comp_meta_avg
     else:
-        return True
+        return True, comp_meta_avg
 
 
 if __name__ == "__main__":

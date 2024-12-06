@@ -1,5 +1,5 @@
 import os
-from constants.misc import *
+from constants.misc import STATISTICS_COMM_PIPE
 
 # Create pipe if it doesn't exist
 if not os.path.exists(STATISTICS_COMM_PIPE):
@@ -11,16 +11,10 @@ count_1 = 0
 try:
     while True:
         # Open pipe in read mode
-        with open(STATISTICS_COMM_PIPE, "r") as pipe:
-            for number in pipe:
-                number = number.strip()
-                if number == "0":
-                    count_0 += 1
-                elif number == "1":
-                    count_1 += 1
-                else:
-                    print("Weird output: ", number)
-                print(f"Current counts - 0s: {count_0}, 1s: {count_1}")
+        with open(STATISTICS_COMM_PIPE, "r") as pipe, open("output.csv", "a") as out:
+            for line in pipe:
+                out.write(line)
+                print(f"{line}")
 except KeyboardInterrupt:
     print("\nStopping reader...")
 finally:
