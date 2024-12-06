@@ -29,6 +29,7 @@ func NewPixelResolutionManager(pixels []geo.RectPixel, radius, subPixelLen float
 type PointResolutionManager struct {
 	PointPixels  *[]*geo.PointPixel
 	PatchManager *PatchManager
+	SubPixelLen  float64
 }
 
 type LatLonWt struct {
@@ -49,7 +50,7 @@ func NewPointResolutionManager(config PointResolutionManagerConfig) *PointResolu
 	}
 
 	patchManager := NewPatchManager()
-	// patchManager.ComputePatches(pointPixels)
+	patchManager.ComputePatches(pointPixels)
 
-	return &PointResolutionManager{PointPixels: &pointPixels, PatchManager: patchManager}
+	return &PointResolutionManager{PointPixels: &pointPixels, PatchManager: patchManager, SubPixelLen: config.SubPixelLen}
 }

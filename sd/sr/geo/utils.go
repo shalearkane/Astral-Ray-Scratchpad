@@ -8,7 +8,7 @@ import (
 	"github.com/k0kubun/pp/v3"
 )
 
-func GetS2PolygonVertexPoints(p s2.Polygon) []s2.Point {
+func GetS2PolygonVertexPoints(p *s2.Polygon) *[]s2.Point {
 	var vertices []s2.Point
 	for li := 0; li < p.NumLoops(); li++ {
 		loop := p.Loop(li)
@@ -17,10 +17,10 @@ func GetS2PolygonVertexPoints(p s2.Polygon) []s2.Point {
 		}
 	}
 
-	return vertices
+	return &vertices
 }
 
-func GetGos2PolygonVertexPoints(p gos.Polygon) []gos.Point {
+func GetGos2PolygonVertexPoints(p *gos.Polygon) *[]gos.Point {
 	var vertices []gos.Point
 	for li := 0; li < p.NumLoops(); li++ {
 		loop := p.Loop(li)
@@ -29,33 +29,35 @@ func GetGos2PolygonVertexPoints(p gos.Polygon) []gos.Point {
 		}
 	}
 
-	return vertices
+	return &vertices
 }
 
-func ConvertGos2ToS2Polygon(polygon *gos.Polygon) s2.Polygon {
+func ConvertGos2ToS2Polygon(polygon *gos.Polygon) *s2.Polygon {
 	var vertices []s2.Point
-	for _, vertex := range GetGos2PolygonVertexPoints(*polygon) {
-		vertices = append(vertices, ConvertGos2ToS2Point(vertex))
+	for _, vertex := range *GetGos2PolygonVertexPoints(polygon) {
+		vertices = append(vertices, *ConvertGos2ToS2Point(vertex))
 	}
 
-	return *s2.PolygonFromLoops([]*s2.Loop{
+	return s2.PolygonFromLoops([]*s2.Loop{
 		s2.LoopFromPoints(vertices),
 	})
 }
 
-func ConvertS2ToGos2Point(point s2.Point) gos.Point {
-	return gos.PointFromCoords(point.X, point.Y, point.Z)
+func ConvertS2ToGos2Point(point s2.Point) *gos.Point {
+	gosPoint := gos.PointFromCoords(point.X, point.Y, point.Z)
+	return &gosPoint
 }
 
-func ConvertGos2ToS2Point(point gos.Point) s2.Point {
-	return s2.PointFromCoords(point.X, point.Y, point.Z)
+func ConvertGos2ToS2Point(point gos.Point) *s2.Point {
+	s2Point := s2.PointFromCoords(point.X, point.Y, point.Z)
+	return &s2Point
 }
 
-func GetPolygonAreaOfIntersection(a, b s2.Polygon) float64 {
+func GetPolygonAreaOfIntersection(a, b *s2.Polygon) float64 {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println("panic occurred:", err)
-			PrintS2Polygon(a)
+			PrintS2Polygon(*a)
 		}
 	}()
 	if a.Validate() != nil || b.Validate() != nil {
@@ -67,11 +69,11 @@ func GetPolygonAreaOfIntersection(a, b s2.Polygon) float64 {
 	var aGosVertices []gos.Point
 	var bGosVertices []gos.Point
 
-	for _, point := range aVertices {
-		aGosVertices = append(aGosVertices, ConvertS2ToGos2Point(point))
+	for _, point := range *aVertices {
+		aGosVertices = append(aGosVertices, *ConvertS2ToGos2Point(point))
 	}
-	for _, point := range bVertices {
-		bGosVertices = append(bGosVertices, ConvertS2ToGos2Point(point))
+	for _, point := range *bVertices {
+		bGosVertices = append(bGosVertices, *ConvertS2ToGos2Point(point))
 	}
 	loopA := gos.NewLoopFromPath(aGosVertices)
 	loopB := gos.NewLoopFromPath(bGosVertices)

@@ -62,16 +62,16 @@ func (rm *PointResolutionManager) SaveCSV(filename string) error {
 	}
 
 	for _, pixel := range *rm.PointPixels {
-		// Placeholder for converting bounding box vertices to lat/lon
+		polygon := pixel.BoundingBox.ToPolygon().Loop(0)
 		record := []string{
-			fmt.Sprintf("%f", s2.LatLngFromPoint(pixel.BoundingBox.Loop(0).Vertex(0)).Lat.Degrees()),
-			fmt.Sprintf("%f", s2.LatLngFromPoint(pixel.BoundingBox.Loop(0).Vertex(0)).Lng.Degrees()),
-			fmt.Sprintf("%f", s2.LatLngFromPoint(pixel.BoundingBox.Loop(0).Vertex(3)).Lat.Degrees()),
-			fmt.Sprintf("%f", s2.LatLngFromPoint(pixel.BoundingBox.Loop(0).Vertex(3)).Lng.Degrees()),
-			fmt.Sprintf("%f", s2.LatLngFromPoint(pixel.BoundingBox.Loop(0).Vertex(2)).Lat.Degrees()),
-			fmt.Sprintf("%f", s2.LatLngFromPoint(pixel.BoundingBox.Loop(0).Vertex(2)).Lng.Degrees()),
-			fmt.Sprintf("%f", s2.LatLngFromPoint(pixel.BoundingBox.Loop(0).Vertex(1)).Lat.Degrees()),
-			fmt.Sprintf("%f", s2.LatLngFromPoint(pixel.BoundingBox.Loop(0).Vertex(1)).Lng.Degrees()),
+			fmt.Sprintf("%f", s2.LatLngFromPoint(polygon.Vertex(0)).Lat.Degrees()),
+			fmt.Sprintf("%f", s2.LatLngFromPoint(polygon.Vertex(0)).Lng.Degrees()),
+			fmt.Sprintf("%f", s2.LatLngFromPoint(polygon.Vertex(3)).Lat.Degrees()),
+			fmt.Sprintf("%f", s2.LatLngFromPoint(polygon.Vertex(3)).Lng.Degrees()),
+			fmt.Sprintf("%f", s2.LatLngFromPoint(polygon.Vertex(2)).Lat.Degrees()),
+			fmt.Sprintf("%f", s2.LatLngFromPoint(polygon.Vertex(2)).Lng.Degrees()),
+			fmt.Sprintf("%f", s2.LatLngFromPoint(polygon.Vertex(1)).Lat.Degrees()),
+			fmt.Sprintf("%f", s2.LatLngFromPoint(polygon.Vertex(1)).Lng.Degrees()),
 			fmt.Sprintf("%f", pixel.Wt.Mg),
 			fmt.Sprintf("%f", pixel.Wt.Al),
 			fmt.Sprintf("%f", pixel.Wt.Si),

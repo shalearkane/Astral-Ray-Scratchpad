@@ -37,19 +37,19 @@ func (p *RectPixel) GetGeoBoundingBox(radius float64) []Geo {
 }
 
 type PointPixel struct {
-	BoundingBox s2.Polygon
-	Wt          Element
+	BoundingBox *Box
+	Wt          *Element
 	ID          string
-	Center      s2.LatLng
+	Center      LatLon
 }
 
 func NewPointPixel(lat float64, lon float64, wt Element, padding float64) *PointPixel {
 	geo := NewGeoFromLatLon(lat, lon, 1.0)
-	boundingBox := geo.GetBoundingPolygon(padding)
+	boundingBox := geo.GetBoundingPolygonBox(padding)
 	return &PointPixel{
 		BoundingBox: boundingBox,
-		Wt:          wt,
+		Wt:          &wt,
 		ID:          uuid.NewString(),
-		Center:      s2.LatLngFromDegrees(lat, lon),
+		Center:      LatLon{Lat: lat, Lon: lon},
 	}
 }

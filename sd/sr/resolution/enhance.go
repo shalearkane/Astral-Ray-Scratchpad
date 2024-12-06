@@ -1,9 +1,11 @@
 package resolution
 
 import (
+	"log/slog"
 	"sr/geo"
 	"sync"
 
+	"github.com/k0kubun/pp/v3"
 	"github.com/schollz/progressbar/v3"
 )
 
@@ -65,23 +67,54 @@ func (rm *PixelResolutionManager) enhancePixel(
 	mutex.Unlock()
 }
 
-func (rm *PointResolutionManager) EnhancePixels() error {
+func (rm *PointResolutionManager) EnhanceAdditionalPixels(emptyPixelMap *map[string]*geo.PointPixel) {
+	var wg sync.WaitGroup
+	var mutex sync.Mutex
+	slog.Info("--FILLING--")
+
+	emptyPixels := make([]*geo.PointPixel, 0)
+	for _, pixel := range *emptyPixelMap {
+		emptyPixels = append(emptyPixels, pixel)
+	}
+
+	enhancedPixels := []*geo.PointPixel{}
+	bar := progressbar.Default(int64(len(emptyPixels)))
+
+	for _, pixelChunck := range chunkBy(emptyPixels, 1000) {
+		for _, pixel := range pixelChunck {
+			wg.Add(1)
+			go rm.enhancePixel(pixel, &enhancedPixels, &mutex, &wg, bar, true)
+		}
+		wg.Wait()
+	}
+
+	for _, emptyPixel := range enhancedPixels {
+		delete(*emptyPixelMap, emptyPixel.ID)
+	}
+
+	// Update the Resolution Manager
+	*rm.PointPixels = append(*rm.PointPixels, enhancedPixels...)
+	rm.PatchManager.ComputePatches(enhancedPixels)
+	pp.Println(len(*rm.PointPixels))
+}
+
+func (rm *PointResolutionManager) EnhancePixels() {
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 
 	enhancedPixels := []*geo.PointPixel{}
+	slog.Info("--ENHANCING--")
 	bar := progressbar.Default(int64(len(*rm.PointPixels)))
 
 	for _, pixelChunck := range chunkBy(*rm.PointPixels, 1000) {
 		for _, pixel := range pixelChunck {
 			wg.Add(1)
-			go rm.enhancePixel(pixel, &enhancedPixels, &mutex, &wg, bar)
+			go rm.enhancePixel(pixel, &enhancedPixels, &mutex, &wg, bar, false)
 		}
 		wg.Wait()
 	}
 
 	*rm.PointPixels = enhancedPixels
-	return nil
 }
 
 func (rm *PointResolutionManager) enhancePixel(
@@ -90,20 +123,27 @@ func (rm *PointResolutionManager) enhancePixel(
 	mutex *sync.Mutex,
 	wg *sync.WaitGroup,
 	bar *progressbar.ProgressBar,
+	interpolate bool,
 ) {
 	defer wg.Done()
-
-	totalArea := pixel.BoundingBox.Area()
+	pixelPolyon := pixel.BoundingBox.ToPolygon()
+	totalArea := pixelPolyon.Area()
 	wt := pixel.Wt.Multiply(totalArea)
+
+	// Dont consider the pixel value if it has to be interpolated
+	if interpolate {
+		totalArea = 0
+		wt = geo.NewElementWithDefault(0.0)
+	}
 
 	for _, p := range rm.PatchManager.Search(pixel) {
 		if p.ID == pixel.ID {
 			continue
 		}
 
-		area := geo.GetPolygonAreaOfIntersection(pixel.BoundingBox, p.BoundingBox)
+		area := geo.GetPolygonAreaOfIntersection(pixelPolyon, p.BoundingBox.ToPolygon())
 
-		if area > 0.00005 {
+		if area > 0.00005 || (interpolate && area > 0) {
 			totalArea += area
 			wt = wt.Add(p.Wt.Multiply(area))
 		}
@@ -111,12 +151,15 @@ func (rm *PointResolutionManager) enhancePixel(
 
 	wt = wt.Divide(totalArea)
 
-	mutex.Lock()
-	*enhancedPixels = append(*enhancedPixels, &geo.PointPixel{
-		BoundingBox: pixel.BoundingBox,
-		Wt:          wt,
-		ID:          pixel.ID,
-	})
-	mutex.Unlock()
+	if (interpolate && totalArea > 0) || !interpolate {
+		mutex.Lock()
+		*enhancedPixels = append(*enhancedPixels, &geo.PointPixel{
+			BoundingBox: pixel.BoundingBox,
+			Wt:          &wt,
+			ID:          pixel.ID,
+			Center:      pixel.Center,
+		})
+		mutex.Unlock()
+	}
 	bar.Add(1)
 }

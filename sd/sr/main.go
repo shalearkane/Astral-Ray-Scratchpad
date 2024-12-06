@@ -41,10 +41,11 @@ func main() {
 	// geo.PrintS2Polygon(resManager.PointPixels[0].BoundingBox)
 
 	// Actual Code
-	data, err := fs.ReadJSONFileToLatLngWt("./ISRO.test_fits.json")
+	data, err := fs.ReadJSONFileToLatLngWt("./data.json")
 	if err != nil {
 		pp.Errorf(err.Error())
 	}
+	// resolution.Run(data)
 
 	config := resolution.PointResolutionManagerConfig{
 		// LatLngs: []resolution.LatLonWt{{
@@ -56,6 +57,7 @@ func main() {
 		SubPixelLen: 12.5 * 1e-5 * 180 / (math.Pi),
 	}
 	resManager := resolution.NewPointResolutionManager(config)
+	resManager.Fill()
 	resManager.EnhancePixels()
 	resManager.SaveCSV("./output.csv")
 }

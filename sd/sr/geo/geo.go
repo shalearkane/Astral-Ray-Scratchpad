@@ -41,7 +41,7 @@ func (g Geo) GetBoundingBox(padding float64) s2.Rect {
 	return s2.RectFromLatLng(lo).AddPoint(hi)
 }
 
-func (g Geo) GetBoundingPolygon(padding float64) s2.Polygon {
+func (g Geo) GetBoundingPolygonBox(padding float64) *Box {
 	rect := s2.RectFromCenterSize(g.ToLatLng(), s2.LatLngFromDegrees(padding, padding))
 
 	centerTop := s2.Interpolate(0.5, s2.PointFromLatLng(rect.Vertex(2)), s2.PointFromLatLng(rect.Vertex(3)))
@@ -79,11 +79,17 @@ func (g Geo) GetBoundingPolygon(padding float64) s2.Polygon {
 	// newTopRightPoint := s2.InterpolateAtDistance(-s1.Angle(padding/2), centerTop, s2.PointFromLatLng(s2.LatLngFromDegrees(float64(s2.LatLngFromPoint(centerTop).Lat), 180)))
 	// newTopLeftPoint := s2.InterpolateAtDistance(s1.Angle(padding/2), centerTop, s2.PointFromLatLng(s2.LatLngFromDegrees(float64(s2.LatLngFromPoint(centerTop).Lat), 180)))
 
-	loop := s2.LoopFromPoints([]s2.Point{
-		newBottomLeftPoint, newBottomRightPoint, newTopRightPoint, newTopLeftPoint,
-	})
+	// loop := s2.LoopFromPoints([]s2.Point{
+	// 	newBottomLeftPoint, newBottomRightPoint, newTopRightPoint, newTopLeftPoint,
+	// })
 
-	return *s2.PolygonFromLoops([]*s2.Loop{loop})
+	// return *s2.PolygonFromLoops([]*s2.Loop{loop})
+	return &Box{
+		BottomLeft:  LatLonFromPoint(newBottomLeftPoint),
+		BottomRight: LatLonFromPoint(newBottomRightPoint),
+		TopLeft:     LatLonFromPoint(newTopLeftPoint),
+		TopRight:    LatLonFromPoint(newTopRightPoint),
+	}
 }
 
 func GetSubRectangles(boundingBox []Geo, sideLen, radius float64) []s2.Rect {

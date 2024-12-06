@@ -1,3 +1,7 @@
+github.com/ardabasaran/go-fourier v0.0.0-20190312022224-70b8b6ca705b h1:cGMcKQQ+Ddl0veatHh4/wQzfsxvgUWrAPRMUux96KR4=
+github.com/ardabasaran/go-fourier v0.0.0-20190312022224-70b8b6ca705b/go.mod h1:r5RSg4RTxEHhWUuQ1ppT+WXEXhmR/HzZRqWqnvINtwk=
+github.com/barkimedes/go-deepcopy v0.0.0-20220514131651-17c30cfc62df h1:GSoSVRLoBaFpOOds6QyY1L8AX7uoY+Ln3BHc22W40X0=
+github.com/barkimedes/go-deepcopy v0.0.0-20220514131651-17c30cfc62df/go.mod h1:hiVxq5OP2bUGBRNS3Z/bt/reCLFNbdcST6gISi1fiOM=
 github.com/chengxilo/virtualterm v1.0.4 h1:Z6IpERbRVlfB8WkOmtbHiDbBANU7cimRIof7mk9/PwM=
 github.com/chengxilo/virtualterm v1.0.4/go.mod h1:DyxxBZz/x1iqJjFxTFcr6/x+jSpqN0iwWCOK1q10rlY=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

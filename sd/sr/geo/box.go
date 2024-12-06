@@ -7,6 +7,14 @@ type LatLon struct {
 	Lon float64
 }
 
+func LatLonFromPoint(point s2.Point) LatLon {
+	latlng := s2.LatLngFromPoint(point)
+	return LatLon{
+		Lat: latlng.Lat.Degrees(),
+		Lon: latlng.Lng.Degrees(),
+	}
+}
+
 func (l *LatLon) ToLatLng() *s2.LatLng {
 	latLng := s2.LatLngFromDegrees(l.Lat, l.Lon)
 	return &latLng
