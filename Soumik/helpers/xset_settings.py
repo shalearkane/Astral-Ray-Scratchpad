@@ -24,7 +24,7 @@ def fit_and_plot(plot_device: str = "/null") -> DataFrame:
     Fit.perform()
 
     Plot.device = plot_device
-    Plot.area = True
+    Plot.area = False
     Plot.xAxis = "KeV"
 
     Plot("data", "resid")

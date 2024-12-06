@@ -70,7 +70,7 @@ def get_df_mg(class_file: str) -> float:
 
     s2 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
     s2.ignore("0.0-1.10")
-    s2.ignore("1.37-**")
+    s2.ignore("1.40-**")
     m2 = Model("ga")
 
     # Setting values for Gaussian 1
@@ -100,14 +100,14 @@ def get_df_al(class_file: str) -> float:
     m2 = Model("ga")
 
     # Setting values for Gaussian 1
-    m2.gaussian.LineE = 1.49  # type: ignore
+    m2.gaussian.LineE = 1.48  # type: ignore
     m2.gaussian.Sigma = 0.05  # type: ignore
     m2.gaussian.norm = 1  # type: ignore
     m2.gaussian.LineE.frozen = True  # type: ignore
 
     df = fit_and_plot()
 
-    target_value_ca = 1.49
+    target_value_ca = 1.48
 
     row_before = df[df["energy"] <= target_value_ca].iloc[-1]  # The row just before the target value
     row_after = df[df["energy"] >= target_value_ca].iloc[0]
@@ -123,7 +123,7 @@ def get_df_si(class_file: str) -> float:
     reset_xspec()
 
     s2 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
-    s2.ignore("0.0-1.62")
+    s2.ignore("0.0-1.620")
     s2.ignore("1.9-**")
     m2 = Model("ga")
 
@@ -179,8 +179,8 @@ def get_df_fe(class_file: str) -> float:
     reset_xspec()
 
     s3 = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
-    s3.ignore("0.0-6.1")
-    s3.ignore("6.6-**")
+    s3.ignore("0.0-6.0")
+    s3.ignore("6.7-**")
     m3 = Model("ga")
 
     # Setting values for Gaussian 1
