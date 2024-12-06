@@ -28,8 +28,9 @@ def fit_and_plot(plot_device: str = "/null") -> DataFrame:
     Plot.xAxis = "KeV"
 
     Plot("data", "resid")
-
+    chi_2=Fit.statistic
+    dof=Fit.dof
     xVals = Plot.x()
     yVals = Plot.y()
 
-    return DataFrame({"energy": xVals, "counts": yVals})
+    return DataFrame({"energy": xVals, "counts": yVals,"Chi_2":chi_2,"dof":dof})
