@@ -37,7 +37,8 @@ This contains files for various independent functionality
 - **Model_X2** -> X2Abund Model
 
 ### Plot
-- **Quadrilaterals** -> Plots to a file
+- **Quadrilaterals** -> Plots to a patches of land to a file
+- **PlotAbundances** -> Plot the raw data outputs by xrf and the predicted abundances by our model.
 
 ### Scatter
 - **Scatter From Incident** -> Calculates Scattered Spectrum from Solar Incident spectrum based on ffast data and outputs to a CSV
