@@ -1,6 +1,6 @@
 from redis_work_queue import Item
 from redis import Redis
-from Soumik.constants.redis_queue import REDIS_HOST, fail_queue, process_queue, output_queue
+from constants.redis_queue import REDIS_HOST, fail_queue, process_queue, output_queue
 from constants.output_dirs import OUTPUT_DIR_CLASS_FITS
 from constants.mongo import COLLECTION_CLASS_FITS
 from helpers.download import download_file_from_file_server
@@ -36,8 +36,9 @@ def run_checker():
                 continue
 
             results = process_abundance_h(output_file_path)
+            print(results)
             results["_id"] = doc["_id"]
-            results_item = Item.from_dict(results)
+            results_item = Item.from_json_data(results)
             output_queue.add_item(db, results_item)
 
         except Exception:

@@ -3,7 +3,7 @@ from redis import Redis
 from helpers.utilities import to_datetime_t
 from constants.output_dirs import OUTPUT_DIR_CLASS_FITS
 from constants.mongo import COLLECTION_CLASS_FITS
-from Soumik.constants.redis_queue import REDIS_HOST, fail_queue, process_queue, check_queue
+from constants.redis_queue import REDIS_HOST, fail_queue, process_queue, check_queue
 
 from helpers.download import stream_file_from_file_server
 from helpers.visible_peak import generate_visible_peaks
