@@ -13,7 +13,7 @@ def check_if_not_in_geotail(dt: datetime) -> bool:
     return True
 
 
-def is_not_during_geotail(docs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def batch_geotail_filter(docs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     results: List[Dict[str, Any]] = list()
 
     for class_observation in docs:

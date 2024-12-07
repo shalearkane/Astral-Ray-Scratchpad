@@ -30,6 +30,8 @@ def fibonacci_sphere(samples: int) -> List[Tuple[str, str]]:
         if abs(latitude) > 85 or abs(longitude) > 175:
             continue
 
+        longitude -= 176
+
         points.append((f"{latitude:.2f}", f"{longitude:.2f}"))
         # points.append((latitude, longitude))
 

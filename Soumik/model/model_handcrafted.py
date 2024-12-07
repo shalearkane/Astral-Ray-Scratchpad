@@ -25,10 +25,10 @@ def get_df_mg(class_file: str) -> Tuple[float, float, float]:
 
     target_value_mg = 1.25
 
-    row_before = df[df["energy"] <= target_value_mg].iloc[-1]  # The row just before the target value
+    row_before = df[df["energy"] <= target_value_mg].iloc[-1]
     row_after = df[df["energy"] >= target_value_mg].iloc[0]
     x1, x2 = row_before["energy"], row_after["energy"]
-    y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
+    y1, y2 = row_before["counts"], row_after["counts"]
     interpolated_value_mg = y1 + (target_value_mg - x1) * (y2 - y1) / (x2 - x1)
 
     return interpolated_value_mg, chi_2, dof
@@ -52,10 +52,10 @@ def get_df_al(class_file: str) -> Tuple[float, float, float]:
 
     target_value_al = 1.48
 
-    row_before = df[df["energy"] <= target_value_al].iloc[-1]  # The row just before the target value
+    row_before = df[df["energy"] <= target_value_al].iloc[-1]
     row_after = df[df["energy"] >= target_value_al].iloc[0]
     x1, x2 = row_before["energy"], row_after["energy"]
-    y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
+    y1, y2 = row_before["counts"], row_after["counts"]
     interpolated_value_al = y1 + (target_value_al - x1) * (y2 - y1) / (x2 - x1)
 
     return interpolated_value_al, chi_2, dof
@@ -79,10 +79,10 @@ def get_df_si(class_file: str) -> Tuple[float, float, float]:
 
     target_value_si = 1.74
 
-    row_before = df[df["energy"] <= target_value_si].iloc[-1]  # The row just before the target value
+    row_before = df[df["energy"] <= target_value_si].iloc[-1]
     row_after = df[df["energy"] >= target_value_si].iloc[0]
     x1, x2 = row_before["energy"], row_after["energy"]
-    y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
+    y1, y2 = row_before["counts"], row_after["counts"]
     interpolated_value_si = y1 + (target_value_si - x1) * (y2 - y1) / (x2 - x1)
 
     return interpolated_value_si, chi_2, dof
@@ -106,10 +106,10 @@ def get_df_ca(class_file: str) -> Tuple[float, float, float]:
 
     target_value_ca = 3.69
 
-    row_before = df[df["energy"] <= target_value_ca].iloc[-1]  # The row just before the target value
+    row_before = df[df["energy"] <= target_value_ca].iloc[-1]
     row_after = df[df["energy"] >= target_value_ca].iloc[0]
     x1, x2 = row_before["energy"], row_after["energy"]
-    y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
+    y1, y2 = row_before["counts"], row_after["counts"]
     interpolated_value_ca = y1 + (target_value_ca - x1) * (y2 - y1) / (x2 - x1)
 
     return interpolated_value_ca, chi_2, dof
@@ -133,10 +133,10 @@ def get_df_fe(class_file: str) -> Tuple[float, float, float]:
 
     target_value_fe = 6.40
 
-    row_before = df[df["energy"] <= target_value_fe].iloc[-1]  # The row just before the target value
+    row_before = df[df["energy"] <= target_value_fe].iloc[-1]
     row_after = df[df["energy"] >= target_value_fe].iloc[0]
     x1, x2 = row_before["energy"], row_after["energy"]
-    y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
+    y1, y2 = row_before["counts"], row_after["counts"]
     interpolated_value_fe = y1 + (target_value_fe - x1) * (y2 - y1) / (x2 - x1)
 
     return interpolated_value_fe, chi_2, dof
@@ -160,10 +160,10 @@ def get_df_ti(class_file: str) -> Tuple[float, float, float]:
 
     target_value_ti = 4.51
 
-    row_before = df[df["energy"] <= target_value_ti].iloc[-1]  # The row just before the target value
+    row_before = df[df["energy"] <= target_value_ti].iloc[-1]
     row_after = df[df["energy"] >= target_value_ti].iloc[0]
     x1, x2 = row_before["energy"], row_after["energy"]
-    y1, y2 = row_before["counts"], row_after["counts"]  # print(result)
+    y1, y2 = row_before["counts"], row_after["counts"]
     interpolated_value_ti = y1 + (target_value_ti - x1) * (y2 - y1) / (x2 - x1)
 
     return interpolated_value_ti, chi_2, dof
