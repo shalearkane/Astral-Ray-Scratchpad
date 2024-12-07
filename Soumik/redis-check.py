@@ -1,11 +1,11 @@
 from redis_work_queue import Item
-from redis_work_queue import KeyPrefix, WorkQueue
 from redis import Redis
 from helpers.utilities import to_datetime_t
 from constants.output_dirs import OUTPUT_DIR_CLASS_FITS
 from constants.mongo import COLLECTION_CLASS_FITS
-from helpers.download import download_file_from_file_server, stream_file_from_file_server
-from model.model_handcrafted import process_abundance_h
+from Soumik.constants.redis_queue import REDIS_HOST, fail_queue, process_queue, check_queue
+
+from helpers.download import stream_file_from_file_server
 from helpers.visible_peak import generate_visible_peaks
 from criterion.photon_count import photon_count_from_hdul
 from criterion.geotail import check_if_not_in_geotail
@@ -13,11 +13,7 @@ from criterion.geotail import check_if_not_in_geotail
 from astropy.io import fits
 from io import BytesIO
 
-db = Redis(host="127.0.0.1")
-
-check_queue = WorkQueue(KeyPrefix("CHECK"))
-fail_queue = WorkQueue(KeyPrefix("FAIL"))
-process_queue = WorkQueue(KeyPrefix("PROCESS"))
+db = Redis(host=REDIS_HOST)
 
 
 def run_checker():
@@ -38,7 +34,6 @@ def run_checker():
 
             if not success:
                 print("download failed")
-                check_queue.complete(db, job)
                 item = Item.from_json_data({"_id": doc["_id"], "stage": "CHECK"})
                 fail_queue.add_item(db, item)
                 continue
@@ -55,7 +50,7 @@ def run_checker():
 
                 print(f"{not_in_geotail} - {photon_count} - {si_visible_peak}")
 
-                if not_in_geotail and photon_count > 3000 and si_visible_peak:
+                if not_in_geotail and si_visible_peak:
                     print("accepted")
                     doc_item = Item.from_json_data(doc)
                     process_queue.add_item(db, doc_item)
