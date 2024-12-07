@@ -2,15 +2,9 @@ import json
 import pandas as pd
 from typing import List
 
-def json_to_csv(
-    json_file_path: str,
-    output_csv_path: str,
-    elements: List[str] = None # type: ignore
-) -> None:
-    if elements is None:
-        elements = ["na", "mg", "al", "si", "ca", "ti", "fe"]
 
-    with open(json_file_path, 'r') as file:
+def json_to_csv(json_file_path: str, output_csv_path: str, elements: List[str] = ["na", "mg", "al", "si", "ca", "ti", "fe"]) -> None:
+    with open(json_file_path, "r") as file:
         data_list = json.load(file)
 
     records = []
@@ -53,4 +47,4 @@ def json_to_csv(
 #     json_file_path="/home/av/Downloads/ISRO.fibnacci_lat_lon.json",
 #     output_csv_path="/home/av/Documents/Visual Shit/combined_data_final.csv",
 #     elements=["na", "mg", "al", "si", "ca", "ti", "fe"]
-#)
+# )

@@ -4,9 +4,11 @@ import matplotlib
 from typing import List, Optional
 from pandas import DataFrame
 
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
+
+matplotlib.use("Agg")
+
 
 def process_and_plot(
     input_csv: str,
@@ -16,23 +18,23 @@ def process_and_plot(
     peak_columns: Optional[List[str]] = None,
     filter_percentage: float = 50,
     bins: int = 50,
-    cmap: str = "viridis"
+    cmap: str = "viridis",
 ) -> None:
     if peak_columns is None:
         peak_columns = ["peak_mg_c", "peak_al_c", "peak_ca_c", "peak_ti_c", "peak_fe_c"]
-    
+
     def filter_by_peak_counts(df: DataFrame, si_peak_col: str, percentage: float, peak_columns: List[str]) -> DataFrame:
         threshold: float = percentage / 100.0
         for col in peak_columns:
             df = df[df[col] >= df[si_peak_col] * threshold]
         return df
-    
+
     def plot_and_save_heatmap(df: DataFrame, x_col: str, y_col: str, save_dir: str, bins: int = 50, cmap: str = "viridis") -> None:
         plt.figure(figsize=(8, 6))
         heatmap, xedges, yedges = np.histogram2d(df[x_col], df[y_col], bins=bins)
         extent: List[float] = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 
-        plt.imshow(heatmap.T, extent=extent, origin='lower', cmap=cmap, aspect='auto') # type: ignore
+        plt.imshow(heatmap.T, extent=extent, origin="lower", cmap=cmap, aspect="auto") # type: ignore
         plt.colorbar(label="Density")
         plt.title(f"{x_col} vs {y_col} Heatmap", fontsize=14)
         plt.xlabel(x_col, fontsize=12)
@@ -82,5 +84,5 @@ process_and_plot(
     peak_columns=["peak_mg_c", "peak_al_c", "peak_ca_c", "peak_ti_c", "peak_fe_c"],
     filter_percentage=50,
     bins=50,
-    cmap="viridis"
+    cmap="viridis",
 )
