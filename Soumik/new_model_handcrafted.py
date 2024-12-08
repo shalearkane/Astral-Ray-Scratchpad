@@ -184,23 +184,29 @@ def process_abundance_h(class_file: str) :
     #     "filename": {"class_file": class_file},
     #     "wt": {"mg": mg, "al": al, "si": si, "ca": ca, "ti": ti, "fe": fe},
     # }
+
+    mg_json= mg.to_json(orient='records')
+    al_json= al.to_json(orient="records")
+    si_json= si.to_json(orient="records")
+    fe_json= fe.to_json(orient="records")
+    ca_json= ca.to_json(orient="records")
+    ti_json= ti.to_json(orient="records")
+
+    # return mg_json
     
-    mg_json= mg.to_json(orient="values")
-    al_json= al.to_json(orient="values")
-    si_json= si.to_json(orient="values")
-    fe_json= fe.to_json(orient="values")
-    ca_json= ca.to_json(orient="values")
-    ti_json= ti.to_json(orient="values")
-
-
-
     return mg_json,al_json,si_json,fe_json,ca_json,ti_json
 
 
 if __name__ == "__main__":
-    dict = process_abundance_h(
+    jsons = process_abundance_h(
         "/home/pg/Documents/Astral-Ray-Scratchpad/Soumik/data/class/-0.04_-5.43.fits"
     )
+#     import json
+#     output_path = '/home/pg/Downloads/json_output.json'
 
-    print(dict)
+# # Write JSON data to the file
+#     with open(output_path, 'w') as file:
+#         json.dump(dict, file, indent=4)
+
+    print(jsons)
 
