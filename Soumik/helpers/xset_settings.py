@@ -19,6 +19,14 @@ def reset_xspec():
     AllChains.clear()
 
 
+def fit() -> Tuple[float, float]:
+    Xset.allowPrompting = False
+    Fit.nIterations = 1000
+    Fit.perform()
+
+    return Fit.statistic, Fit.dof
+
+
 def fit_and_plot(plot_device: str = "/null") -> Tuple[DataFrame, float, float]:
     Xset.allowPrompting = False
     Fit.nIterations = 1000
