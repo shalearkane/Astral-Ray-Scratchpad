@@ -8,7 +8,7 @@ from astropy.io import fits
 
 from criterion.goes_solar_flare import get_flare_class
 from criterion.geotail import check_if_not_in_geotail
-from helpers.visible_peak import generate_visible_peaks
+from Soumik.helpers.visual_peak import generate_visible_peaks
 from helpers.download import stream_file_from_file_server
 from constants.mongo import (
     COLLECTION_CLASS_FITS,

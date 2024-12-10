@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from model.model_handcrafted import process_abundance_h
-from helpers.visible_peak import generate_visible_peaks
+from Soumik.helpers.visual_peak import generate_visible_peaks
 from criterion.photon_count import photon_count_from_hdul
 from helpers.utilities import to_datetime_t
 from criterion.geotail import check_if_not_in_geotail

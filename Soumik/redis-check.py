@@ -1,12 +1,14 @@
+from typing import Dict, List
 from redis_work_queue import Item
 from redis import Redis
+from Soumik.helpers import visual_peak
 from helpers.utilities import to_datetime_t
 from constants.output_dirs import OUTPUT_DIR_CLASS_FITS
 from constants.mongo import COLLECTION_CLASS_FITS
-from constants.redis_queue import REDIS_HOST, fail_queue, process_queue, check_queue
+from constants.redis_queue import REDIS_HOST, backend_fail_queue, backend_2_process_queue, backend_1_check_queue
 
 from helpers.download import stream_file_from_file_server
-from helpers.visible_peak import generate_visible_peaks
+from Soumik.helpers.visual_peak import generate_visible_peaks
 from criterion.photon_count import photon_count_from_hdul
 from criterion.geotail import check_if_not_in_geotail
 
@@ -19,7 +21,7 @@ db = Redis(host=REDIS_HOST)
 def run_checker():
     while True:
         print("Waiting for job ...")
-        job: Item = check_queue.lease(db, 5)  # type: ignore
+        job: Item = backend_1_check_queue.lease(db, 5)  # type: ignore
         try:
             doc = job.data_json()
             print(f"starting {doc}")
@@ -35,7 +37,7 @@ def run_checker():
             if not success:
                 print("download failed")
                 item = Item.from_json_data({"_id": doc["_id"], "stage": "CHECK"})
-                fail_queue.add_item(db, item)
+                backend_fail_queue.add_item(db, item)
                 continue
 
             with fits.open(BytesIO(fits_bytes)) as hdul:
@@ -46,14 +48,31 @@ def run_checker():
 
                 not_in_geotail = check_if_not_in_geotail(start_time) and check_if_not_in_geotail(end_time)
                 photon_count = photon_count_from_hdul(hdul)
-                si_visible_peak = "Si" in generate_visible_peaks(hdul).keys()
+                visible_peaks = generate_visible_peaks(hdul)
+                si_visible_peak = "Si" in visible_peaks.keys()
+                peaks: Dict[str, List[Dict[str, float]]] = dict()
 
-                print(f"{not_in_geotail} - {photon_count} - {si_visible_peak}")
+                for key, val in visible_peaks.items():
+                    if key not in peaks.keys():
+                        peaks[key] = list()
+
+                    peaks[key].append({"channelNumber": 100, "counts": val})
+
+                next_stage_input = {
+                    "_id": doc["_id"],
+                    "clientId": doc["clientId"],
+                    "geotail": not not_in_geotail,
+                    "photonCount": photon_count,
+                    "siVisiblePeak": si_visible_peak,
+                    "peaks": peaks,
+                }
+
+                # print(f"{not_in_geotail} - {photon_count} - {si_visible_peak}")
 
                 if not_in_geotail and si_visible_peak:
                     print("accepted")
-                    doc_item = Item.from_json_data(doc)
-                    process_queue.add_item(db, doc_item)
+                    doc_item = Item.from_json_data(id=job.id, data=next_stage_input)
+                    backend_2_process_queue.add_item(db, doc_item)
                 else:
                     print("rejected")
 
@@ -62,7 +81,7 @@ def run_checker():
 
             print(traceback.format_exc())
         finally:
-            check_queue.complete(db, job)
+            backend_1_check_queue.complete(db, job)
 
 
 if __name__ == "__main__":

@@ -44,5 +44,5 @@ def generate_visible_peaks(hdul: HDUList) -> Dict[str, float]:
 if __name__ == "__main__":
     directory = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/fibonacci-fits"
 
-    with fits.open("/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/x-class.fits") as hdul:
+    with fits.open("../data/class/-84.98_91.10.fits") as hdul:
         generate_visible_peaks(hdul)
