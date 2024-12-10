@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Set, Tuple
 from helpers.combine_fits_with_metadata import combine_fits_with_meta, hdul_meta_to_dict
 from model.model_handcrafted_v2 import process_abundance_h_v2
 from constants.output_dirs import OUTPUT_DIR_CLASS_FITS, OUTPUT_DIR_COMBINED_FITS
-from constants.mongo import COLLECTION_CLASS_FITS, COLLECTION_DATA_COLLECTION_V2, DATABASE_ISRO, MONGO_URI
+from constants.mongo import COLLECTION_CLASS_FITS, COLLECTION_DATA_COLLECTION_V3, DATABASE_ISRO, MONGO_URI
 from helpers.download import download_file_from_file_server
 from helpers.query_class import get_class_fits_at_lat_lon
 from os.path import isfile
@@ -35,7 +35,7 @@ def get_job_from_mongo(fibonacci_collection: Collection) -> Tuple[str, str]:
 
 
 def generate_combined_fits_for_lat_lon(worker_id: int, redo: bool):
-    data_collection = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_DATA_COLLECTION_V2]
+    data_collection = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_DATA_COLLECTION_V3]
 
     while True:
         latitude_str, longitude_str = get_job_from_mongo(data_collection)

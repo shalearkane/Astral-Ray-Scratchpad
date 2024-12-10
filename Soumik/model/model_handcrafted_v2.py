@@ -8,12 +8,24 @@ respFile = f"model/data/{bin_factor}/class_rmf_v1.rmf"
 background = "model/data/reference/background_allevents.fits"
 
 
+def spec_mod(spectrum: Spectrum, ignore_list: List[str]):
+    for ign in ignore_list:
+        spectrum.ignore(ign)
+
+    spectrum.response.gain.slope = "1.0043000"
+    spectrum.response.gain.offset = "0.0316000"
+    spectrum.response.gain.slope.frozen = True  # type: ignore
+    spectrum.response.gain.offset.frozen = True  # type: ignore
+
+    return spectrum
+
+
 def get_df_mg(class_file: str, return_model: bool = False) -> Tuple[float, float, float, Optional[List[Dict[str, float]]]]:
     reset_xspec()
 
     spectrum = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
-    spectrum.ignore("0.0-1.08")
-    spectrum.ignore("1.40-**")
+    spectrum = spec_mod(spectrum, ["0.0-1.08", "1.40-**"])
+
     model = Model("ga")
 
     model.gaussian.LineE = 1.2536  # type: ignore
@@ -31,8 +43,8 @@ def get_df_al(class_file: str, return_model: bool = False) -> Tuple[float, float
     reset_xspec()
 
     spectrum = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
-    spectrum.ignore("0.0-1.30")
-    spectrum.ignore("1.64-**")
+    spectrum = spec_mod(spectrum, ["0.0-1.30", "1.64-**"])
+
     model = Model("ga")
 
     # Setting values for Gaussian 1
@@ -51,8 +63,8 @@ def get_df_si(class_file: str, return_model: bool = False) -> Tuple[float, float
     reset_xspec()
 
     spectrum = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
-    spectrum.ignore("0.0-1.58")
-    spectrum.ignore("1.9-**")
+    spectrum = spec_mod(spectrum, ["0.0-1.58", "1.9-**"])
+
     model = Model("ga")
 
     # Setting values for Gaussian 1
@@ -71,8 +83,8 @@ def get_df_ca(class_file: str, return_model: bool = False) -> Tuple[float, float
     reset_xspec()
 
     spectrum = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
-    spectrum.ignore("0.0-3.2")
-    spectrum.ignore("4.2-**")
+    spectrum = spec_mod(spectrum, ["0.0-3.2", "4.2-**"])
+
     model = Model("ga")
 
     # Setting values for Gaussian 1
@@ -87,16 +99,16 @@ def get_df_ca(class_file: str, return_model: bool = False) -> Tuple[float, float
     return norm, chi_2, dof, model_plot
 
 
-def get_df_fe(class_file: str, return_model: bool = False) -> Tuple[float, float, float, Optional[List[Dict[str, float]]]]:
+def get_df_ti(class_file: str, return_model: bool = False) -> Tuple[float, float, float, Optional[List[Dict[str, float]]]]:
     reset_xspec()
 
     spectrum = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
-    spectrum.ignore("0.0-6.1")
-    spectrum.ignore("6.6-**")
+    spectrum = spec_mod(spectrum, ["0.0-4.2", "4.8-**"])
+
     model = Model("ga")
 
     # Setting values for Gaussian 1
-    model.gaussian.LineE = 6.40384  # type: ignore
+    model.gaussian.LineE = 4.51084  # type: ignore
     model.gaussian.Sigma = 0.05  # type: ignore
     model.gaussian.norm = 1  # type: ignore
     model.gaussian.LineE.frozen = True  # type: ignore
@@ -107,16 +119,16 @@ def get_df_fe(class_file: str, return_model: bool = False) -> Tuple[float, float
     return norm, chi_2, dof, model_plot
 
 
-def get_df_ti(class_file: str, return_model: bool = False) -> Tuple[float, float, float, Optional[List[Dict[str, float]]]]:
+def get_df_fe(class_file: str, return_model: bool = False) -> Tuple[float, float, float, Optional[List[Dict[str, float]]]]:
     reset_xspec()
 
     spectrum = Spectrum(class_file, backFile=background, respFile=respFile, arfFile=arfFile)
-    spectrum.ignore("0.0-4.2")
-    spectrum.ignore("4.8-**")
+    spectrum = spec_mod(spectrum, ["0.0-6.1", "6.6-**"])
+
     model = Model("ga")
 
     # Setting values for Gaussian 1
-    model.gaussian.LineE = 4.51084  # type: ignore
+    model.gaussian.LineE = 6.40384  # type: ignore
     model.gaussian.Sigma = 0.05  # type: ignore
     model.gaussian.norm = 1  # type: ignore
     model.gaussian.LineE.frozen = True  # type: ignore

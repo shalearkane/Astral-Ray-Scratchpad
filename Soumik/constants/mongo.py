@@ -11,6 +11,7 @@ COLLECTION_CLASS_FITS_FLARE_CLASSIFIED: Final[str] = "class_fits_flare_classifie
 COLLECTION_XSM_PRIMARY: Final[str] = "xsm_primary"
 COLLECTION_DATA_COLLECTION: Final[str] = "data_collection"
 COLLECTION_DATA_COLLECTION_V2: Final[str] = "data_collection_v2"
+COLLECTION_DATA_COLLECTION_V3: Final[str] = "data_collection_v3"
 
 COLLECTION_FIBONACCI_LAT_LON: Final[str] = "fibnacci_lat_lon"
 

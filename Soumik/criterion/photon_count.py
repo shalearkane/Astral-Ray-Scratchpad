@@ -5,9 +5,11 @@ import pandas as pd
 from astropy.io import fits
 from helpers.utilities import to_datetime_t
 from criterion.goes_solar_flare import get_flare_class
+from numpy import pi
+from astropy.table import Table
 
 
-def photon_count_and_flare_class(fits_file: str, start_channel: int = 15, end_channel: int = 800) -> Optional[Tuple[int, str, float]]:
+def photon_count_and_flare_class(fits_file: str, start_channel: int = 37, end_channel: int = 800) -> Optional[Tuple[int, str, float]]:
     """
     Sums the counts in the specified channel range for a given FITS file.
     """
@@ -41,6 +43,13 @@ def photon_count_from_hdul(hdul: HDUList, start_channel: int = 37, end_channel: 
     mask = (channels >= start_channel) & (channels <= end_channel)
     counts_in_range = counts[mask]
     return int(counts_in_range.sum())
+
+
+def scaling_factor(hdul: HDUList) -> float:
+    table = Table.read(hdul["SPECTRUM"])
+    altitude = float(table.meta["SAT_ALT"])
+    exposure = float(table.meta["EXPOSURE"])
+    return (12.5 * 1e4 * 12.5 * (round(exposure / 8.0) + 1) * 1e8) / (exposure * 8 * pi * (altitude * 1e4) ** 2)
 
 
 def photon_count(fits_file: str, start_channel: int = 37, end_channel: int = 800) -> int:

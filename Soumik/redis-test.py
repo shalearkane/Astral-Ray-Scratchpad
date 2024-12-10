@@ -5,7 +5,7 @@ from constants.redis_queue import REDIS_HOST, backend_1_check_queue
 
 db = Redis(host=REDIS_HOST)
 try:
-    json_item = Item.from_json_data(id=1, data={"_id": "67547045fc1f043674c87e44"})
+    json_item = Item.from_json_data(id=1, data={"_id": "6758728075f569d70cff2cf6", "clientId": "string"})
     backend_1_check_queue.add_item(db, json_item)
 except Exception:
     import traceback

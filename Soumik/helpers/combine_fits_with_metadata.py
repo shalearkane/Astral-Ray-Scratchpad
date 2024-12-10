@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Final, Tuple
 from astropy.table import Table
 from datetime import datetime
 from helpers.utilities import set_default_values_to_class_fits
-from criterion.photon_count import photon_count_from_hdul
+from criterion.photon_count import photon_count_from_hdul, scaling_factor
 
 CHANNELS: Final[int] = 2048
 
@@ -275,6 +275,7 @@ def combine_fits_with_meta(
             with fits.open(file_path) as hdul:
 
                 files_used += 1
+                hdul[1].data["COUNTS"] *= scaling_factor(hdul)  # type: ignore
                 weight = photon_count_from_hdul(hdul)
                 computed_metadata = process_hdul(hdul, metadata, weight, method)
                 comp_meta_avg = add_to_computed_metadata_average(comp_meta_avg, computed_metadata)
