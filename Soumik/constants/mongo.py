@@ -1,9 +1,10 @@
 from typing import Final
 
 # MongoDB connection details
-MONGO_URI: Final[str] = "mongodb://localhost:27017"
+MONGO_URI: Final[str] = "mongodb://192.168.32.59:27017"
 DATABASE_ISRO: Final[str] = "ISRO"
 COLLECTION_CLASS_FITS: Final[str] = "primary"
+COLLECTION_CLASS_JOB: Final[str] = "job"
 COLLECTION_CLASS_FITS_ACCEPTED: Final[str] = "class_fits_accepted"
 COLLECTION_CLASS_FITS_TEST_FITS: Final[str] = "test_fits"
 COLLECTION_CLASS_FITS_FLARE_CLASSIFIED: Final[str] = "class_fits_flare_classified"
