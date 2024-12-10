@@ -22,6 +22,9 @@ def reset_xspec():
 def model_to_model_plot(model: list) -> List[Dict[str, float]]:
     model_plot = list()
     for idx, h in enumerate(model):
+        if h == 0:
+            continue
+
         model_plot.append({"channelNumber": idx + 1, "count": h})
 
     return model_plot

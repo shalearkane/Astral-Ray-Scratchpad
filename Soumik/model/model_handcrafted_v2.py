@@ -145,6 +145,10 @@ def process_abundance_h_v2(class_file: str, return_model: bool = False) -> Dict[
     }
 
     if return_model:
+        # i.e. we're working on the redis queue
+        dict["intensity"] = dict["wt"]
+        dict.pop("wt")
+
         dict["fitting"] = {
             "mg": mg_model_plot,
             "al": al_model_plot,
