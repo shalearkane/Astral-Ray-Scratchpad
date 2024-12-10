@@ -4,10 +4,11 @@ from astropy.io.fits import HDUList
 import numpy as np
 from scipy.signal import find_peaks, savgol_filter
 
+element_kalpha_lines = {"na": 1.04, "mg": 1.25, "al": 1.48, "si": 1.74, "ca": 3.69, "ti": 4.51, "fe": 6.40}
+
 
 def generate_visible_peaks(hdul: HDUList) -> Dict[str, float]:
     tolerance = 0.05
-    element_kalpha_lines = {"Na": 1.04, "Mg": 1.25, "Al": 1.48, "Si": 1.74, "Ca": 3.69, "Ti": 4.51, "Fe": 6.40}
 
     try:
         data = hdul[1].data  # type: ignore

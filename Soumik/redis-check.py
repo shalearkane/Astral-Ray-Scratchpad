@@ -1,14 +1,13 @@
 from typing import Dict, List
 from redis_work_queue import Item
 from redis import Redis
-from Soumik.helpers import visual_peak
 from helpers.utilities import to_datetime_t
 from constants.output_dirs import OUTPUT_DIR_CLASS_FITS
-from constants.mongo import COLLECTION_CLASS_FITS
-from constants.redis_queue import REDIS_HOST, backend_fail_queue, backend_2_process_queue, backend_1_check_queue
+from constants.mongo import COLLECTION_CLASS_JOB
+from constants.redis_queue import REDIS_HOST, backend_fail_queue, backend_2_process_queue, backend_1_check_queue, step1_checks_job_queue
 
 from helpers.download import stream_file_from_file_server
-from Soumik.helpers.visual_peak import generate_visible_peaks
+from helpers.visual_peak import generate_visible_peaks, element_kalpha_lines
 from criterion.photon_count import photon_count_from_hdul
 from criterion.geotail import check_if_not_in_geotail
 
@@ -31,7 +30,7 @@ def run_checker():
                     "_id": doc["_id"],
                     "path": f"{OUTPUT_DIR_CLASS_FITS}/{doc["_id"]}.fits",
                 },
-                COLLECTION_CLASS_FITS,
+                COLLECTION_CLASS_JOB,
             )
 
             if not success:
@@ -56,7 +55,7 @@ def run_checker():
                     if key not in peaks.keys():
                         peaks[key] = list()
 
-                    peaks[key].append({"channelNumber": 100, "counts": val})
+                    peaks[key].append({"channelNumber": int(element_kalpha_lines[key] / 0.01361), "counts": val})
 
                 next_stage_input = {
                     "_id": doc["_id"],
@@ -67,12 +66,15 @@ def run_checker():
                     "peaks": peaks,
                 }
 
+                print(next_stage_input)
+
                 # print(f"{not_in_geotail} - {photon_count} - {si_visible_peak}")
 
                 if not_in_geotail and si_visible_peak:
                     print("accepted")
                     doc_item = Item.from_json_data(id=job.id, data=next_stage_input)
                     backend_2_process_queue.add_item(db, doc_item)
+                    step1_checks_job_queue.add_item(db, doc_item)
                 else:
                     print("rejected")
 

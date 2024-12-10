@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional, List, Dict
 from xspec import Xset, AllData, AllModels, AllChains, Fit, Plot
 from pandas import DataFrame
 
@@ -19,12 +19,26 @@ def reset_xspec():
     AllChains.clear()
 
 
-def fit() -> Tuple[float, float]:
+def model_to_model_plot(model: list) -> List[Dict[str, float]]:
+    model_plot = list()
+    for idx, h in enumerate(model):
+        model_plot.append({"channelNumber": idx + 1, "count": h})
+
+    return model_plot
+
+
+def fit(return_model: bool = False, plot_device: str = "/null") -> Tuple[float, float, Optional[List]]:
     Xset.allowPrompting = False
     Fit.nIterations = 1000
     Fit.perform()
 
-    return Fit.statistic, Fit.dof
+    if not return_model:
+        return Fit.statistic, Fit.dof, None
+
+    Plot.device = plot_device
+    Plot("model")
+
+    return Fit.statistic, Fit.dof, model_to_model_plot(Plot.model())
 
 
 def fit_and_plot(plot_device: str = "/null") -> Tuple[DataFrame, float, float]:

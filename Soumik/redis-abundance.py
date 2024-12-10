@@ -4,7 +4,7 @@ from constants.redis_queue import REDIS_HOST, backend_fail_queue, backend_2_proc
 from constants.output_dirs import OUTPUT_DIR_CLASS_FITS
 from constants.mongo import COLLECTION_CLASS_FITS
 from helpers.download import download_file_from_file_server
-from model.model_handcrafted import process_abundance_h
+from model.model_handcrafted_v2 import process_abundance_h_v2
 
 
 db = Redis(host=REDIS_HOST)
@@ -35,10 +35,9 @@ def run_checker():
                 backend_fail_queue.add_item(db, item)
                 continue
 
-            results = process_abundance_h(output_file_path)
-            print(results)
+            results = process_abundance_h_v2(output_file_path)
             results["_id"] = doc["_id"]
-            results_item = Item.from_json_data(results)
+            results_item = Item.from_json_data(id=job.id, data=results)
             backend_3_output_queue.add_item(db, results_item)
 
         except Exception:
