@@ -30,7 +30,7 @@ def get_class_fits_at_lat_lon(lat: float, lon: float) -> list[Dict[str, Any]]:
         ]
     }
 
-    results = class_fits_accepted.find(filter=filter)
+    results = class_fits_accepted.find(filter=filter, projection={"_id": 1, "path": 1, "visible_peaks": 1})
 
     return [doc for doc in results]
 
