@@ -1,0 +1,21 @@
+data -0.00_2.41.fits
+resp model/data/2048/class_rmf_v1.rmf
+arf model/data/2048/class_arf_v1.arf
+cpd /xw
+model voigt
+
+newpar 1 1.740
+freeze 1
+
+newpar 2 0.070 * sqrt(1.740/5.9)
+thaw 2
+
+newpar 3 4.8E-4
+freeze 3
+
+newpar 4 1.0
+thaw 4
+
+ignore **-1.58 1.9-**
+fit
+plot data model

@@ -20,6 +20,19 @@ def get_fits_plot(hdul: HDUList) -> List[Dict[str, float]]:
         return []
 
 
+def get_fits_plot_from_fits_file(fits_file: str) -> List[Dict[str, float]]:
+    with fits.open(fits_file, "readonly") as hdul:
+        return get_fits_plot(hdul)
+
+
+def get_fits_plot_array(fits_file: str) -> List[float]:
+    with fits.open(fits_file, "readonly") as hdul:
+        data = hdul[1].data  # type: ignore
+        counts = data["COUNTS"][60:800]
+
+        return list(counts)
+
+
 if __name__ == "__main__":
     directory = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/fibonacci-fits"
 

@@ -81,13 +81,17 @@ def run_checker():
 
                     f.write(json.dumps(next_stage_input))
 
-                if not_in_geotail and si_visible_peak:
-                    print("accepted")
-                    doc_item = Item.from_json_data(id=job.id(), data=next_stage_input)
-                    backend_2_process_queue.add_item(db, doc_item)
-                    step1_checks_job_queue.add_item(db, doc_item)
-                else:
-                    print("rejected")
+                doc_item = Item.from_json_data(id=job.id(), data=next_stage_input)
+                backend_2_process_queue.add_item(db, doc_item)
+                step1_checks_job_queue.add_item(db, doc_item)
+
+                # if not_in_geotail and si_visible_peak:
+                #     print("accepted")
+                #     doc_item = Item.from_json_data(id=job.id(), data=next_stage_input)
+                #     backend_2_process_queue.add_item(db, doc_item)
+                #     step1_checks_job_queue.add_item(db, doc_item)
+                # else:
+                #     print("rejected")
 
         except Exception:
             import traceback
