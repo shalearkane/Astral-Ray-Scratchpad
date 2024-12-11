@@ -12,8 +12,10 @@ COLLECTION_XSM_PRIMARY: Final[str] = "xsm_primary"
 COLLECTION_DATA_COLLECTION: Final[str] = "data_collection"
 COLLECTION_DATA_COLLECTION_V2: Final[str] = "data_collection_v2"
 COLLECTION_DATA_COLLECTION_V3: Final[str] = "data_collection_v3"
+COLLECTION_DATA_COLLECTION_V4: Final[str] = "data_collection_v4"
 
 COLLECTION_FIBONACCI_LAT_LON: Final[str] = "fibnacci_lat_lon"
+COLLECTION_FIBONACCI_LAT_LON_V2: Final[str] = "fibnacci_lat_lon_v2"
 
 KEY_PASSED_CHECK: Final[str] = "passed_check"
 KEY_IS_IN_GEOTAIL: Final[str] = "is_in_geotail"

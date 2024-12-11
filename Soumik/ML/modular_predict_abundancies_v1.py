@@ -21,12 +21,12 @@ import xgboost as xgb
 import pickle
 import os
 
-model_al_path="/home/pg/Documents/Astral-Ray-Scratchpad/Soumik/ML/Trained_model/true_wt_al_model_final_new.pkl"
-model_fe_path="/home/pg/Documents/Astral-Ray-Scratchpad/Soumik/ML/Trained_model/true_wt_fe_model_final_new.pkl"
-model_mg_path="/home/pg/Documents/Astral-Ray-Scratchpad/Soumik/ML/Trained_model/true_wt_mg_model_final_new.pkl"
-model_si_path="/home/pg/Documents/Astral-Ray-Scratchpad/Soumik/ML/Trained_model/true_wt_si_model_final_new.pkl"
+model_al_path = "/home/pg/Documents/Astral-Ray-Scratchpad/Soumik/ML/Trained_model/true_wt_al_model_final_new.pkl"
+model_fe_path = "/home/pg/Documents/Astral-Ray-Scratchpad/Soumik/ML/Trained_model/true_wt_fe_model_final_new.pkl"
+model_mg_path = "/home/pg/Documents/Astral-Ray-Scratchpad/Soumik/ML/Trained_model/true_wt_mg_model_final_new.pkl"
+model_si_path = "/home/pg/Documents/Astral-Ray-Scratchpad/Soumik/ML/Trained_model/true_wt_si_model_final_new.pkl"
 
-json_path='/content/drive/MyDrive/inter_IIT_ISRO/ISRO.data_collection_v3.json'
+json_path = "/content/drive/MyDrive/inter_IIT_ISRO/ISRO.data_collection_v3.json"
 
 # area_path='/content/drive/MyDrive/inter_IIT_ISRO/sampled-curve.txt'
 
@@ -58,7 +58,8 @@ json_path='/content/drive/MyDrive/inter_IIT_ISRO/ISRO.data_collection_v3.json'
 #         else:
 #             return "Maria - Basaltic Plains"
 
-def classify_lunar_feature(latitude, longitude):
+
+def classify_lunar_feature(latitude: float, longitude: float):
     # Primary classification: Highlands vs. Maria
     if (40 <= latitude <= 90 or -90 <= latitude <= -40) and -180 <= longitude <= 180:
         primary_class = "Highlands"
@@ -84,9 +85,11 @@ def classify_lunar_feature(latitude, longitude):
         else:
             return "Maria - Basaltic Plains"
 
-def red_chi_2(element,df):
-  df[f'red_chi_2_{element}']=df[f'chi_2_{element}']/(df[f'dof_{element}'])
-  return df
+
+def red_chi_2(element: str, df: pd.DataFrame):
+    df[f"red_chi_2_{element}"] = df[f"chi_2_{element}"] / (df[f"dof_{element}"])
+    return df
+
 
 def expand_dict_column(df, column_name, prefix):
     """
@@ -116,50 +119,109 @@ def expand_dict_column(df, column_name, prefix):
 
     return df
 
+
 model_paths = {
     "model_al": model_al_path,
     "model_fe": model_fe_path,
     "model_mg": model_mg_path,
-    "model_si":model_si_path,
+    "model_si": model_si_path,
 }
 
 # Define the feature sets for each model
 features = {
     "model_al": [
-        'wt_al', 'wt_si', 'photon_counts',
-       'solar_zenith_angle', 'emission_angle', 'altitude', 'exposure',
-        'peak_si_c','peak_mg_c','peak_al_c','peak_ti_c','peak_fe_c','peak_ca_c', 'latitude', 'longitude',
-        'Region_Highlands - Craters',
-       'Region_Highlands - Mountain Ranges', 'Region_Maria - Basaltic Plains',
-       'Region_Maria - Lunar Domes', 'Region_Maria - Rilles'
+        "wt_al",
+        "wt_si",
+        "photon_counts",
+        "solar_zenith_angle",
+        "emission_angle",
+        "altitude",
+        "exposure",
+        "peak_si_c",
+        "peak_mg_c",
+        "peak_al_c",
+        "peak_ti_c",
+        "peak_fe_c",
+        "peak_ca_c",
+        "latitude",
+        "longitude",
+        "Region_Highlands - Craters",
+        "Region_Highlands - Mountain Ranges",
+        "Region_Maria - Basaltic Plains",
+        "Region_Maria - Lunar Domes",
+        "Region_Maria - Rilles",
     ],
     "model_fe": [
-        'wt_mg', 'wt_al', 'wt_si','wt_fe', 'photon_counts',
-       'solar_zenith_angle', 'emission_angle', 'altitude', 'exposure',
-        'peak_si_c','peak_mg_c','peak_al_c','peak_ti_c','peak_fe_c','peak_ca_c', 'latitude', 'longitude',
-        'Region_Highlands - Craters',
-       'Region_Highlands - Mountain Ranges', 'Region_Maria - Basaltic Plains',
-       'Region_Maria - Lunar Domes', 'Region_Maria - Rilles'
+        "wt_mg",
+        "wt_al",
+        "wt_si",
+        "wt_fe",
+        "photon_counts",
+        "solar_zenith_angle",
+        "emission_angle",
+        "altitude",
+        "exposure",
+        "peak_si_c",
+        "peak_mg_c",
+        "peak_al_c",
+        "peak_ti_c",
+        "peak_fe_c",
+        "peak_ca_c",
+        "latitude",
+        "longitude",
+        "Region_Highlands - Craters",
+        "Region_Highlands - Mountain Ranges",
+        "Region_Maria - Basaltic Plains",
+        "Region_Maria - Lunar Domes",
+        "Region_Maria - Rilles",
     ],
     "model_mg": [
-'wt_mg', 'wt_al', 'wt_si', 'photon_counts',
-       'solar_zenith_angle', 'emission_angle', 'altitude', 'exposure',
-        'peak_si_c','peak_mg_c','peak_al_c','peak_ti_c','peak_fe_c','peak_ca_c', 'latitude', 'longitude',
-        'Region_Highlands - Craters',
-       'Region_Highlands - Mountain Ranges', 'Region_Maria - Basaltic Plains',
-       'Region_Maria - Lunar Domes', 'Region_Maria - Rilles'
-
+        "wt_mg",
+        "wt_al",
+        "wt_si",
+        "photon_counts",
+        "solar_zenith_angle",
+        "emission_angle",
+        "altitude",
+        "exposure",
+        "peak_si_c",
+        "peak_mg_c",
+        "peak_al_c",
+        "peak_ti_c",
+        "peak_fe_c",
+        "peak_ca_c",
+        "latitude",
+        "longitude",
+        "Region_Highlands - Craters",
+        "Region_Highlands - Mountain Ranges",
+        "Region_Maria - Basaltic Plains",
+        "Region_Maria - Lunar Domes",
+        "Region_Maria - Rilles",
     ],
     "model_si": [
-  'wt_si', 'photon_counts',
-       'solar_zenith_angle', 'emission_angle', 'altitude', 'exposure',
-        'peak_si_c','peak_mg_c','peak_al_c','peak_ti_c','peak_fe_c','peak_ca_c', 'latitude', 'longitude',
-        'Region_Highlands - Craters',
-       'Region_Highlands - Mountain Ranges', 'Region_Maria - Basaltic Plains',
-       'Region_Maria - Lunar Domes', 'Region_Maria - Rilles','Region_Highlands - Valleys'
-]
-
+        "wt_si",
+        "photon_counts",
+        "solar_zenith_angle",
+        "emission_angle",
+        "altitude",
+        "exposure",
+        "peak_si_c",
+        "peak_mg_c",
+        "peak_al_c",
+        "peak_ti_c",
+        "peak_fe_c",
+        "peak_ca_c",
+        "latitude",
+        "longitude",
+        "Region_Highlands - Craters",
+        "Region_Highlands - Mountain Ranges",
+        "Region_Maria - Basaltic Plains",
+        "Region_Maria - Lunar Domes",
+        "Region_Maria - Rilles",
+        "Region_Highlands - Valleys",
+    ],
 }
+
 
 def one_hot_encode_region(df, column_name):
     """
@@ -176,12 +238,12 @@ def one_hot_encode_region(df, column_name):
     """
     # Predefined categories for one-hot encoding
     allowed_categories = [
-        'Highlands - Craters',
-        'Highlands - Mountain Ranges',
-        'Maria - Basaltic Plains',
-        'Maria - Lunar Domes',
-        'Maria - Rilles',
-        "Highlands - Valleys"
+        "Highlands - Craters",
+        "Highlands - Mountain Ranges",
+        "Maria - Basaltic Plains",
+        "Maria - Lunar Domes",
+        "Maria - Rilles",
+        "Highlands - Valleys",
     ]
 
     # Check if the column exists in the DataFrame
@@ -190,77 +252,76 @@ def one_hot_encode_region(df, column_name):
 
     # One-hot encoding logic
     for category in allowed_categories:
-        encoded_column = f'Region_{category}'
+        encoded_column = f"Region_{category}"
         df[encoded_column] = (df[column_name] == category).astype(int)
 
     return df
 
-def abun_pred(json_path,model_paths,features):
-  df=pd.read_json(json_path)
 
-#   df=df.iloc[:10]
+def abun_pred(json_path, model_paths, features):
+    df = pd.read_json(json_path)
 
-  df=expand_dict_column(df,"wt","wt_")
-  df=expand_dict_column(df,"dof","dof_")
-  df=expand_dict_column(df,"chi_2","chi_2_")
-  df=df=expand_dict_column(df,"computed_metadata","")
-  # print(df.columns)
-  df['Region']=df.apply(lambda row: classify_lunar_feature(row['latitude'],row['longitude']),axis=1)
+    #   df=df.iloc[:10]
 
-  df=red_chi_2('mg',df)
-  df=red_chi_2('al',df)
-  df=red_chi_2('si',df)
-  df=red_chi_2('fe',df)
-  df=red_chi_2('ti',df)
-  df=red_chi_2('ca',df)
+    df = expand_dict_column(df, "wt", "wt_")
+    df = expand_dict_column(df, "dof", "dof_")
+    df = expand_dict_column(df, "chi_2", "chi_2_")
+    df = df = expand_dict_column(df, "computed_metadata", "")
+    # print(df.columns)
+    df["Region"] = df.apply(lambda row: classify_lunar_feature(row["latitude"], row["longitude"]), axis=1)
 
-  data=one_hot_encode_region(df,'Region')
+    df = red_chi_2("mg", df)
+    df = red_chi_2("al", df)
+    df = red_chi_2("si", df)
+    df = red_chi_2("fe", df)
+    df = red_chi_2("ti", df)
+    df = red_chi_2("ca", df)
 
-  data['emission_angle']=90-data['emission_angle']
-  data['solar_zenith_angle']=90-data['solar_zenith_angle']
+    data = one_hot_encode_region(df, "Region")
+
+    data["emission_angle"] = 90 - data["emission_angle"]
+    data["solar_zenith_angle"] = 90 - data["solar_zenith_angle"]
+
+    data["lat"] = data["latitude"]
+    data["long"] = data["longitude"]
+    # data=data.drop(columns=['Region','Region_Highlands - General'])
+    # print(data.columns)
+    # print(data.head())
+    predictions = {}
+
+    for model_name, model_path in model_paths.items():
+        # Check if the model file exists
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"Model file for {model_name} not found at path: {model_path}")
+
+        # Load the model using pickle
+        with open(model_path, "rb") as file:
+            model = pickle.load(file)
+
+        # Retrieve the feature set for the current model
+        feature_set = features[model_name]
+
+        # Check if all required features are present in the data
+        missing_features = [feature for feature in feature_set if feature not in data.columns]
+        if missing_features:
+            raise ValueError(f"Missing features for {model_name}: {missing_features}")
+
+        # Prepare the input data for prediction
+        model_input = data[feature_set]
+
+        # Make predictions
+        preds = model.predict(model_input)
+
+        # Store the predictions with a descriptive column name
+        prediction_column = f"{model_name}_prediction"
+        predictions[prediction_column] = preds
+
+    predictions_df = pd.DataFrame(predictions)
+    combined_df = pd.concat([data[["latitude", "longitude", "wt_fe", "wt_al", "wt_mg", "wt_si"]], predictions_df], axis=1)
+    # print(combined_df.columns)
+    combined_df_json = combined_df.to_json(orient="records")
+    return combined_df_json
+    # combined_df.to_csv(output_path)
 
 
-
-  data['lat']=data['latitude']
-  data['long']=data['longitude']
-  # data=data.drop(columns=['Region','Region_Highlands - General'])
-  # print(data.columns)
-  # print(data.head())
-  predictions = {}
-
-  for model_name, model_path in model_paths.items():
-      # Check if the model file exists
-      if not os.path.exists(model_path):
-          raise FileNotFoundError(f"Model file for {model_name} not found at path: {model_path}")
-
-      # Load the model using pickle
-      with open(model_path, 'rb') as file:
-          model = pickle.load(file)
-
-      # Retrieve the feature set for the current model
-      feature_set = features[model_name]
-
-      # Check if all required features are present in the data
-      missing_features = [feature for feature in feature_set if feature not in data.columns]
-      if missing_features:
-          raise ValueError(f"Missing features for {model_name}: {missing_features}")
-
-     # Prepare the input data for prediction
-      model_input = data[feature_set]
-
-      # Make predictions
-      preds = model.predict(model_input)
-
-      # Store the predictions with a descriptive column name
-      prediction_column = f"{model_name}_prediction"
-      predictions[prediction_column] = preds
-
-  predictions_df = pd.DataFrame(predictions)
-  combined_df = pd.concat([data[['latitude','longitude','wt_fe','wt_al','wt_mg','wt_si']], predictions_df], axis=1)
-  # print(combined_df.columns)
-  combined_df_json= combined_df.to_json(orient='records')
-  return combined_df_json
-  # combined_df.to_csv(output_path)
-
-print(abun_pred(json_path,model_paths,features))
-
+print(abun_pred(json_path, model_paths, features))

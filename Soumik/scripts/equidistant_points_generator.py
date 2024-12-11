@@ -27,10 +27,10 @@ def fibonacci_sphere(samples: int) -> List[Tuple[str, str]]:
         latitude = math.degrees(phi - math.pi / 2)  # Shift latitude to [-90, 90]
         longitude = math.degrees(theta % (2 * math.pi))  # Wrap longitude to [0, 360]
 
-        if abs(latitude) > 85 or abs(longitude) > 175:
+        if abs(latitude) > 85 or longitude > 355 or longitude < 5:
             continue
 
-        longitude -= 176
+        longitude -= 180
 
         points.append((f"{latitude:.2f}", f"{longitude:.2f}"))
         # points.append((latitude, longitude))
@@ -42,7 +42,7 @@ def main() -> None:
     """Generates points, formats them, and stores them in MongoDB."""
     try:
         # Connect to MongoDB
-        collection = pymongo.MongoClient("mongodb://172.20.101.53:27017")["ISRO"]["fibnacci_lat_lon"]
+        collection = pymongo.MongoClient("mongodb://192.168.156.59:27017")["ISRO"]["fibnacci_lat_lon_v2"]
 
         # Create unique compound index on latitude and longitude
         collection.create_index([("latitude", pymongo.ASCENDING), ("longitude", pymongo.ASCENDING)], unique=True)
@@ -55,7 +55,6 @@ def main() -> None:
                 "longitude": longitude,
                 "status": False,
                 "last_served": datetime.datetime(1970, 1, 1),
-                "request_count": 0,
             }
             points_data.append(point_data)
 
