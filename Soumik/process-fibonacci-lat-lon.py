@@ -14,7 +14,7 @@ from pymongo.collection import Collection
 from typing import Final
 from time import sleep
 
-NUM_PROCESSES: Final[int] = 8
+NUM_PROCESSES: Final[int] = 32
 
 
 def save_to_mongo(latitude: str, longitude: str, doc: Dict[str, Any], fibonacci_collection: Collection):
@@ -35,7 +35,7 @@ def get_job_from_mongo(fibonacci_collection: Collection) -> Tuple[str, str]:
 
 
 def generate_combined_fits_for_lat_lon(worker_id: int, redo: bool):
-    data_collection = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_DATA_COLLECTION_V4]
+    data_collection = MongoClient(MONGO_URI)[DATABASE_ISRO][COLLECTION_FIBONACCI_LAT_LON_V2]
 
     while True:
         latitude_str, longitude_str = get_job_from_mongo(data_collection)
