@@ -198,7 +198,7 @@ def one_hot_encode_region(df, column_name):
 def abun_pred(json_path,model_paths,features):
   df=pd.read_json(json_path)
 
-  df=df.iloc[:10]
+#   df=df.iloc[:10]
 
   df=expand_dict_column(df,"wt","wt_")
   df=expand_dict_column(df,"dof","dof_")
