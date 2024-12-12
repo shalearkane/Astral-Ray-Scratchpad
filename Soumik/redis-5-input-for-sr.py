@@ -56,7 +56,7 @@ def get_all_points_from_mongo(
 
 
 def generate_rectangle_on_sphere(lat: float, lon: float) -> BOUNDING_BOX:
-    return BOUNDING_BOX(30, 30, 10, 30, 10, 50, 30, 50)
+    return BOUNDING_BOX(30, 30, 25, 30, 25, 35, 30, 35)
 
 
 def run_mapper():
@@ -69,7 +69,22 @@ def run_mapper():
 
             patch = get_all_points_from_mongo(generate_rectangle_on_sphere(doc["lat"], doc["lon"]))
             print(patch)
-            results = {"patch": patch}
+            results = {
+                "patch": patch,
+                "box": {
+                    "topLeft": {
+                        "lat": 30,
+                        "lon": 30,
+                    },
+                    "bottomLeft": {"lat": 25, "lon": 30},
+                    "bottomRight": {
+                        "lat": 25,
+                        "lon": 35,
+                    },
+                    "topRight": {"lat": 30, "lon": 35},
+                },
+            }
+
             results["clientId"] = doc["clientId"]
             results_item = Item.from_json_data(id=job.id(), data=results)
 

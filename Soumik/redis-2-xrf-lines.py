@@ -2,10 +2,11 @@ from redis_work_queue import Item
 from redis import Redis
 from constants.redis_queue import (
     REDIS_HOST,
-    backend_fail_queue,
-    backend_2_process_queue,
-    backend_3_output_queue,
+    backend_0_fail_queue,
+    backend_2_xrf_line_queue,
+    backend_3_prediction_queue,
     step2_xrf_line_intensity_job_queue,
+    backend_5_sr_process_queue,
 )
 from constants.output_dirs import OUTPUT_DIR_JOB_FITS
 from constants.mongo import COLLECTION_CLASS_JOB
@@ -19,7 +20,7 @@ db = Redis(host=REDIS_HOST)
 def run_checker():
     while True:
         print("Waiting for job ...")
-        job: Item = backend_2_process_queue.lease(db, 5)  # type: ignore
+        job: Item = backend_2_xrf_line_queue.lease(db, 5)  # type: ignore
         try:
             doc = job.data_json()
             print(f"starting {doc}")
@@ -38,7 +39,7 @@ def run_checker():
             if not success:
                 print("download failed")
                 item = Item.from_json_data({"_id": job.id(), "stage": "PROCESS"})
-                backend_fail_queue.add_item(db, item)
+                backend_0_fail_queue.add_item(db, item)
                 continue
 
             results = process_abundance_h_v2(output_file_path, True)
@@ -50,15 +51,18 @@ def run_checker():
 
                 f.write(json.dumps(results))
 
-            backend_3_output_queue.add_item(db, results_item)
+            backend_3_prediction_queue.add_item(db, results_item)
             step2_xrf_line_intensity_job_queue.add_item(db, results_item)
+
+            sr_input = Item.from_json_data(id=job.id(), data={"clientId": doc["clientId"], "lat": 23.0, "lon": 24})
+            backend_5_sr_process_queue.add_item(db, sr_input)
 
         except Exception:
             import traceback
 
             print(traceback.format_exc())
         finally:
-            backend_2_process_queue.complete(db, job)
+            backend_2_xrf_line_queue.complete(db, job)
 
 
 if __name__ == "__main__":

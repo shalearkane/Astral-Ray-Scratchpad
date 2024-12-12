@@ -6,10 +6,11 @@ step3_x2_abund_job_queue = WorkQueue(KeyPrefix("STEP3_X2_ABUND_JOB_QUEUE"))
 create_job_queue = WorkQueue(KeyPrefix("CREATE_JOB_QUEUE"))
 sr_process = WorkQueue(KeyPrefix("SR_PROCESS"))
 
-backend_fail_queue = WorkQueue(KeyPrefix("BACKEND_FAIL"))
-backend_2_process_queue = WorkQueue(KeyPrefix("BACKEND_PROCESS"))
-backend_3_output_queue = WorkQueue(KeyPrefix("BACKEND_OUTPUT"))
-backend_1_check_queue = WorkQueue(KeyPrefix("BACKEND_CHECK"))
+backend_0_fail_queue = WorkQueue(KeyPrefix("BACKEND_FAIL"))
+backend_1_filter_queue = WorkQueue(KeyPrefix("BACKEND_FILTER"))
+backend_2_xrf_line_queue = WorkQueue(KeyPrefix("BACKEND_XRF_LINE"))
+backend_3_prediction_queue = WorkQueue(KeyPrefix("BACKEND_PREDICTION"))
+backend_4_x2_abund_compare_queue = WorkQueue(KeyPrefix("BACKEND_X2_ABUND"))
 backend_5_sr_process_queue = WorkQueue(KeyPrefix("BACKEND_SR"))
 
 

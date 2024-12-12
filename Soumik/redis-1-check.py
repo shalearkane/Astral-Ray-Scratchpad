@@ -7,9 +7,9 @@ from constants.output_dirs import OUTPUT_DIR_JOB_FITS
 from constants.mongo import COLLECTION_CLASS_JOB
 from constants.redis_queue import (
     REDIS_HOST,
-    backend_fail_queue,
-    backend_2_process_queue,
-    backend_1_check_queue,
+    backend_0_fail_queue,
+    backend_2_xrf_line_queue,
+    backend_1_filter_queue,
     step1_checks_job_queue,
     create_job_queue,
 )
@@ -82,7 +82,7 @@ def run_checker():
                     f.write(json.dumps(next_stage_input))
 
                 doc_item = Item.from_json_data(id=job.id(), data=next_stage_input)
-                backend_2_process_queue.add_item(db, doc_item)
+                backend_2_xrf_line_queue.add_item(db, doc_item)
                 step1_checks_job_queue.add_item(db, doc_item)
 
                 # if not_in_geotail and si_visible_peak:
@@ -98,7 +98,7 @@ def run_checker():
 
             print(traceback.format_exc())
         finally:
-            backend_1_check_queue.complete(db, job)
+            backend_1_filter_queue.complete(db, job)
 
 
 if __name__ == "__main__":
