@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Hashable, List
 import pandas as pd
 import pickle
 import os
@@ -203,7 +203,7 @@ def one_hot_encode_region(df: pd.DataFrame, column_name: str):
     return df
 
 
-def abundance_prediction_for_a_list_of_xrf_lines(xrf_lines: List[Dict[str, Any]]):
+def abundance_prediction_for_a_list_of_xrf_lines(xrf_lines: List[Dict[str, Any]]) -> List[dict[Hashable, Any]]:
     df = pd.DataFrame(xrf_lines)
 
     df = expand_dict_column(df, "wt", "wt_")
@@ -227,9 +227,7 @@ def abundance_prediction_for_a_list_of_xrf_lines(xrf_lines: List[Dict[str, Any]]
 
     data["lat"] = data["latitude"]
     data["long"] = data["longitude"]
-    # data=data.drop(columns=['Region','Region_Highlands - General'])
-    # print(data.columns)
-    # print(data.head())
+
     predictions = {}
 
     for model_name, model_path in MODEL_PATHS.items():
@@ -261,10 +259,15 @@ def abundance_prediction_for_a_list_of_xrf_lines(xrf_lines: List[Dict[str, Any]]
 
     predictions_df = pd.DataFrame(predictions)
     combined_df = pd.concat([data[["latitude", "longitude", "wt_fe", "wt_al", "wt_mg", "wt_si"]], predictions_df], axis=1)
-    # print(combined_df.columns)
-    combined_df_json = combined_df.to_json(orient="records")
+
+    combined_df_json = combined_df.to_dict(orient="records")
     return combined_df_json
-    # combined_df.to_csv(output_path)
+
+
+def abundance_prediction(d: Dict[str, Any]) -> Dict[str, Any]:
+    abundances = abundance_prediction_for_a_list_of_xrf_lines([d])
+
+    return abundances[0]  # type: ignore
 
 
 if __name__ == "__main__":

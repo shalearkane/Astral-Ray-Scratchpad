@@ -1,24 +1,13 @@
-from typing import Dict, List
+from typing import Any, Dict
 from redis_work_queue import Item
 from redis import Redis
-from helpers.fits_get_plot import get_fits_plot
-from helpers.utilities import to_datetime_t
-from constants.output_dirs import OUTPUT_DIR_JOB_FITS
+from ML.modular_predict_abundancies_v1 import abundance_prediction
+from helpers.combine_fits_with_metadata import get_latitude_longitude_from_hdul, hdul_meta_to_dict, process_hdul
 from constants.mongo import COLLECTION_CLASS_JOB
-from constants.redis_queue import (
-    REDIS_HOST,
-    backend_0_fail_queue,
-    backend_3_prediction_queue,
-    backend_2_xrf_line_queue,
-    backend_1_filter_queue,
-    step1_checks_job_queue,
-    create_job_queue,
-)
+from constants.redis_queue import REDIS_HOST, backend_3_prediction_queue, step3_ml_prediction_job_queue, backend_4_x2_abund_compare_queue
 
 from helpers.download import stream_file_from_file_server
-from helpers.visual_peak import generate_visible_peaks, element_kalpha_lines
-from criterion.photon_count import photon_count_from_hdul
-from criterion.geotail import check_if_not_in_geotail
+from helpers.visual_peak import generate_visible_peaks
 
 from astropy.io import fits
 from io import BytesIO
@@ -31,75 +20,56 @@ def run_checker():
         print("Waiting for job ...")
         job: Item = backend_3_prediction_queue.lease(db, 5)  # type: ignore
         try:
-            doc = job.data_json()
-            print(f"starting {doc}")
+            abundance_dict = job.data_json()
+            abundance_dict.pop("fitting")
+            print(abundance_dict)
+            print(f"starting {abundance_dict}")
             print(job.id())
 
             success, fits_bytes = stream_file_from_file_server(
                 {
                     "_id": job.id(),
-                    "path": f"{OUTPUT_DIR_JOB_FITS}/{job.id()}.fits",
                 },
                 COLLECTION_CLASS_JOB,
             )
 
-            # if not success:
-            #     print("download failed")
-            #     item = Item.from_json_data({"_id": doc["_id"], "stage": "CHECK"})
-            #     backend_fail_queue.add_item(db, item)
-            #     continue
-
             with fits.open(BytesIO(fits_bytes)) as hdul:
-                print("checking ...")
-                metadata = hdul[1].header  # type: ignore
-                start_time = to_datetime_t(metadata["STARTIME"])
-                end_time = to_datetime_t(metadata["ENDTIME"])
-
-                not_in_geotail = check_if_not_in_geotail(start_time) and check_if_not_in_geotail(end_time)
-                photon_count = photon_count_from_hdul(hdul)
                 visible_peaks = generate_visible_peaks(hdul)
-                si_visible_peak = "si" in visible_peaks.keys()
-                peaks: Dict[str, List[Dict[str, float]]] = dict()
+                latitude, longitude = get_latitude_longitude_from_hdul(hdul)
+                computed_metadata = process_hdul(hdul, {"visible_peaks": visible_peaks}, 1, method="average")
 
-                for key, val in visible_peaks.items():
-                    if key not in peaks.keys():
-                        peaks[key] = list()
-
-                    peaks[key].append({"channelNumber": int(element_kalpha_lines[key] / 0.01361), "count": float(val)})
-
-                next_stage_input = {
-                    "clientId": doc["clientId"],
-                    "geotail": not not_in_geotail,
-                    "photonCount": photon_count,
-                    "siVisiblePeak": si_visible_peak,
-                    "fitsPlot": get_fits_plot(hdul),
-                    "peaks": peaks,
+                prediction_input: Dict[str, Any] = {
+                    "wt": abundance_dict["intensity"],
+                    "chi_2": abundance_dict["chi_2"],
+                    "dof": abundance_dict["dof"],
+                    "photon_count": int(computed_metadata.photon_counts.sum()),
+                    "computed_metadata": hdul_meta_to_dict(computed_metadata),
+                    "latitude": latitude,
+                    "longitude": longitude,
                 }
 
-                print(next_stage_input)
-                with open("redis-check.json", "w") as f:
-                    import json
+                prediction_output = abundance_prediction(prediction_input)
+                print(f"prediction output: {prediction_output}")
+                next_stage_input = {
+                    "clientId": abundance_dict["clientId"],
+                    "wt": {
+                        "mg": prediction_output["model_mg_prediction"],
+                        "al": prediction_output["model_al_prediction"],
+                        "si": prediction_output["model_si_prediction"],
+                        "fe": prediction_output["model_fe_prediction"],
+                    },
+                }
 
-                    f.write(json.dumps(next_stage_input))
-
-                doc_item = Item.from_json_data(id=job.id(), data=next_stage_input)
-                backend_2_xrf_line_queue.add_item(db, doc_item)
-                step1_checks_job_queue.add_item(db, doc_item)
-
-                # if not_in_geotail and si_visible_peak:
-                #     print("accepted")
-                #     doc_item = Item.from_json_data(id=job.id(), data=next_stage_input)
-                #     backend_2_process_queue.add_item(db, doc_item)
-                #     step1_checks_job_queue.add_item(db, doc_item)
-                # else:
-                #     print("rejected")
+                next_stage_item = Item.from_json_data(id=job.id(), data=next_stage_input)
+                step3_ml_prediction_job_queue.add_item(db, next_stage_item)
+                backend_4_x2_abund_compare_queue.add_item(db, next_stage_item)
 
         except Exception:
             import traceback
 
             print(traceback.format_exc())
         finally:
-            backend_1_filter_queue.complete(db, job)
+            backend_3_prediction_queue.complete(db, job)
 
 
 if __name__ == "__main__":

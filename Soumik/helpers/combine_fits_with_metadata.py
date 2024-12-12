@@ -80,6 +80,13 @@ def hdul_meta_to_dict(hdul_meta: HDUL_META) -> dict:
     }
 
 
+def get_latitude_longitude_from_hdul(hdul) -> Tuple[float, float]:
+    meta = Table.read(hdul["SPECTRUM"]).meta
+    lat = float((meta["V0_LAT"] + meta["V1_LAT"] + meta["V2_LAT"] + meta["V3_LAT"]) / 4.0)
+    lon = float((meta["V0_LON"] + meta["V1_LON"] + meta["V2_LON"] + meta["V3_LON"]) / 4.0)
+    return lat, lon
+
+
 def process_hdul(hdul, metadata: Dict[str, Any], weight: int, method: str = "weighted_average") -> HDUL_META:
     computed_metadata = HDUL_META()
 
