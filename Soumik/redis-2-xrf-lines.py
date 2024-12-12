@@ -5,6 +5,7 @@ from constants.redis_queue import (
     backend_0_fail_queue,
     backend_2_xrf_line_queue,
     backend_3_prediction_queue,
+    backend_4_x2_abund_compare_queue,
     step2_xrf_line_intensity_job_queue,
     backend_5_sr_process_queue,
 )
@@ -52,6 +53,7 @@ def run_checker():
                 f.write(json.dumps(results))
 
             backend_3_prediction_queue.add_item(db, results_item)
+            backend_4_x2_abund_compare_queue.add_item(db, results_item)
             step2_xrf_line_intensity_job_queue.add_item(db, results_item)
 
             sr_input = Item.from_json_data(id=job.id(), data={"clientId": doc["clientId"], "lat": 23.0, "lon": 24})

@@ -1,104 +1,74 @@
-from typing import Dict, List
 from redis_work_queue import Item
 from redis import Redis
-from helpers.fits_get_plot import get_fits_plot
-from helpers.utilities import to_datetime_t
+from model.model_generic import process_abundance_x2
 from constants.output_dirs import OUTPUT_DIR_JOB_FITS
 from constants.mongo import COLLECTION_CLASS_JOB
-from constants.redis_queue import (
-    REDIS_HOST,
-    backend_0_fail_queue,
-    backend_2_xrf_line_queue,
-    backend_1_filter_queue,
-    step1_checks_job_queue,
-    create_job_queue,
-)
+from constants.redis_queue import REDIS_HOST, backend_4_x2_abund_compare_queue, step4_x2_abund_job_queue
 
-from helpers.download import stream_file_from_file_server
-from helpers.visual_peak import generate_visible_peaks, element_kalpha_lines
-from criterion.photon_count import photon_count_from_hdul
-from criterion.geotail import check_if_not_in_geotail
-
-from astropy.io import fits
-from io import BytesIO
+from helpers.download import download_file_from_file_server
+from os.path import join
 
 db = Redis(host=REDIS_HOST)
+background = "model/data/reference/background_allevents.fits"
+solar = "data-generated/client/some.txt"
+scatter_atable = "data-generated/client/some.fits"
 
 
 def run_checker():
     while True:
         print("Waiting for job ...")
-        job: Item = create_job_queue.lease(db, 5)  # type: ignore
+        job: Item = backend_4_x2_abund_compare_queue.lease(db, 5)  # type: ignore
         try:
-            doc = job.data_json()
-            print(f"starting {doc}")
+            input = job.data_json()
+            print(f"starting on {input}")
             print(job.id())
 
-            success, fits_bytes = stream_file_from_file_server(
-                {
-                    "_id": job.id(),
-                    "path": f"{OUTPUT_DIR_JOB_FITS}/{job.id()}.fits",
-                },
+            success = download_file_from_file_server(
+                {"_id": job.id(), "path": f"{job.id()}.fits"},
                 COLLECTION_CLASS_JOB,
+                OUTPUT_DIR_JOB_FITS,
             )
 
-            # if not success:
-            #     print("download failed")
-            #     item = Item.from_json_data({"_id": doc["_id"], "stage": "CHECK"})
-            #     backend_fail_queue.add_item(db, item)
-            #     continue
+            if not success:
+                print("could not download file")
+                raise Exception("could not download file")
 
-            with fits.open(BytesIO(fits_bytes)) as hdul:
-                print("checking ...")
-                metadata = hdul[1].header  # type: ignore
-                start_time = to_datetime_t(metadata["STARTIME"])
-                end_time = to_datetime_t(metadata["ENDTIME"])
+            class_l1 = join(OUTPUT_DIR_JOB_FITS, f"{job.id()}.fits")
 
-                not_in_geotail = check_if_not_in_geotail(start_time) and check_if_not_in_geotail(end_time)
-                photon_count = photon_count_from_hdul(hdul)
-                visible_peaks = generate_visible_peaks(hdul)
-                si_visible_peak = "si" in visible_peaks.keys()
-                peaks: Dict[str, List[Dict[str, float]]] = dict()
+            x2_abund_output = process_abundance_x2(class_l1, background, solar, scatter_atable)
+            stage_output = {
+                "clientId": input["cliendId"],
+                "wt": {
+                    "na": x2_abund_output["wt"]["Wt_Na"],
+                    "mg": x2_abund_output["wt"]["Wt_Mg"],
+                    "al": x2_abund_output["wt"]["Wt_Al"],
+                    "si": x2_abund_output["wt"]["Wt_Si"],
+                    "ca": x2_abund_output["wt"]["Wt_Ca"],
+                    "ti": x2_abund_output["wt"]["Wt_Ti"],
+                    "fe": x2_abund_output["wt"]["Wt_Fe"],
+                    "o": x2_abund_output["wt"]["Wt_O"],
+                },
+                "error": {
+                    "na": x2_abund_output["error"]["Wt_Na"],
+                    "mg": x2_abund_output["error"]["Wt_Mg"],
+                    "al": x2_abund_output["error"]["Wt_Al"],
+                    "si": x2_abund_output["error"]["Wt_Si"],
+                    "ca": x2_abund_output["error"]["Wt_Ca"],
+                    "ti": x2_abund_output["error"]["Wt_Ti"],
+                    "fe": x2_abund_output["error"]["Wt_Fe"],
+                    "o": x2_abund_output["error"]["Wt_O"],
+                },
+            }
 
-                for key, val in visible_peaks.items():
-                    if key not in peaks.keys():
-                        peaks[key] = list()
-
-                    peaks[key].append({"channelNumber": int(element_kalpha_lines[key] / 0.01361), "count": float(val)})
-
-                next_stage_input = {
-                    "clientId": doc["clientId"],
-                    "geotail": not not_in_geotail,
-                    "photonCount": photon_count,
-                    "siVisiblePeak": si_visible_peak,
-                    "fitsPlot": get_fits_plot(hdul),
-                    "peaks": peaks,
-                }
-
-                print(next_stage_input)
-                with open("redis-check.json", "w") as f:
-                    import json
-
-                    f.write(json.dumps(next_stage_input))
-
-                doc_item = Item.from_json_data(id=job.id(), data=next_stage_input)
-                backend_2_xrf_line_queue.add_item(db, doc_item)
-                step1_checks_job_queue.add_item(db, doc_item)
-
-                # if not_in_geotail and si_visible_peak:
-                #     print("accepted")
-                #     doc_item = Item.from_json_data(id=job.id(), data=next_stage_input)
-                #     backend_2_process_queue.add_item(db, doc_item)
-                #     step1_checks_job_queue.add_item(db, doc_item)
-                # else:
-                #     print("rejected")
+            stage_output_item = Item.from_json_data(id=job.id(), data=stage_output)
+            step4_x2_abund_job_queue.add_item(db, stage_output_item)
 
         except Exception:
             import traceback
 
             print(traceback.format_exc())
         finally:
-            backend_1_filter_queue.complete(db, job)
+            backend_4_x2_abund_compare_queue.complete(db, job)
 
 
 if __name__ == "__main__":

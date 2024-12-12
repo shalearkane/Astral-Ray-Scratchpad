@@ -52,7 +52,7 @@ def process_abundance_x2(
     Fit.query = "no"
     Fit.perform()
 
-    abundances = {"filename": "some", "lat": latitude, "lon": longitude, "wt": {}, "error": {}}
+    abundances = {"filename": class_l1.split("/")[-1], "lat": latitude, "lon": longitude, "wt": {}, "error": {}}
 
     for i in range(1, 11):
         param = model(i)
