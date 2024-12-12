@@ -12,7 +12,7 @@ from constants.redis_queue import (
 from constants.output_dirs import OUTPUT_DIR_JOB_FITS
 from constants.mongo import COLLECTION_CLASS_JOB
 from helpers.download import download_file_from_file_server
-from model.model_handcrafted_v2 import process_abundance_h_v2
+from model.model_handcrafted_v3 import process_abundance_h_v3
 
 
 db = Redis(host=REDIS_HOST)
@@ -43,7 +43,7 @@ def run_checker():
                 backend_0_fail_queue.add_item(db, item)
                 continue
 
-            results = process_abundance_h_v2(output_file_path, True)
+            results = process_abundance_h_v3(output_file_path, True)
             results["clientId"] = doc["clientId"]
             results_item = Item.from_json_data(id=job.id(), data=results)
 

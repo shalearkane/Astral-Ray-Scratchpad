@@ -4,7 +4,7 @@ from redis import Redis
 from ML.modular_predict_abundancies_v1 import abundance_prediction
 from helpers.combine_fits_with_metadata import get_latitude_longitude_from_hdul, hdul_meta_to_dict, process_hdul
 from constants.mongo import COLLECTION_CLASS_JOB
-from constants.redis_queue import REDIS_HOST, backend_3_prediction_queue, step3_ml_prediction_job_queue, backend_4_x2_abund_compare_queue
+from constants.redis_queue import REDIS_HOST, backend_3_prediction_queue, step3_ml_prediction_job_queue
 
 from helpers.download import stream_file_from_file_server
 from helpers.visual_peak import generate_visible_peaks
@@ -62,7 +62,6 @@ def run_checker():
 
                 next_stage_item = Item.from_json_data(id=job.id(), data=next_stage_input)
                 step3_ml_prediction_job_queue.add_item(db, next_stage_item)
-                backend_4_x2_abund_compare_queue.add_item(db, next_stage_item)
 
         except Exception:
             import traceback

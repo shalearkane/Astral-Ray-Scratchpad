@@ -37,7 +37,7 @@ def run_checker():
 
             x2_abund_output = process_abundance_x2(class_l1, background, solar, scatter_atable)
             stage_output = {
-                "clientId": input["cliendId"],
+                "clientId": input["clientId"],
                 "wt": {
                     "na": x2_abund_output["wt"]["Wt_Na"],
                     "mg": x2_abund_output["wt"]["Wt_Mg"],

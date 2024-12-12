@@ -5,36 +5,79 @@ import os
 import json
 
 MODEL_PATHS = {
-    "model_mg": "ML/Trained_model/true_wt_mg_model_final_new.pkl",
-    "model_al": "ML/Trained_model/true_wt_al_model_final_new.pkl",
-    "model_si": "ML/Trained_model/true_wt_si_model_final_new.pkl",
-    "model_fe": "ML/Trained_model/true_wt_fe_model_final_new.pkl",
+    "model_mg": "ML/Trained_model/true_wt_mg_model_alt_peak_angle.pkl",
+    "model_al": "ML/Trained_model/true_wt_al_model_alt_peak_angle.pkl",
+    "model_si": "ML/Trained_model/true_wt_si_model_alt_peak_angle.pkl",
+    "model_fe": "ML/Trained_model/true_wt_fe_model_alt_peak_angle.pkl",
 }
 
 # Define the feature sets for each model
 FEATURES = {
-   "model_al": [
-   'peak_si_h','peak_mg_h','peak_al_h', 'photon_counts',
-        'altitude', 'exposure','solar_zenith_angle','emission_angle',
-        'peak_si_c','peak_mg_c','peak_al_c','peak_ti_c','peak_fe_c','peak_ca_c'
+    "model_al": [
+        "peak_si_h",
+        "peak_mg_h",
+        "peak_al_h",
+        "photon_counts",
+        "altitude",
+        "exposure",
+        "solar_zenith_angle",
+        "emission_angle",
+        "peak_si_c",
+        "peak_mg_c",
+        "peak_al_c",
+        "peak_ti_c",
+        "peak_fe_c",
+        "peak_ca_c",
     ],
     "model_fe": [
-       'peak_si_h','peak_mg_h','peak_al_h','peak_fe_h', 'photon_counts',
-        'altitude', 'exposure','solar_zenith_angle','emission_angle',
-        'peak_si_c','peak_mg_c','peak_al_c','peak_ti_c','peak_fe_c','peak_ca_c'
+        "peak_si_h",
+        "peak_mg_h",
+        "peak_al_h",
+        "peak_fe_h",
+        "photon_counts",
+        "altitude",
+        "exposure",
+        "solar_zenith_angle",
+        "emission_angle",
+        "peak_si_c",
+        "peak_mg_c",
+        "peak_al_c",
+        "peak_ti_c",
+        "peak_fe_c",
+        "peak_ca_c",
     ],
     "model_mg": [
-'peak_si_h','peak_mg_h','peak_al_h', 'photon_counts',
-        'altitude', 'exposure','solar_zenith_angle','emission_angle',
-        'peak_si_c','peak_mg_c','peak_al_c','peak_ti_c','peak_fe_c','peak_ca_c'
-
+        "peak_si_h",
+        "peak_mg_h",
+        "peak_al_h",
+        "photon_counts",
+        "altitude",
+        "exposure",
+        "solar_zenith_angle",
+        "emission_angle",
+        "peak_si_c",
+        "peak_mg_c",
+        "peak_al_c",
+        "peak_ti_c",
+        "peak_fe_c",
+        "peak_ca_c",
     ],
     "model_si": [
-'peak_si_h','peak_mg_h','peak_al_h' ,'photon_counts',
-        'altitude', 'exposure','solar_zenith_angle','emission_angle',
-        'peak_si_c','peak_mg_c','peak_al_c','peak_ti_c','peak_fe_c','peak_ca_c'
-
-]
+        "peak_si_h",
+        "peak_mg_h",
+        "peak_al_h",
+        "photon_counts",
+        "altitude",
+        "exposure",
+        "solar_zenith_angle",
+        "emission_angle",
+        "peak_si_c",
+        "peak_mg_c",
+        "peak_al_c",
+        "peak_ti_c",
+        "peak_fe_c",
+        "peak_ca_c",
+    ],
 }
 
 
