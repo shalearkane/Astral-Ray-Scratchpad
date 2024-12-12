@@ -29,7 +29,7 @@ db = Redis(host=REDIS_HOST)
 def run_checker():
     while True:
         print("Waiting for job ...")
-        job: Item = create_job_queue.lease(db, 5)  # type: ignore
+        job: Item = backend_3_prediction_queue.lease(db, 5)  # type: ignore
         try:
             doc = job.data_json()
             print(f"starting {doc}")
