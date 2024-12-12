@@ -6,11 +6,12 @@ from astropy.io.fits import HDUList
 def get_fits_plot(hdul: HDUList) -> List[Dict[str, float]]:
     try:
         data = hdul[1].data  # type: ignore
-        counts = data["COUNTS"]
+        counts = data["COUNTS"][37:800]
         plot_info = list()
 
         for idx, count in enumerate(counts):
-            plot_info.append({"channelNumber": idx, "count": float(count)})
+            if count > 0:
+                plot_info.append({"channelNumber": idx + 37, "count": float(count)})
 
         return plot_info
     except Exception:

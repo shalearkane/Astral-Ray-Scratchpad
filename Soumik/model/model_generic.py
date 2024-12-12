@@ -5,7 +5,7 @@ from model.functions.xrf_localmodel import LocalModel_Parameters, create_xrf_loc
 
 
 def process_abundance_x2(
-    class_l1: str, background: str, solar: str, scatter_atable: str, bin_size: int = 2048, num_parallel_param: int = 2
+    class_l1: str, background: str, solar: str, scatter_atable: str, bin_size: int = 2048, num_parallel_param: int = 8
 ) -> dict:
     set_xset_settings(num_parallel_param)
     ignore_erange = ["0.9", "4.2"]
