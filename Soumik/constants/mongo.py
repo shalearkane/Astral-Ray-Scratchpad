@@ -19,3 +19,5 @@ COLLECTION_FIBONACCI_LAT_LON_V2: Final[str] = "fibnacci_lat_lon_v2"
 
 KEY_PASSED_CHECK: Final[str] = "passed_check"
 KEY_IS_IN_GEOTAIL: Final[str] = "is_in_geotail"
+
+COLLECTION_TEMP_FIBONACCI: Final[str] = "fibonacci_temp_process"
