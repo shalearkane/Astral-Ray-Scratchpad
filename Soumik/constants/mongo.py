@@ -1,7 +1,7 @@
 from typing import Final
 
 # MongoDB connection details
-MONGO_URI: Final[str] = "mongodb://192.168.156.59:27017"
+MONGO_URI: Final[str] = "mongodb://192.168.154.59:27017"
 DATABASE_ISRO: Final[str] = "ISRO"
 COLLECTION_CLASS_FITS: Final[str] = "primary"
 COLLECTION_CLASS_JOB: Final[str] = "job"

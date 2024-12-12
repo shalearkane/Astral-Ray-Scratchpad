@@ -11,4 +11,4 @@ backend_3_output_queue = WorkQueue(KeyPrefix("BACKEND_OUTPUT"))
 backend_1_check_queue = WorkQueue(KeyPrefix("BACKEND_CHECK"))
 
 
-REDIS_HOST = "192.168.156.116"
+REDIS_HOST = "192.168.154.116"
