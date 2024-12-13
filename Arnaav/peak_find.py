@@ -13,14 +13,14 @@ def process_fits(file_path, output_image="filtered_plot.png"):
     tolerance = 0.05
     targets = {"Na": 1.04, "Mg": 1.25, "Al": 1.48, "Si": 1.74, "Ca": 3.69, "Ti": 4.51, "Fe": 6.40}
 
-    output_image = os.path.join(f"output_pics/{file_path.split("/")[-1][:-5]}.png")
+    output_image = os.path.join(f"output_pics/combined/{file_path.split("/")[-1][:-5]}.png")
 
     try:
         with fits.open(file_path) as hdul:
-            data = hdul[1].data
+            data = hdul[1].data  # type: ignore
 
-            channels = data["CHANNEL"][70:300]
-            counts = data["COUNTS"][70:300]
+            channels = data["CHANNEL"][60:485]
+            counts = data["COUNTS"][60:485]
 
             min_value = np.min(counts)
             max_value = np.max(counts)
@@ -30,7 +30,7 @@ def process_fits(file_path, output_image="filtered_plot.png"):
             gain = 13.61 / 1000.0
             energy = channels * gain
 
-            peaks, _ = find_peaks(counts, distance=10, height=5)
+            peaks, _ = find_peaks(counts, distance=10, height=4)
             peak_energies = energy[peaks]
 
             results = {element: False for element in targets}
@@ -67,4 +67,8 @@ if __name__ == "__main__":
     result = process_fits(file_path)
     print(result)
 
-    # directory = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/fibonacci-fits"
+    directory = "/home/sm/Public/Inter-IIT/Astral-Ray-Scratchpad/Soumik/data-generated/plot"
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        if os.path.isfile(file_path):  # Check if it's a file
+            process_fits(file_path)

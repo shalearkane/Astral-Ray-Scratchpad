@@ -50,7 +50,9 @@ def convert_coordinates_to_float(
             lng_float = float(doc[longitude_field])
 
             # Update document with new float fields
-            result = collection.update_one({"_id": doc["_id"]}, {"$set": {new_lat_field: lat_float, new_lng_field: lng_float}})
+            result = collection.update_one(
+                {"_id": doc["_id"]}, {"$set": {"location": {"type": "Point", "coordinates": [lng_float, lat_float]}}}
+            )
 
             if result.modified_count > 0:
                 updated += 1
@@ -68,7 +70,7 @@ if __name__ == "__main__":
     # Connection details
     MONGO_URI = "mongodb://localhost:27017"
     DB_NAME = "ISRO"
-    COLLECTION_NAME = "fibonacci_temp_process"
+    COLLECTION_NAME = "fibnacci_lat_lon_v2"
 
     # Convert coordinates
     processed, updated = convert_coordinates_to_float(

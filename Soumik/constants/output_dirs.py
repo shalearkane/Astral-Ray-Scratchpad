@@ -12,5 +12,6 @@ OUTPUT_DIR_TRUTH_FITS = "data-generated/truth-fits"
 OUTPUT_DIR_GOES = "data-generated/goes"
 
 OUTPUT_DIR_TMP = "/tmp"
+OUTPUT_DIR_PLOT = "data-generated/plot"
 
 TO_PROCESS_FILE_INDEXES = "data-generated/file_indexes"
