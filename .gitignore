@@ -634,3 +634,5 @@ sd/sr/missing.csv
 sd/super_res/data.csv
 sd/super_res/data.json
 sd/super_res/output.csv
+
+sd/tmp/*

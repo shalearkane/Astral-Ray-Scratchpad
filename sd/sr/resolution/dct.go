@@ -106,10 +106,10 @@ func Process(sampleImg *[][]float64, missingPoints [][]int, delta, mu float64) *
 func Reconstruct(sampledImg *[][]float64) *[][]float64 {
 	// Get the missing pixels
 	kls := GetMissingPixels(sampledImg)
-	bar := progressbar.Default(int64(40))
+	bar := progressbar.Default(int64(20))
 
 	processingSampleImg := deepcopy.MustAnything(sampledImg).(*[][]float64)
-	for itr := 0; itr < 40; itr++ {
+	for itr := 0; itr < 20; itr++ {
 		processingSampleImg = Process(processingSampleImg, kls, 0.1, 0.01)
 		bar.Add(1)
 	}
@@ -335,10 +335,21 @@ func ElementMatricsToPointPixels(elementMatrices *geo.ElementMatrices) *[][]*geo
 
 func RunDCTFilling(pointPixels *[][]*geo.PointPixel) *[][]*geo.PointPixel {
 	elementMatrices := PointPixelsToElementMatrices(pointPixels)
+
+	// min := 1e9
+	// for _, row := range elementMatrices.Al {
+	// 	for _, cell := range row {
+	// 		if cell == 0.0 {
+	// 			continue
+	// 		}
+	// 		min = math.Min(min, cell)
+	// 	}
+	// }
+
 	max := Max(&elementMatrices.Al)
 	sampleImg := Remap(&elementMatrices.Al, 0, 1) // Normalizing
-	sampleImg = Reconstruct(&elementMatrices.Al)
-	sampleImg = Remap(sampleImg, 0, max) // DeNormalizing
+	reconstructedSampleImg := Reconstruct(sampleImg)
+	remappedReconstructedImg := Remap(reconstructedSampleImg, 0, max) // DeNormalizing
 
-	return ElementMatricsToPointPixels(&geo.ElementMatrices{Al: *sampleImg})
+	return ElementMatricsToPointPixels(&geo.ElementMatrices{Al: *remappedReconstructedImg})
 }

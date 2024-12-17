@@ -1,12 +1,6 @@
 package main
 
-import (
-	"math"
-	"sr/fs"
-	"sr/resolution"
-
-	"github.com/k0kubun/pp/v3"
-)
+import "sr/worker"
 
 func main() {
 	// pixels, err := fs.ReadJSONFile("./data.json")
@@ -41,23 +35,35 @@ func main() {
 	// geo.PrintS2Polygon(resManager.PointPixels[0].BoundingBox)
 
 	// Actual Code
-	data, err := fs.ReadJSONFileToLatLngWt("./data.json")
-	if err != nil {
-		pp.Errorf(err.Error())
-	}
-	// resolution.Run(data)
+	// data, err := fs.ReadJSONFileToLatLngWt("./ISRO.fibnacci_lat_lon_v2.bak.json")
+	// if err != nil {
+	// 	pp.Errorf(err.Error())
+	// }
 
-	config := resolution.PointResolutionManagerConfig{
-		// LatLngs: []resolution.LatLonWt{{
-		// 	LatLngs: s2.LatLngFromDegrees(26.0, 20.0),
-		// 	Wt:      geo.Element{Mg: 3},
-		// }},
-		LatLngs:     data,
-		Radius:      1.0,
-		SubPixelLen: 12.5 * 1e-5 * 180 / (math.Pi),
-	}
-	resManager := resolution.NewPointResolutionManager(config)
-	resManager.Fill()
-	resManager.EnhancePixels()
-	resManager.SaveCSV("./output.csv")
+	// config := resolution.PointResolutionManagerConfig{
+	// 	// LatLngs: []resolution.LatLonWt{{
+	// 	// 	LatLngs: s2.LatLngFromDegrees(26.0, 20.0),
+	// 	// 	Wt:      geo.Element{Mg: 3},
+	// 	// }},
+	// 	LatLngs:     data,
+	// 	Radius:      1.0,
+	// 	SubPixelLen: 12.5 * 1e-5 * 180 / (math.Pi),
+	// 	Box: geo.Box{
+	// 		BottomLeft: geo.LatLon{
+	// 			Lat: -90.0,
+	// 			Lon: -180.0,
+	// 		},
+	// 		TopLeft: geo.LatLon{
+	// 			Lat: 90.0,
+	// 			Lon: 180.0,
+	// 		},
+	// 	},
+	// }
+	// resManager := resolution.NewPointResolutionManager(config)
+	// // resManager.Fill()
+	// // resManager.EnhancePixels()
+	// resManager.SaveCSV("./output.csv")
+
+	worker := worker.NewWorker()
+	worker.Listen()
 }

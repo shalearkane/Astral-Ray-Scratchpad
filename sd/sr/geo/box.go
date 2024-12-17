@@ -3,8 +3,8 @@ package geo
 import "github.com/golang/geo/s2"
 
 type LatLon struct {
-	Lat float64
-	Lon float64
+	Lat float64 `json:"lat" bson:"lat"`
+	Lon float64 `json:"lon" bson:"lon"`
 }
 
 func LatLonFromPoint(point s2.Point) LatLon {
@@ -21,10 +21,10 @@ func (l *LatLon) ToLatLng() *s2.LatLng {
 }
 
 type Box struct {
-	BottomLeft  LatLon
-	BottomRight LatLon
-	TopLeft     LatLon
-	TopRight    LatLon
+	BottomLeft  LatLon `json:"bottomLeft" bson:"bottomLeft"`
+	BottomRight LatLon `json:"bottomRight" bson:"bottomRight"`
+	TopLeft     LatLon `json:"topLeft" bson:"topLeft"`
+	TopRight    LatLon `json:"topRight" bson:"topRight"`
 }
 
 func NewBox(newBottomLeftPoint, newBottomRightPoint, newTopRightPoint, newTopLeftPoint LatLon) *Box {

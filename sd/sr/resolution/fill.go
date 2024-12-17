@@ -16,7 +16,12 @@ type DCT struct {
 	Lon    float64
 }
 
-const CONTEXT_WINDOW = 8.0
+const CONTEXT_WINDOW = 16.0
+
+// const LAT_START = -90.0
+// const LAT_END = 90.0
+// const LON_START = -180.0
+// const LON_END = 180.0
 
 func (pm *PointResolutionManager) GetPixelsToFill() (*map[string]*geo.PointPixel, *map[string]*geo.LatLon) {
 	pixelsYetToBeProcessed := make(map[string]*geo.LatLon)
@@ -26,16 +31,16 @@ func (pm *PointResolutionManager) GetPixelsToFill() (*map[string]*geo.PointPixel
 	pixelFound := map[string]*geo.PointPixel{}
 	for _, pointPixel := range *pm.PointPixels {
 		bound := pointPixel.BoundingBox.ToPolygon().RectBound()
-		for lat := bound.Lo().Lat.Degrees(); lat <= bound.Hi().Lat.Degrees(); lat = lat + 0.1 {
-			for lon := bound.Lo().Lng.Degrees(); lon <= bound.Hi().Lng.Degrees(); lon = lon + 0.1 {
+		for lat := bound.Lo().Lat.Degrees(); lat <= bound.Hi().Lat.Degrees(); lat = lat + 0.2 {
+			for lon := bound.Lo().Lng.Degrees(); lon <= bound.Hi().Lng.Degrees(); lon = lon + 0.2 {
 				pixelFound[GetTokenFromLatLon(lat, lon)] = pointPixel
 			}
 		}
 		bar.Add(1)
 	}
 
-	for lat := 30.0; lat <= 50.0; lat = lat + 0.1 {
-		for lon := 80.0; lon <= 100.0; lon = lon + 0.1 {
+	for lat := pm.Box.BottomLeft.Lat; lat <= pm.Box.TopLeft.Lat; lat = lat + 0.1 {
+		for lon := pm.Box.BottomLeft.Lon; lon <= pm.Box.BottomRight.Lon; lon = lon + 0.1 {
 			if pixelFound[GetTokenFromLatLon(lat, lon)] == nil {
 				pixelsYetToBeProcessed[GetTokenFromLatLon(lat, lon)] = &geo.LatLon{
 					Lat: lat,
@@ -95,12 +100,17 @@ func (pm *PointResolutionManager) GetClusters(pixelsFound *map[string]*geo.Point
 
 			// Create the DCT matrix -> 0.4 lat | lon consists of one matrix
 			dctMatrix := [][]*geo.PointPixel{}
-			for i := 0; i < 16; i++ {
-				dctMatrixRow := []*geo.PointPixel{}
-				for j := 0; j < 16; j++ {
+			// minDiffLat := 1e9
+			// minDiffLon := 1e9
+			// offsetedLat := 0
+			// offsetedLon := 0
 
-					lat := latLon.Lat + ((0.4 / CONTEXT_WINDOW) * float64(i)) - 0.2 - latOffset
-					lon := latLon.Lon + ((0.4 / CONTEXT_WINDOW) * float64(j)) - 0.2 - lonOffset
+			for i := 0; i < CONTEXT_WINDOW; i++ {
+				dctMatrixRow := []*geo.PointPixel{}
+				for j := 0; j < CONTEXT_WINDOW; j++ {
+
+					lat := latLon.Lat + ((1.6 / CONTEXT_WINDOW) * float64(i)) - 0.8 - latOffset
+					lon := latLon.Lon + ((1.6 / CONTEXT_WINDOW) * float64(j)) - 0.8 - lonOffset
 
 					token := GetTokenFromLatLon(lat, lon)
 					newPixelFound := (*pixelsFound)[token]
@@ -309,24 +319,34 @@ func (pm *PointResolutionManager) Fill() {
 
 	dcts := pm.GetClusters(pixelFound, pixelsYetToBeProcessed)
 
+	var publishWg sync.WaitGroup
 	for len(dcts) > 0 {
-		pp.Println("ANALYSING " + strconv.Itoa(len(dcts)))
-		var wg sync.WaitGroup
-		var mutex sync.Mutex
-		for _, dct := range dcts {
-			wg.Add(1)
-			go func(dct *DCT, wg *sync.WaitGroup, mutex *sync.Mutex, pixelFound *map[string]*geo.PointPixel) {
-				defer wg.Done()
-				// dctMatrix, minLat, minLon := pm.GetDCTCompatibleBoundingBox(cluster)
-				dctOutput := RunDCTFilling(dct.Matrix)
-				pm.PatchImageAfterDCT(dct, dctOutput, mutex, pixelFound)
-			}(dct, &wg, &mutex, pixelFound)
+		pp.Println("ANALYSING " + strconv.Itoa(len(dcts)) + " | LEFT : " + strconv.Itoa(len(*pixelsYetToBeProcessed)))
+		for _, chunk := range chunkBy(dcts, 200) {
+			var wg sync.WaitGroup
+			var mutex sync.Mutex
+			for _, dct := range chunk {
+				wg.Add(1)
+				go func(dct *DCT, wg *sync.WaitGroup, mutex *sync.Mutex, pixelFound *map[string]*geo.PointPixel) {
+					defer wg.Done()
+					// dctMatrix, minLat, minLon := pm.GetDCTCompatibleBoundingBox(cluster)
+					dctOutput := RunDCTFilling(dct.Matrix)
+					pm.PatchImageAfterDCT(dct, dctOutput, mutex, pixelFound)
+				}(dct, &wg, &mutex, pixelFound)
+			}
+
+			wg.Wait()
+
+			publishWg.Add(1)
+			go pm.PublishWithEnhancement(&publishWg)
+
 		}
-		wg.Wait()
 
 		// Update the dcts for next batch
 		dcts = pm.GetClusters(pixelFound, pixelsYetToBeProcessed)
 	}
+
+	publishWg.Wait()
 
 	// for len(*emptyPixelsMap) > 0 && len(*emptyPixelsMap) != remaining {
 	// 	remaining = len(*emptyPixelsMap)

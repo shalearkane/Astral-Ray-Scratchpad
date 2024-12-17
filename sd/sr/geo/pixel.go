@@ -37,10 +37,10 @@ func (p *RectPixel) GetGeoBoundingBox(radius float64) []Geo {
 }
 
 type PointPixel struct {
-	BoundingBox *Box
-	Wt          *Element
-	ID          string
-	Center      LatLon
+	BoundingBox *Box     `json:"boundingBox" bson:"boundingBox"`
+	Wt          *Element `json:"wt" bson:"wt"`
+	ID          string   `json:"id" bson:"id"`
+	Center      LatLon   `json:"latlon" bson:"latlon"`
 }
 
 func NewPointPixel(lat float64, lon float64, wt Element, padding float64) *PointPixel {

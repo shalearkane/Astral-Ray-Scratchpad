@@ -1,0 +1,4 @@
+package constants
+
+const RECEIVE_JOB_QUEUE = "SR_PROCESS"
+const STEP5_SR_JOB_QUEUE = "STEP5_SR_JOB_QUEUE"

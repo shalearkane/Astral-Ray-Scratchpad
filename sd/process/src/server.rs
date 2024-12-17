@@ -34,15 +34,15 @@ pub async fn file_by_id(
     .unwrap()
     .unwrap();
 
-    let path = doc.get_str("path").unwrap();
-    let file = fs::NamedFile::open(path)?;
+    let path = doc.get_str("path").unwrap().replace("../files", "../class_data/files");
+    let file = fs::NamedFile::open(path.clone())?;
 
     Ok(file
         .use_last_modified(true)
         .set_content_disposition(ContentDisposition {
             disposition: DispositionType::Attachment,
             parameters: vec![DispositionParam::Filename(
-                std::path::Path::new(path)
+                std::path::Path::new(path.as_str())
                     .file_name()
                     .unwrap()
                     .to_str()

@@ -33,8 +33,8 @@ def visualize_data(df: pd.DataFrame, elem_wt: str):
     ax.add_collection(patch_collection)
 
     # Add colorbar
-    cbar = plt.colorbar(patch_collection, ax=ax)
-    cbar.set_label(f"{elem_wt} (weight percentage)")
+    # cbar = plt.colorbar(patch_collection, ax=ax)
+    # cbar.set_label(f"{elem_wt} (weight percentage)")
     #cbar.set_ticks([0, 1, 2, 3, 4, 5])
     #cbar.ax.set_yticklabels(['0', '1', '2', '3', '4', '5'])
 
@@ -46,9 +46,17 @@ def visualize_data(df: pd.DataFrame, elem_wt: str):
     ax.set_ylim(df[["V0_LATITUDE", "V1_LATITUDE", "V2_LATITUDE", "V3_LATITUDE"]].min().min(),
                 df[["V0_LATITUDE", "V1_LATITUDE", "V2_LATITUDE", "V3_LATITUDE"]].max().max())
 
-    plt.yticks(np.linspace(30,50,50))
+    # Remove x-axis, y-axis, labels, and legends
+    plt.axis('off')  # Turns off both axes
+    plt.gca().set_frame_on(False)  # Optional: Removes the border frame
+    plt.gca().legend_ = None
+
+
+    # plt.yticks(np.linspace(30,50,50))
     # Save and show the plot
-    plt.savefig(f"./plottings/{elem_wt}_o_changed2.png", bbox_inches="tight", dpi=300)
+    # plt.savefig(f"./plottings/{elem_wt}_o_changed2.png", bbox_inches="tight", dpi=300)
+    plt.savefig(f"./plottings/{elem_wt}_o_changed2.png", bbox_inches="tight", dpi=600, pad_inches=0,  transparent=True)
+
     #plt.show()
 
 # Load data and visualize

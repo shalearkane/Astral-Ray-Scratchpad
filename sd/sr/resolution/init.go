@@ -3,7 +3,9 @@ package resolution
 import (
 	"sr/constants"
 	"sr/geo"
+	"sync"
 
+	"github.com/barkimedes/go-deepcopy"
 	"github.com/golang/geo/s2"
 )
 
@@ -27,9 +29,14 @@ func NewPixelResolutionManager(pixels []geo.RectPixel, radius, subPixelLen float
 }
 
 type PointResolutionManager struct {
-	PointPixels  *[]*geo.PointPixel
-	PatchManager *PatchManager
-	SubPixelLen  float64
+	PointPixels   *[]*geo.PointPixel
+	PatchManager  *PatchManager
+	SubPixelLen   float64
+	JobID         string
+	ClientID      string
+	UpdateChannel (chan *PointResolutionManager)
+	Finished      bool
+	Box           geo.Box
 }
 
 type LatLonWt struct {
@@ -38,9 +45,13 @@ type LatLonWt struct {
 }
 
 type PointResolutionManagerConfig struct {
-	LatLngs     []*LatLonWt
-	Radius      float64
-	SubPixelLen float64
+	JobID         string
+	ClientID      string
+	UpdateChannel (chan *PointResolutionManager)
+	LatLngs       []*LatLonWt
+	Radius        float64
+	SubPixelLen   float64
+	Box           geo.Box
 }
 
 func NewPointResolutionManager(config PointResolutionManagerConfig) *PointResolutionManager {
@@ -52,5 +63,31 @@ func NewPointResolutionManager(config PointResolutionManagerConfig) *PointResolu
 	patchManager := NewPatchManager()
 	patchManager.ComputePatches(pointPixels)
 
-	return &PointResolutionManager{PointPixels: &pointPixels, PatchManager: patchManager, SubPixelLen: config.SubPixelLen}
+	return &PointResolutionManager{
+		PointPixels:   &pointPixels,
+		PatchManager:  patchManager,
+		SubPixelLen:   config.SubPixelLen,
+		JobID:         config.JobID,
+		ClientID:      config.ClientID,
+		UpdateChannel: config.UpdateChannel,
+		Finished:      false,
+		Box:           config.Box,
+	}
+}
+
+func (rm *PointResolutionManager) PublishWithEnhancement(wg *sync.WaitGroup) {
+	defer wg.Done()
+	newRM := &PointResolutionManager{
+		PointPixels:   deepcopy.MustAnything(rm.PointPixels).(*[]*geo.PointPixel),
+		PatchManager:  deepcopy.MustAnything(rm.PatchManager).(*PatchManager),
+		SubPixelLen:   rm.SubPixelLen,
+		JobID:         rm.JobID,
+		ClientID:      rm.ClientID,
+		UpdateChannel: rm.UpdateChannel,
+		Finished:      false,
+		Box:           rm.Box,
+	}
+
+	newRM.EnhancePixels()
+	(*rm).UpdateChannel <- newRM
 }
